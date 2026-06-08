@@ -1,0 +1,122 @@
+:host { display: flex; flex-direction: column; gap: 24px; width: 100%; }
+
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.page-title { font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 700; color: #f8fafc; margin: 0; letter-spacing: -0.5px; }
+.page-subtitle { font-family: 'Inter', sans-serif; font-size: 14px; color: #64748b; margin: 4px 0 0; }
+
+.btn-primary {
+  display: flex; align-items: center; gap: 8px;
+  background-color: #2563eb; color: #fff; border: none; border-radius: 10px;
+  padding: 10px 20px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+  transition: background-color 0.2s;
+}
+.btn-primary:hover { background-color: #1d4ed8; }
+.btn-primary svg { width: 18px; height: 18px; }
+.btn-primary.sm { padding: 8px 16px; font-size: 13px; }
+.btn-primary.sm svg { width: 16px; height: 16px; }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.mini-stat { background-color: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+.mini-stat-label { font-family: 'Inter', sans-serif; font-size: 13px; color: #94a3b8; }
+.mini-stat-value { font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+.mini-stat-value.white { color: #f8fafc; }
+.mini-stat-value.cyan  { color: #34d399; }
+
+/* Trips card */
+.trips-card {
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.trips-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #27272a;
+}
+
+.trips-card-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.trips-list { display: flex; flex-direction: column; }
+
+.trip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #1c1c20;
+  transition: background-color 0.2s;
+}
+.trip-row:last-child { border-bottom: none; }
+.trip-row:hover { background-color: #1c1c20; }
+
+.trip-main { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+
+.trip-route {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.trip-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.trip-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #64748b;
+}
+.trip-meta-item svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+.trip-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.student-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.count-num { font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 700; color: #f8fafc; line-height: 1; }
+.count-label { font-family: 'Inter', sans-serif; font-size: 11px; color: #64748b; }
+
+/* Trip badges */
+.trip-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.trip-badge.agendada   { background-color: #1e3a8a; color: #93c5fd; }
+.trip-badge.concluida  { background-color: #14532d; color: #4ade80; }
+.trip-badge.pending    { background-color: #78350f; color: #fcd34d; }
+.trip-badge.in-progress { background-color: #1e3a5f; color: #60a5fa; }
+.trip-badge.completed  { background-color: #14532d; color: #4ade80; }
+
+@media (max-width: 767px) { .stats-row { grid-template-columns: 1fr; } }
+@media (max-width: 599px) { .trip-meta { gap: 10px; } .trip-row { flex-direction: column; align-items: flex-start; } }

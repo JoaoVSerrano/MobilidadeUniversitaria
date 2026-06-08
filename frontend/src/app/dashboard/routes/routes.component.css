@@ -1,0 +1,321 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.page-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+}
+.btn-primary:hover { background-color: #1d4ed8; }
+.btn-primary svg { width: 18px; height: 18px; }
+
+/* Stats row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.mini-stat {
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mini-stat-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.mini-stat-value {
+  font-family: 'Inter', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+.mini-stat-value.white  { color: #f8fafc; }
+.mini-stat-value.blue   { color: #60a5fa; }
+.mini-stat-value.cyan   { color: #34d399; }
+.mini-stat-value.yellow { color: #fbbf24; }
+
+/* Filters */
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-ico {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  height: 40px;
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  padding: 0 12px 0 36px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #f8fafc;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input::placeholder { color: #64748b; }
+.search-input:focus { border-color: #2563eb; }
+
+.filter-select {
+  height: 40px;
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #f8fafc;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Route Cards Grid */
+.routes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.route-card {
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.route-card:hover {
+  border-color: #3f3f46;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.route-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.route-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.route-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+.route-status {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.route-status.ativa   { background-color: #14532d; color: #4ade80; }
+.route-status.inativa { background-color: #27272a; color: #94a3b8; }
+
+.route-origin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #94a3b8;
+}
+.route-origin svg { width: 14px; height: 14px; color: #60a5fa; flex-shrink: 0; }
+
+/* Chips */
+.route-chips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background-color: #27272a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chip {
+  background-color: #1c1c20;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chip-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.chip-value {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+/* Stops */
+.stops-section {
+  background-color: #1c1c20;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stops-header {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+.stops-header svg { width: 14px; height: 14px; }
+
+.stop-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stop-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.stop-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Actions */
+.route-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-details {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.btn-details:hover { background-color: #1d4ed8; }
+.btn-details svg { width: 16px; height: 16px; }
+
+.action-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.action-btn svg { width: 16px; height: 16px; }
+.action-btn.edit   { background-color: #1c2a1c; color: #4ade80; }
+.action-btn.delete { background-color: #2d1111; color: #f87171; }
+.action-btn:hover  { opacity: 0.8; transform: scale(1.05); }
+
+@media (max-width: 767px) {
+  .routes-grid { grid-template-columns: 1fr; }
+  .stats-row   { grid-template-columns: repeat(2,1fr); }
+}
