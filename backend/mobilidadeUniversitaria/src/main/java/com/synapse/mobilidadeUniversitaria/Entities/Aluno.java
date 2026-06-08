@@ -1,5 +1,7 @@
 package com.synapse.mobilidadeUniversitaria.Entities;
 
+import com.synapse.mobilidadeUniversitaria.Entities.enums.StatusMatricula;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +20,8 @@ public class Aluno extends Usuario {
     @JoinColumn(name = "faculdade_id")
     private Faculdade faculdade;
 
-    private String statusMatricula;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatusMatricula statusMatricula;
 
 }

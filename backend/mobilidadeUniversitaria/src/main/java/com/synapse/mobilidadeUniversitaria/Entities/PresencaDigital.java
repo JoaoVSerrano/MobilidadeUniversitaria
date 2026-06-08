@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "presenca")
-public class Presenca {
+public class PresencaDigital {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

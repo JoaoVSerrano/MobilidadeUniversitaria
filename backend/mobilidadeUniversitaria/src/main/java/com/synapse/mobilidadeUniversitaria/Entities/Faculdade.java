@@ -30,6 +30,10 @@ public class Faculdade {
     @OneToMany(mappedBy = "faculdade")
     private List<Aluno> alunos;
 
+    @OneToOne
+    @JoinColumn(name = "endereco_id")
+    private Endereco endereco;
+
     @CreationTimestamp
     private LocalDateTime dataHoraValidacao;
 
