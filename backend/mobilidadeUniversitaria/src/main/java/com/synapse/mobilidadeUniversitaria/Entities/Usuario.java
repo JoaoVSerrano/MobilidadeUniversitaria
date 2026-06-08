@@ -2,6 +2,7 @@ package com.synapse.mobilidadeUniversitaria.Entities;
 
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 @Entity
