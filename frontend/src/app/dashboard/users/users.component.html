@@ -1,0 +1,141 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Gestão de Usuários</h1>
+    <p class="page-subtitle">Gerencie alunos, motoristas e administradores</p>
+  </div>
+  <button class="btn-primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    Novo Usuário
+  </button>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row">
+  <div class="mini-stat">
+    <span class="mini-stat-label">Total de Usuários</span>
+    <span class="mini-stat-value white">{{ totalUsers }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Alunos</span>
+    <span class="mini-stat-value blue">{{ totalAlunos }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Motoristas</span>
+    <span class="mini-stat-value cyan">{{ totalMotoristas }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Pendentes</span>
+    <span class="mini-stat-value yellow">{{ totalPendentes }}</span>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar">
+  <div class="search-wrap">
+    <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input type="text" class="search-input" placeholder="Buscar por nome, email ou CPF..." (input)="onSearch($event)">
+  </div>
+  <select class="filter-select" (change)="onTypeChange($event)">
+    <option value="todos">Todos os Tipos</option>
+    <option value="aluno">Aluno</option>
+    <option value="motorista">Motorista</option>
+    <option value="admin">Admin</option>
+  </select>
+  <select class="filter-select" (change)="onStatusChange($event)">
+    <option value="todos">Todos os Status</option>
+    <option value="Ativo">Ativo</option>
+    <option value="Pendente">Pendente</option>
+    <option value="Inativo">Inativo</option>
+  </select>
+</div>
+
+<!-- Table -->
+<div class="table-card">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Usuário</th>
+          <th>Contato</th>
+          <th>Tipo</th>
+          <th>Status</th>
+          <th>Data Cadastro</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of filtered; track user.id) {
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div [class]="'user-avatar ' + user.type">{{ getInitials(user.name) }}</div>
+                <div>
+                  <div class="user-name">{{ user.name }}</div>
+                  <div class="user-cpf">{{ user.cpf }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="contact-cell">
+                <div class="contact-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  {{ user.email }}
+                </div>
+                <div class="contact-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.38 2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                  {{ user.phone }}
+                </div>
+              </div>
+            </td>
+            <td>
+              <span [class]="'badge-type ' + user.type">{{ user.type }}</span>
+            </td>
+            <td>
+              <select [class]="'status-select ' + user.status.toLowerCase()">
+                <option>{{ user.status }}</option>
+                <option>Ativo</option>
+                <option>Pendente</option>
+                <option>Inativo</option>
+              </select>
+            </td>
+            <td class="date-cell">{{ user.createdAt }}</td>
+            <td>
+              <div class="action-btns">
+                <button class="action-btn view" title="Visualizar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+                <button class="action-btn edit" title="Editar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button class="action-btn delete" title="Excluir">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
