@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class VeiculoMapper {
 
-    public Veiculo toEntitiy(VeiculoRequestDTO request) {
-
+    public Veiculo toEntity(VeiculoRequestDTO request) {
         if (request == null) return null;
 
         Veiculo v = new Veiculo();
@@ -20,13 +19,12 @@ public class VeiculoMapper {
         return v;
     }
 
-    public void UpdateEntity(Veiculo v, VeiculoRequestDTO request) {
+    public void updateEntity(Veiculo v, VeiculoRequestDTO request) {
+        if (v == null || request == null) return;
 
         v.setPlaca(request.placa());
         v.setModelo(request.modelo());
         v.setCapacidadeTotal(request.capacidadeTotal());
-
-
     }
 
     public VeiculoResponseDTO toResponse(Veiculo veiculo) {

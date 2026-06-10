@@ -10,6 +10,7 @@ public class EnderecoMapper {
 
 
     public Endereco toEntity(EnderecoRequestDTO request) {
+        if (request == null) return null;
 
         Endereco endereco = new Endereco();
         endereco.setCep(request.cep());
@@ -22,9 +23,19 @@ public class EnderecoMapper {
         return endereco;
     }
 
-    public EnderecoResponseDTO toResponse(Endereco endereco) {
+    public void updateEntity(Endereco endereco, EnderecoRequestDTO request) {
+        if (endereco == null || request == null) return;
 
-        if(endereco == null) return null;
+        endereco.setCep(request.cep());
+        endereco.setRua(request.rua());
+        endereco.setBairro(request.bairro());
+        endereco.setNumero(request.numero());
+        endereco.setComplemento(request.complemento());
+        endereco.setTipoLocal(request.tipoLocal());
+    }
+
+    public EnderecoResponseDTO toResponse(Endereco endereco) {
+        if (endereco == null) return null;
 
         return new EnderecoResponseDTO(
                 endereco.getId(),
