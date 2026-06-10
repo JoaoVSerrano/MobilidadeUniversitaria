@@ -31,4 +31,5 @@ public class Endereco {
 
     @Enumerated(EnumType.STRING)
     private LocalType tipoLocal;
+
 }
