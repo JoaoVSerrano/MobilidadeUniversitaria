@@ -2,12 +2,13 @@ package com.synapse.mobilidadeUniversitaria.dtos.response;
 
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MotoristaResponseDTO extends UsuarioResponseDTO {
