@@ -8,7 +8,7 @@ import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.mapper.MotoristaMapper;
 import com.synapse.mobilidadeUniversitaria.repositories.EnderecoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.MotoristaRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,12 +20,12 @@ public class MotoristaService {
     private final MotoristaRepository motoristaRepository;
     private final EnderecoRepository enderecoRepository;
     private final MotoristaMapper motoristaMapper;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public MotoristaService(MotoristaRepository motoristaRepository,
                             EnderecoRepository enderecoRepository,
                             MotoristaMapper motoristaMapper,
-                            BCryptPasswordEncoder passwordEncoder) {
+                            PasswordEncoder passwordEncoder) {
         this.motoristaRepository = motoristaRepository;
         this.enderecoRepository = enderecoRepository;
         this.motoristaMapper = motoristaMapper;

@@ -11,7 +11,7 @@ import com.synapse.mobilidadeUniversitaria.mapper.AlunoMapper;
 import com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.EnderecoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.FaculdadeRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,13 +24,13 @@ public class AlunoService {
     private final EnderecoRepository enderecoRepository;
     private final FaculdadeRepository faculdadeRepository;
     private final AlunoMapper alunoMapper;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public AlunoService(AlunoRepository alunoRepository,
                         EnderecoRepository enderecoRepository,
                         FaculdadeRepository faculdadeRepository,
                         AlunoMapper alunoMapper,
-                        BCryptPasswordEncoder passwordEncoder) {
+                        PasswordEncoder passwordEncoder) {
         this.alunoRepository = alunoRepository;
         this.enderecoRepository = enderecoRepository;
         this.faculdadeRepository = faculdadeRepository;
