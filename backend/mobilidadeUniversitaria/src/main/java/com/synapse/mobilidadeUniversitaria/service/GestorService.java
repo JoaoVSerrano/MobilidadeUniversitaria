@@ -8,7 +8,7 @@ import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.mapper.GestorMapper;
 import com.synapse.mobilidadeUniversitaria.repositories.EnderecoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.GestorRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,12 +20,12 @@ public class GestorService {
     private final GestorRepository gestorRepository;
     private final EnderecoRepository enderecoRepository;
     private final GestorMapper gestorMapper;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public GestorService(GestorRepository gestorRepository,
                          EnderecoRepository enderecoRepository,
                          GestorMapper gestorMapper,
-                         BCryptPasswordEncoder passwordEncoder) {
+                         PasswordEncoder passwordEncoder) {
         this.gestorRepository = gestorRepository;
         this.enderecoRepository = enderecoRepository;
         this.gestorMapper = gestorMapper;
