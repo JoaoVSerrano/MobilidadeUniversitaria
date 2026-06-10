@@ -11,8 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "gestor")
 public class Gestor extends Usuario {
 
 }
