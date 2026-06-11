@@ -6,18 +6,22 @@ import { RoutesComponent } from './dashboard/routes/routes.component';
 import { VehiclesComponent } from './dashboard/vehicles/vehicles.component';
 import { TripsComponent } from './dashboard/trips/trips.component';
 import { DocumentsComponent } from './dashboard/documents/documents.component';
+import { NotificationsComponent } from './dashboard/notifications/notifications.component';
+import { SettingsComponent } from './dashboard/settings/settings.component';
 
 export const routes: Routes = [
   {
     path: '',
     component: DashboardLayoutComponent,
     children: [
-      { path: '',           component: DashboardHomeComponent },
-      { path: 'usuarios',  component: UsersComponent },
-      { path: 'rotas',     component: RoutesComponent },
-      { path: 'veiculos',  component: VehiclesComponent },
-      { path: 'viagens',   component: TripsComponent },
-      { path: 'documentos',component: DocumentsComponent },
+      { path: '',            component: DashboardHomeComponent },
+      { path: 'usuarios',    component: UsersComponent },
+      { path: 'rotas',       component: RoutesComponent },
+      { path: 'veiculos',    component: VehiclesComponent },
+      { path: 'viagens',     component: TripsComponent },
+      { path: 'documentos',  component: DocumentsComponent },
+      { path: 'notificacoes',component: NotificationsComponent },
+      { path: 'configuracoes',component: SettingsComponent }
     ]
   },
   { path: '**', redirectTo: '' }
