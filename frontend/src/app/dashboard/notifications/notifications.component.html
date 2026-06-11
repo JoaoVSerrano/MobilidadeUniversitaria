@@ -1,0 +1,101 @@
+<div class="notifications-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Central de Notificações</h1>
+      <p class="page-subtitle">Envie notificações para usuários</p>
+    </div>
+  </div>
+
+  <div class="notifications-grid">
+    <!-- Nova Notificação Form -->
+    <div class="card form-card">
+      <h2 class="card-title">Nova Notificação</h2>
+      
+      <form (ngSubmit)="sendNotification()" #notificationForm="ngForm" class="notification-form">
+        <div class="form-group">
+          <label for="recipient">Destinatários</label>
+          <select id="recipient" name="recipient" [(ngModel)]="recipient" class="form-control">
+            <option value="Todos os Alunos">Todos os Alunos</option>
+            <option value="Motoristas">Motoristas</option>
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="type">Tipo</label>
+          <select id="type" name="type" [(ngModel)]="type" class="form-control">
+            <option value="info">Informação</option>
+            <option value="alerta">Alerta</option>
+            <option value="sucesso">Sucesso</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="title">Título</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            [(ngModel)]="title" 
+            placeholder="Ex: Alteração de horário" 
+            class="form-control"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="message">Mensagem</label>
+          <textarea 
+            id="message" 
+            name="message" 
+            [(ngModel)]="message" 
+            placeholder="Digite a mensagem..." 
+            class="form-control textarea-control"
+            rows="5"
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="send-icon">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+          Enviar Notificação
+        </button>
+      </form>
+    </div>
+
+    <!-- Histórico de Envios -->
+    <div class="card history-card">
+      <h2 class="card-title">Histórico de Envios</h2>
+      
+      <div class="history-list">
+        @for (item of history; track item.id) {
+          <div class="history-item">
+            <div class="item-header">
+              <span class="item-title">{{ item.title }}</span>
+              <span class="badge" [ngClass]="item.type">
+                {{ item.type === 'alerta' ? 'alerta' : 'info' }}
+              </span>
+            </div>
+            <div class="item-meta">
+              <span class="item-recipient">{{ item.recipient }}</span>
+              <span class="item-time">{{ item.time }}</span>
+            </div>
+            @if (item.message) {
+              <p class="item-message">{{ item.message }}</p>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  @if (toastMessage) {
+    <div class="toast" [ngClass]="toastType">
+      <span>{{ toastMessage }}</span>
+    </div>
+  }
+</div>
