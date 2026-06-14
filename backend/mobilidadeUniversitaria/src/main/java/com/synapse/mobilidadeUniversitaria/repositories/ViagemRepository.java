@@ -21,4 +21,6 @@ public interface ViagemRepository extends JpaRepository<Viagem, Long> {
     Page<Viagem> findByMotoristaId(Long motoristaId, Pageable pageable);
 
     List<Viagem> findByDataHoraPartidaBetween(LocalDateTime inicio, LocalDateTime fim);
+
+    List<Viagem> findByDataHoraPartidaAfterOrderByDataHoraPartidaAsc(LocalDateTime dataHora);
 }

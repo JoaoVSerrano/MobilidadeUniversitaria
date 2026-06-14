@@ -19,7 +19,6 @@ public abstract class UsuarioMapper {
         entidade.setNome(dto.getNome());
         entidade.setEmail(dto.getEmail());
         entidade.setCpf(dto.getCpf());
-        entidade.setUserType(dto.getUserType());
         entidade.setTelefone(dto.getTelefone());
 
     }

@@ -12,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Table(name = "usuario")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Usuario {
+public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +38,7 @@ public abstract class Usuario {
     @Column(nullable = false)
     private UserType userType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "endereco_id")
     private Endereco endereco;
 

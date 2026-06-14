@@ -2,6 +2,7 @@ package com.synapse.mobilidadeUniversitaria.controller;
 
 import com.synapse.mobilidadeUniversitaria.dtos.request.RotaRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.RotaResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.RotaStatsResponseDTO;
 import com.synapse.mobilidadeUniversitaria.service.RotaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,11 @@ public class RotaController {
     public ResponseEntity<List<RotaResponseDTO>> listarTodos() {
         List<RotaResponseDTO> response = rotaService.listarTodos();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<RotaStatsResponseDTO> estatisticas() {
+        return ResponseEntity.ok(rotaService.estatisticas());
     }
 
     @PutMapping("/{id}")

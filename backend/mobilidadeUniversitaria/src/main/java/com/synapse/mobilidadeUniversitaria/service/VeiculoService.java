@@ -3,6 +3,7 @@ package com.synapse.mobilidadeUniversitaria.service;
 import com.synapse.mobilidadeUniversitaria.Entities.Veiculo;
 import com.synapse.mobilidadeUniversitaria.dtos.request.VeiculoRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.VeiculoResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.VeiculoStatsResponseDTO;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.mapper.VeiculoMapper;
 import com.synapse.mobilidadeUniversitaria.repositories.VeiculoRepository;
@@ -55,5 +56,13 @@ public class VeiculoService {
         Veiculo veiculo = veiculoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Veiculo nao encontrado com id: " + id));
         veiculoRepository.delete(veiculo);
+    }
+
+    public VeiculoStatsResponseDTO estatisticas() {
+        int capacidadeTotal = veiculoRepository.findAll()
+                .stream()
+                .mapToInt(Veiculo::getCapacidadeTotal)
+                .sum();
+        return new VeiculoStatsResponseDTO(veiculoRepository.count(), capacidadeTotal);
     }
 }

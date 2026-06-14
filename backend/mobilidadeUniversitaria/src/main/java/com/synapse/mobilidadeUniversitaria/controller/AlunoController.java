@@ -2,6 +2,8 @@ package com.synapse.mobilidadeUniversitaria.controller;
 
 import com.synapse.mobilidadeUniversitaria.dtos.request.AlunoRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.PresencaDigitalResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.ViagemResponseDTO;
 import com.synapse.mobilidadeUniversitaria.service.AlunoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,16 @@ public class AlunoController {
                                                       @Valid @RequestBody AlunoRequestDTO dto) {
         AlunoResponseDTO response = alunoService.atualizar(id, dto);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/viagens")
+    public ResponseEntity<List<ViagemResponseDTO>> listarViagens(@PathVariable Long id) {
+        return ResponseEntity.ok(alunoService.listarViagens(id));
+    }
+
+    @GetMapping("/{id}/presencas")
+    public ResponseEntity<List<PresencaDigitalResponseDTO>> listarPresencas(@PathVariable Long id) {
+        return ResponseEntity.ok(alunoService.listarPresencas(id));
     }
 
     @DeleteMapping("/{id}")

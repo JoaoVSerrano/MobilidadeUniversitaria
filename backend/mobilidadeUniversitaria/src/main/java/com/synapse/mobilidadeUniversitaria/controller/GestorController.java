@@ -1,7 +1,7 @@
 package com.synapse.mobilidadeUniversitaria.controller;
 
 import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioRequestDTO;
-import com.synapse.mobilidadeUniversitaria.dtos.response.GestorResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioResponseDTO;
 import com.synapse.mobilidadeUniversitaria.service.GestorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,27 +19,27 @@ public class GestorController {
     private final GestorService gestorService;
 
     @PostMapping
-    public ResponseEntity<GestorResponseDTO> criar(@Valid @RequestBody UsuarioRequestDTO dto) {
-        GestorResponseDTO response = gestorService.criar(dto);
+    public ResponseEntity<UsuarioResponseDTO> criar(@Valid @RequestBody UsuarioRequestDTO dto) {
+        UsuarioResponseDTO response = gestorService.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GestorResponseDTO> buscarPorId(@PathVariable Long id) {
-        GestorResponseDTO response = gestorService.buscarPorId(id);
+    public ResponseEntity<UsuarioResponseDTO> buscarPorId(@PathVariable Long id) {
+        UsuarioResponseDTO response = gestorService.buscarPorId(id);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<GestorResponseDTO>> listarTodos() {
-        List<GestorResponseDTO> response = gestorService.listarTodos();
+    public ResponseEntity<List<UsuarioResponseDTO>> listarTodos() {
+        List<UsuarioResponseDTO> response = gestorService.listarTodos();
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GestorResponseDTO> atualizar(@PathVariable Long id,
-                                                       @Valid @RequestBody UsuarioRequestDTO dto) {
-        GestorResponseDTO response = gestorService.atualizar(id, dto);
+    public ResponseEntity<UsuarioResponseDTO> atualizar(@PathVariable Long id,
+                                                        @Valid @RequestBody UsuarioRequestDTO dto) {
+        UsuarioResponseDTO response = gestorService.atualizar(id, dto);
         return ResponseEntity.ok(response);
     }
 
