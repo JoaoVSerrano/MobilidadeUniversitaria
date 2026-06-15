@@ -1,5 +1,6 @@
 package com.synapse.mobilidadeUniversitaria.Entities;
 
+import com.synapse.mobilidadeUniversitaria.Entities.enums.ViagemStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.context.annotation.EnableMBeanExport;
@@ -25,6 +26,14 @@ public class Viagem {
 
     @Column(nullable = false)
     private LocalDateTime dataHoraChegadaPrevista;
+
+    private LocalDateTime dataHoraInicio;
+
+    private LocalDateTime dataHoraChegadaReal;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ViagemStatus status = ViagemStatus.AGENDADA;
 
     @OneToMany(mappedBy = "viagem")
     private List<Notificacao> notificacoes;

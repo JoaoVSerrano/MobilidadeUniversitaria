@@ -2,11 +2,15 @@ package com.synapse.mobilidadeUniversitaria.service;
 
 import com.synapse.mobilidadeUniversitaria.Entities.Usuario;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
+import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioUpdateRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioStatsResponseDTO;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.mapper.EnderecoMapper;
+import com.synapse.mobilidadeUniversitaria.repositories.EnderecoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.UsuarioRepository;
+import com.synapse.mobilidadeUniversitaria.security.AuthorizationService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +20,23 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final EnderecoMapper enderecoMapper;
+    private final EnderecoRepository enderecoRepository;
+    private final UsuarioValidationService usuarioValidationService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthorizationService authorizationService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, EnderecoMapper enderecoMapper) {
+    public UsuarioService(UsuarioRepository usuarioRepository,
+                          EnderecoMapper enderecoMapper,
+                          EnderecoRepository enderecoRepository,
+                          UsuarioValidationService usuarioValidationService,
+                          PasswordEncoder passwordEncoder,
+                          AuthorizationService authorizationService) {
         this.usuarioRepository = usuarioRepository;
         this.enderecoMapper = enderecoMapper;
+        this.enderecoRepository = enderecoRepository;
+        this.usuarioValidationService = usuarioValidationService;
+        this.passwordEncoder = passwordEncoder;
+        this.authorizationService = authorizationService;
     }
 
     public List<UsuarioResponseDTO> listarTodos() {
@@ -31,6 +48,29 @@ public class UsuarioService {
 
     public UsuarioResponseDTO buscarPorId(Long id) {
         return toResponse(buscarUsuarioPorId(id));
+    }
+
+    public UsuarioResponseDTO buscarUsuarioLogado() {
+        return buscarPorId(authorizationService.currentUser().getId());
+    }
+
+    public UsuarioResponseDTO atualizarUsuarioLogado(UsuarioUpdateRequestDTO dto) {
+        Long usuarioId = authorizationService.currentUser().getId();
+        Usuario usuario = buscarUsuarioPorId(usuarioId);
+        usuarioValidationService.validarAtualizacao(usuarioId, dto);
+
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        usuario.setCpf(dto.getCpf());
+        usuario.setTelefone(dto.getTelefone());
+        usuario.setEndereco(enderecoRepository.findById(dto.getEnderecoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Endereco nao encontrado com id: " + dto.getEnderecoId())));
+
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
+
+        return toResponse(usuarioRepository.save(usuario));
     }
 
     public List<UsuarioResponseDTO> listarPorTipo(UserType tipoUsuario) {

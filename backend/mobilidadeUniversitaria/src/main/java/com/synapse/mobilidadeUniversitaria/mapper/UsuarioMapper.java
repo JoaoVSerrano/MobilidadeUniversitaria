@@ -1,6 +1,7 @@
 package com.synapse.mobilidadeUniversitaria.mapper;
 
 import com.synapse.mobilidadeUniversitaria.Entities.Usuario;
+import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioDadosDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioResponseDTO;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,15 @@ public abstract class UsuarioMapper {
     }
 
     protected void updateCommon(Usuario entidade, UsuarioRequestDTO dto) {
+        if (entidade == null || dto == null) return;
+        entidade.setNome(dto.getNome());
+        entidade.setEmail(dto.getEmail());
+        entidade.setCpf(dto.getCpf());
+        entidade.setTelefone(dto.getTelefone());
+
+    }
+
+    protected void updateCommon(Usuario entidade, UsuarioDadosDTO dto) {
         if (entidade == null || dto == null) return;
         entidade.setNome(dto.getNome());
         entidade.setEmail(dto.getEmail());

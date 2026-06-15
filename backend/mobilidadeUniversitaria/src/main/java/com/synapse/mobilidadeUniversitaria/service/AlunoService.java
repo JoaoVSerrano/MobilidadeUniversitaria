@@ -5,6 +5,7 @@ import com.synapse.mobilidadeUniversitaria.Entities.Endereco;
 import com.synapse.mobilidadeUniversitaria.Entities.Faculdade;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import com.synapse.mobilidadeUniversitaria.dtos.request.AlunoRequestDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.request.AlunoUpdateRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.PresencaDigitalResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.ViagemResponseDTO;
@@ -76,13 +77,15 @@ public class AlunoService {
                 .collect(Collectors.toList());
     }
 
-    public AlunoResponseDTO atualizar(Long id, AlunoRequestDTO dto) {
+    public AlunoResponseDTO atualizar(Long id, AlunoUpdateRequestDTO dto) {
         Aluno aluno = buscarAlunoPorId(id);
         usuarioValidationService.validarAtualizacao(aluno.getId(), dto);
 
         alunoMapper.updateEntity(aluno, dto);
         aluno.setUserType(UserType.ALUNO);
-        aluno.setSenha(passwordEncoder.encode(dto.getSenha()));
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            aluno.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
         aluno.setEndereco(buscarEndereco(dto.getEnderecoId()));
         aluno.setFaculdade(buscarFaculdade(dto.getFaculdadeId()));
 

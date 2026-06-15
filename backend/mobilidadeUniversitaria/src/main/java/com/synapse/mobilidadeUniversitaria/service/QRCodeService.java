@@ -37,25 +37,31 @@ public class QRCodeService {
     }
 
     public Long validarEExtrairViagemId(String qrData) {
-        String decoded = new String(Base64.getUrlDecoder().decode(qrData), StandardCharsets.UTF_8);
-        String[] parts = decoded.split(":");
-        if (parts.length != 3) {
+        try {
+            String decoded = new String(Base64.getUrlDecoder().decode(qrData), StandardCharsets.UTF_8);
+            String[] parts = decoded.split(":");
+            if (parts.length != 3) {
+                throw new BadRequestException("QR Code invalido");
+            }
+
+            String payload = parts[0] + ":" + parts[1];
+            String expectedSignature = assinar(payload);
+            if (!expectedSignature.equals(parts[2])) {
+                throw new BadRequestException("QR Code invalido");
+            }
+
+            long expiresEpoch = Long.parseLong(parts[1]);
+            long nowEpoch = LocalDateTime.now().atZone(ZONE_ID).toEpochSecond();
+            if (nowEpoch > expiresEpoch) {
+                throw new BadRequestException("QR Code expirado");
+            }
+
+            return Long.parseLong(parts[0]);
+        } catch (BadRequestException ex) {
+            throw ex;
+        } catch (Exception ex) {
             throw new BadRequestException("QR Code invalido");
         }
-
-        String payload = parts[0] + ":" + parts[1];
-        String expectedSignature = assinar(payload);
-        if (!expectedSignature.equals(parts[2])) {
-            throw new BadRequestException("QR Code invalido");
-        }
-
-        long expiresEpoch = Long.parseLong(parts[1]);
-        long nowEpoch = LocalDateTime.now().atZone(ZONE_ID).toEpochSecond();
-        if (nowEpoch > expiresEpoch) {
-            throw new BadRequestException("QR Code expirado");
-        }
-
-        return Long.parseLong(parts[0]);
     }
 
     private String assinar(String payload) {

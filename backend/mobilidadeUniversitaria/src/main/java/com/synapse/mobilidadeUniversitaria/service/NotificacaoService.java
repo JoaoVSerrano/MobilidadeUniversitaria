@@ -1,24 +1,42 @@
 package com.synapse.mobilidadeUniversitaria.service;
 
 import com.synapse.mobilidadeUniversitaria.Entities.Notificacao;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import com.synapse.mobilidadeUniversitaria.dtos.response.NotificacaoResponseDTO;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.repositories.NotificacaoRepository;
+import com.synapse.mobilidadeUniversitaria.security.AuthenticatedUser;
+import com.synapse.mobilidadeUniversitaria.security.AuthorizationService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class NotificacaoService {
 
     private final NotificacaoRepository notificacaoRepository;
+    private final AuthorizationService authorizationService;
 
-    public NotificacaoService(NotificacaoRepository notificacaoRepository) {
+    public NotificacaoService(NotificacaoRepository notificacaoRepository,
+                              AuthorizationService authorizationService) {
         this.notificacaoRepository = notificacaoRepository;
+        this.authorizationService = authorizationService;
     }
 
-    public List<NotificacaoResponseDTO> listarTodas() {
-        return notificacaoRepository.findAll()
+    public List<NotificacaoResponseDTO> listarDoUsuarioLogado() {
+        AuthenticatedUser user = authorizationService.currentUser();
+        List<Notificacao> notificacoes;
+
+        if (UserType.GESTOR.equals(user.getUserType())) {
+            notificacoes = notificacaoRepository.findAll();
+        } else if (UserType.ALUNO.equals(user.getUserType())) {
+            notificacoes = notificacaoRepository.findByAlunoId(user.getId());
+        } else {
+            notificacoes = new ArrayList<>();
+        }
+
+        return notificacoes
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -35,13 +53,21 @@ public class NotificacaoService {
     }
 
     public void marcarTodasComoLidas() {
-        List<Notificacao> notificacoes = notificacaoRepository.findAll();
+        AuthenticatedUser user = authorizationService.currentUser();
+        List<Notificacao> notificacoes = UserType.GESTOR.equals(user.getUserType())
+                ? notificacaoRepository.findAll()
+                : notificacaoRepository.findByAlunoId(user.getId());
         notificacoes.forEach(notificacao -> notificacao.setLida(true));
         notificacaoRepository.saveAll(notificacoes);
     }
 
     public long contarNaoLidas() {
-        return notificacaoRepository.findAll()
+        AuthenticatedUser user = authorizationService.currentUser();
+        List<Notificacao> notificacoes = UserType.GESTOR.equals(user.getUserType())
+                ? notificacaoRepository.findAll()
+                : notificacaoRepository.findByAlunoId(user.getId());
+
+        return notificacoes
                 .stream()
                 .filter(notificacao -> Boolean.FALSE.equals(notificacao.getLida()))
                 .count();

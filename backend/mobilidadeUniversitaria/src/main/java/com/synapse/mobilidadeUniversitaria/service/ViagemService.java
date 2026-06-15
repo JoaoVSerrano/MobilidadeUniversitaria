@@ -4,10 +4,13 @@ import com.synapse.mobilidadeUniversitaria.Entities.Motorista;
 import com.synapse.mobilidadeUniversitaria.Entities.Rota;
 import com.synapse.mobilidadeUniversitaria.Entities.Veiculo;
 import com.synapse.mobilidadeUniversitaria.Entities.Viagem;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.ViagemStatus;
 import com.synapse.mobilidadeUniversitaria.dtos.request.ViagemRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.QRCodeResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.ViagemStatsResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.ViagemResponseDTO;
+import com.synapse.mobilidadeUniversitaria.exceptions.BadRequestException;
+import com.synapse.mobilidadeUniversitaria.exceptions.ResourceAlreadyExistsException;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.mapper.ViagemMapper;
 import com.synapse.mobilidadeUniversitaria.repositories.MotoristaRepository;
@@ -55,9 +58,12 @@ public class ViagemService {
         Rota rota = rotaRepository.findById(dto.rotaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Rota nao encontrada com id: " + dto.rotaId()));
 
+        validarConflitos(dto, null);
+
         Viagem viagem = new Viagem();
         viagem.setDataHoraPartida(dto.dataHoraPartida());
         viagem.setDataHoraChegadaPrevista(dto.dataHoraChegadaPrevista());
+        viagem.setStatus(ViagemStatus.AGENDADA);
         viagem.setMotorista(motorista);
         viagem.setVeiculo(veiculo);
         viagem.setRota(rota);
@@ -86,6 +92,16 @@ public class ViagemService {
                 .toList();
     }
 
+    public List<ViagemResponseDTO> listarHojePorMotorista(Long motoristaId) {
+        LocalDate hoje = LocalDate.now();
+        return viagemRepository.findByMotoristaId(motoristaId)
+                .stream()
+                .filter(viagem -> !viagem.getDataHoraPartida().isBefore(hoje.atStartOfDay())
+                        && viagem.getDataHoraPartida().isBefore(hoje.plusDays(1).atStartOfDay()))
+                .map(viagemMapper::toResponse)
+                .toList();
+    }
+
     public List<ViagemResponseDTO> listarHoje() {
         LocalDate hoje = LocalDate.now();
         return viagemRepository.findByDataHoraPartidaBetween(hoje.atStartOfDay(), hoje.plusDays(1).atStartOfDay())
@@ -110,8 +126,9 @@ public class ViagemService {
     }
 
     public QRCodeResponseDTO gerarQRCode(Long viagemId) {
-        viagemRepository.findById(viagemId)
+        Viagem viagem = viagemRepository.findById(viagemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Viagem nao encontrada com id: " + viagemId));
+        validarViagemPodeGerarQRCode(viagem);
         return qrCodeService.gerarParaViagem(viagemId);
     }
 
@@ -128,6 +145,12 @@ public class ViagemService {
         Rota rota = rotaRepository.findById(dto.rotaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Rota nao encontrada com id: " + dto.rotaId()));
 
+        if (!ViagemStatus.AGENDADA.equals(viagem.getStatus())) {
+            throw new BadRequestException("Apenas viagens agendadas podem ser atualizadas");
+        }
+
+        validarConflitos(dto, id);
+
         viagem.setDataHoraPartida(dto.dataHoraPartida());
         viagem.setDataHoraChegadaPrevista(dto.dataHoraChegadaPrevista());
         viagem.setMotorista(motorista);
@@ -141,6 +164,65 @@ public class ViagemService {
     public void deletar(Long id) {
         Viagem viagem = viagemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Viagem nao encontrada com id: " + id));
-        viagemRepository.delete(viagem);
+        if (ViagemStatus.FINALIZADA.equals(viagem.getStatus())) {
+            throw new BadRequestException("Viagem finalizada nao pode ser cancelada");
+        }
+        viagem.setStatus(ViagemStatus.CANCELADA);
+        viagemRepository.save(viagem);
+    }
+
+    public ViagemResponseDTO iniciar(Long id) {
+        Viagem viagem = viagemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Viagem nao encontrada com id: " + id));
+        if (!ViagemStatus.AGENDADA.equals(viagem.getStatus())) {
+            throw new BadRequestException("Apenas viagens agendadas podem ser iniciadas");
+        }
+        viagem.setStatus(ViagemStatus.EM_ANDAMENTO);
+        viagem.setDataHoraInicio(LocalDateTime.now());
+        return viagemMapper.toResponse(viagemRepository.save(viagem));
+    }
+
+    public ViagemResponseDTO finalizar(Long id) {
+        Viagem viagem = viagemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Viagem nao encontrada com id: " + id));
+        if (!ViagemStatus.EM_ANDAMENTO.equals(viagem.getStatus())) {
+            throw new BadRequestException("Apenas viagens em andamento podem ser finalizadas");
+        }
+        viagem.setStatus(ViagemStatus.FINALIZADA);
+        viagem.setDataHoraChegadaReal(LocalDateTime.now());
+        return viagemMapper.toResponse(viagemRepository.save(viagem));
+    }
+
+    private void validarConflitos(ViagemRequestDTO dto, Long ignorarId) {
+        if (viagemRepository.countConflitosMotorista(
+                dto.motoristaId(),
+                dto.dataHoraPartida(),
+                dto.dataHoraChegadaPrevista(),
+                ignorarId
+        ) > 0) {
+            throw new ResourceAlreadyExistsException("Motorista ja possui viagem no mesmo periodo");
+        }
+
+        if (viagemRepository.countConflitosVeiculo(
+                dto.veiculoId(),
+                dto.dataHoraPartida(),
+                dto.dataHoraChegadaPrevista(),
+                ignorarId
+        ) > 0) {
+            throw new ResourceAlreadyExistsException("Veiculo ja possui viagem no mesmo periodo");
+        }
+    }
+
+    private void validarViagemPodeGerarQRCode(Viagem viagem) {
+        if (ViagemStatus.CANCELADA.equals(viagem.getStatus()) || ViagemStatus.FINALIZADA.equals(viagem.getStatus())) {
+            throw new BadRequestException("QR Code nao pode ser gerado para viagem cancelada ou finalizada");
+        }
+
+        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime inicioJanela = viagem.getDataHoraPartida().minusMinutes(30);
+        LocalDateTime fimJanela = viagem.getDataHoraChegadaPrevista().plusMinutes(30);
+        if (agora.isBefore(inicioJanela) || agora.isAfter(fimJanela)) {
+            throw new BadRequestException("QR Code so pode ser gerado proximo ao horario da viagem");
+        }
     }
 }

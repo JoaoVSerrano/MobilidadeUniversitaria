@@ -1,12 +1,14 @@
 package com.synapse.mobilidadeUniversitaria.service;
 
 import com.synapse.mobilidadeUniversitaria.Entities.enums.PresencaStatus;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.ViagemStatus;
 import com.synapse.mobilidadeUniversitaria.dtos.request.QRCodeConfirmacaoRequestDTO;
 import com.synapse.mobilidadeUniversitaria.Entities.Aluno;
 import com.synapse.mobilidadeUniversitaria.Entities.PresencaDigital;
 import com.synapse.mobilidadeUniversitaria.Entities.Viagem;
 import com.synapse.mobilidadeUniversitaria.dtos.request.PresencaRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.QRCodeConfirmacaoResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.OcupacaoViagemResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.PresencaDigitalResponseDTO;
 import com.synapse.mobilidadeUniversitaria.exceptions.BadRequestException;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceAlreadyExistsException;
@@ -14,6 +16,7 @@ import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.PresencaDigitalRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.ViagemRepository;
+import com.synapse.mobilidadeUniversitaria.security.AuthorizationService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,26 +29,39 @@ public class PresencaService {
     private final AlunoRepository alunoRepository;
     private final ViagemRepository viagemRepository;
     private final QRCodeService qrCodeService;
+    private final AuthorizationService authorizationService;
 
     public PresencaService(PresencaDigitalRepository presencaRepository,
                            AlunoRepository alunoRepository,
                            ViagemRepository viagemRepository,
-                           QRCodeService qrCodeService) {
+                           QRCodeService qrCodeService,
+                           AuthorizationService authorizationService) {
         this.presencaRepository = presencaRepository;
         this.alunoRepository = alunoRepository;
         this.viagemRepository = viagemRepository;
         this.qrCodeService = qrCodeService;
+        this.authorizationService = authorizationService;
     }
 
     public PresencaDigitalResponseDTO registrar(PresencaRequestDTO dto) {
-        if (presencaRepository.findByAlunoIdAndViagemId(dto.alunoId(), dto.viagemId()).isPresent()) {
+        return registrar(dto.alunoId(), dto.viagemId());
+    }
+
+    public PresencaDigitalResponseDTO reservarParaAlunoLogado(Long viagemId) {
+        return registrar(authorizationService.currentUser().getId(), viagemId);
+    }
+
+    private PresencaDigitalResponseDTO registrar(Long alunoId, Long viagemId) {
+        if (presencaRepository.findByAlunoIdAndViagemId(alunoId, viagemId).isPresent()) {
             throw new ResourceAlreadyExistsException("Aluno ja possui reserva de presenca nesta viagem");
         }
 
-        Aluno aluno = alunoRepository.findById(dto.alunoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Aluno nao encontrado com id: " + dto.alunoId()));
-        Viagem viagem = viagemRepository.findById(dto.viagemId())
-                .orElseThrow(() -> new ResourceNotFoundException("Viagem nao encontrada com id: " + dto.viagemId()));
+        Aluno aluno = alunoRepository.findById(alunoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno nao encontrado com id: " + alunoId));
+        Viagem viagem = viagemRepository.findById(viagemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Viagem nao encontrada com id: " + viagemId));
+
+        validarViagemPodeReceberReserva(viagem);
 
         PresencaDigital presenca = new PresencaDigital();
         presenca.setAluno(aluno);
@@ -55,13 +71,24 @@ public class PresencaService {
     }
 
     public QRCodeConfirmacaoResponseDTO confirmarPorQRCode(QRCodeConfirmacaoRequestDTO dto) {
-        Long viagemId = qrCodeService.validarEExtrairViagemId(dto.qrData());
+        return confirmarPorQRCode(dto.alunoId(), dto.qrData());
+    }
 
-        Aluno aluno = alunoRepository.findById(dto.alunoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Aluno nao encontrado com id: " + dto.alunoId()));
+    public QRCodeConfirmacaoResponseDTO confirmarPorQRCodeDoAlunoLogado(String qrData) {
+        Long alunoId = authorizationService.currentUser().getId();
+        return confirmarPorQRCode(alunoId, qrData);
+    }
 
-        PresencaDigital presenca = presencaRepository.findByAlunoIdAndViagemId(dto.alunoId(), viagemId)
+    private QRCodeConfirmacaoResponseDTO confirmarPorQRCode(Long alunoId, String qrData) {
+        Long viagemId = qrCodeService.validarEExtrairViagemId(qrData);
+
+        Aluno aluno = alunoRepository.findById(alunoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno nao encontrado com id: " + alunoId));
+
+        PresencaDigital presenca = presencaRepository.findByAlunoIdAndViagemId(alunoId, viagemId)
                 .orElseThrow(() -> new BadRequestException("Aluno nao possui reserva de presenca para esta viagem"));
+
+        validarViagemPodeConfirmarPresenca(presenca.getViagem());
 
         if (PresencaStatus.CANCELADA.equals(presenca.getStatus())) {
             throw new BadRequestException("Reserva de presenca cancelada");
@@ -99,6 +126,27 @@ public class PresencaService {
                 .toList();
     }
 
+    public List<PresencaDigitalResponseDTO> listarDoAlunoLogado() {
+        return listarPorAluno(authorizationService.currentUser().getId());
+    }
+
+    public OcupacaoViagemResponseDTO ocupacaoDaViagem(Long viagemId) {
+        Viagem viagem = viagemRepository.findById(viagemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Viagem nao encontrada com id: " + viagemId));
+
+        List<PresencaDigital> presencas = presencaRepository.findByViagemId(viagemId);
+        long reservas = presencas.stream()
+                .filter(presenca -> !PresencaStatus.CANCELADA.equals(presenca.getStatus()))
+                .count();
+        long confirmados = presencas.stream()
+                .filter(presenca -> PresencaStatus.CONFIRMADA.equals(presenca.getStatus()))
+                .count();
+        int capacidade = viagem.getVeiculo() == null ? 0 : viagem.getVeiculo().getCapacidadeTotal();
+        double percentual = capacidade == 0 ? 0 : (confirmados * 100.0) / capacidade;
+
+        return new OcupacaoViagemResponseDTO(viagemId, capacidade, reservas, confirmados, percentual);
+    }
+
     public void deletar(Long id) {
         PresencaDigital presenca = presencaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Presenca nao encontrada com id: " + id));
@@ -115,5 +163,27 @@ public class PresencaService {
                 presenca.getDataHoraValidacao(),
                 presenca.getStatus()
         );
+    }
+
+    private void validarViagemPodeReceberReserva(Viagem viagem) {
+        if (!ViagemStatus.AGENDADA.equals(viagem.getStatus())) {
+            throw new BadRequestException("Apenas viagens agendadas aceitam reserva de presenca");
+        }
+
+        if (!LocalDateTime.now().isBefore(viagem.getDataHoraPartida())) {
+            throw new BadRequestException("Nao e possivel reservar presenca apos o inicio da viagem");
+        }
+
+        int capacidade = viagem.getVeiculo() == null ? 0 : viagem.getVeiculo().getCapacidadeTotal();
+        long reservasAtivas = presencaRepository.countByViagemIdAndStatusNot(viagem.getId(), PresencaStatus.CANCELADA);
+        if (capacidade > 0 && reservasAtivas >= capacidade) {
+            throw new BadRequestException("Viagem sem vagas disponiveis");
+        }
+    }
+
+    private void validarViagemPodeConfirmarPresenca(Viagem viagem) {
+        if (ViagemStatus.CANCELADA.equals(viagem.getStatus()) || ViagemStatus.FINALIZADA.equals(viagem.getStatus())) {
+            throw new BadRequestException("Nao e possivel confirmar presenca em viagem cancelada ou finalizada");
+        }
     }
 }

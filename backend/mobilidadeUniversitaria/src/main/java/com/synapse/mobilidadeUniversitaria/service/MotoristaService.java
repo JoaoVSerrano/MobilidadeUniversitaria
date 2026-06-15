@@ -4,6 +4,7 @@ import com.synapse.mobilidadeUniversitaria.Entities.Endereco;
 import com.synapse.mobilidadeUniversitaria.Entities.Motorista;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import com.synapse.mobilidadeUniversitaria.dtos.request.MotoristaRequestDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.request.MotoristaUpdateRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.MotoristaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.ViagemResponseDTO;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
@@ -69,13 +70,15 @@ public class MotoristaService {
                 .collect(Collectors.toList());
     }
 
-    public MotoristaResponseDTO atualizar(Long id, MotoristaRequestDTO dto) {
+    public MotoristaResponseDTO atualizar(Long id, MotoristaUpdateRequestDTO dto) {
         Motorista motorista = buscarMotoristaPorId(id);
         usuarioValidationService.validarAtualizacao(motorista.getId(), dto);
 
         motoristaMapper.updateEntity(motorista, dto);
         motorista.setUserType(UserType.MOTORISTA);
-        motorista.setSenha(passwordEncoder.encode(dto.getSenha()));
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            motorista.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
         motorista.setEndereco(buscarEndereco(dto.getEnderecoId()));
 
         Motorista atualizado = motoristaRepository.save(motorista);

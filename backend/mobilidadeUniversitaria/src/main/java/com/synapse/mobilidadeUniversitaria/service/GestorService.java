@@ -3,7 +3,9 @@ package com.synapse.mobilidadeUniversitaria.service;
 import com.synapse.mobilidadeUniversitaria.Entities.Endereco;
 import com.synapse.mobilidadeUniversitaria.Entities.Usuario;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
+import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioDadosDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioRequestDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioUpdateRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioResponseDTO;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.mapper.EnderecoMapper;
@@ -60,13 +62,15 @@ public class GestorService {
                 .collect(Collectors.toList());
     }
 
-    public UsuarioResponseDTO atualizar(Long id, UsuarioRequestDTO dto) {
+    public UsuarioResponseDTO atualizar(Long id, UsuarioUpdateRequestDTO dto) {
         Usuario gestor = buscarGestorPorId(id);
         usuarioValidationService.validarAtualizacao(gestor.getId(), dto);
 
         atualizarCamposComuns(gestor, dto);
         gestor.setUserType(UserType.GESTOR);
-        gestor.setSenha(passwordEncoder.encode(dto.getSenha()));
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            gestor.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
 
         Usuario atualizado = usuarioRepository.save(gestor);
         return toResponse(atualizado);
@@ -82,7 +86,7 @@ public class GestorService {
                 .orElseThrow(() -> new ResourceNotFoundException("Gestor nao encontrado com id: " + id));
     }
 
-    private void atualizarCamposComuns(Usuario usuario, UsuarioRequestDTO dto) {
+    private void atualizarCamposComuns(Usuario usuario, UsuarioDadosDTO dto) {
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         usuario.setCpf(dto.getCpf());

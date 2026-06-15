@@ -1,6 +1,6 @@
 package com.synapse.mobilidadeUniversitaria.service;
 
-import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioRequestDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioDadosDTO;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceAlreadyExistsException;
 import com.synapse.mobilidadeUniversitaria.repositories.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ public class UsuarioValidationService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public void validarCriacao(UsuarioRequestDTO dto) {
+    public void validarCriacao(UsuarioDadosDTO dto) {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
             throw new ResourceAlreadyExistsException("Email ja cadastrado: " + dto.getEmail());
         }
@@ -24,7 +24,7 @@ public class UsuarioValidationService {
         }
     }
 
-    public void validarAtualizacao(Long usuarioId, UsuarioRequestDTO dto) {
+    public void validarAtualizacao(Long usuarioId, UsuarioDadosDTO dto) {
         if (usuarioRepository.existsByEmailAndIdNot(dto.getEmail(), usuarioId)) {
             throw new ResourceAlreadyExistsException("Email ja cadastrado: " + dto.getEmail());
         }

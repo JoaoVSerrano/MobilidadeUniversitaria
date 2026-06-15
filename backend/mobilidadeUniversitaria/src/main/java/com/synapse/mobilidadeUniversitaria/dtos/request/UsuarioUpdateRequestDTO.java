@@ -11,7 +11,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UsuarioRequestDTO implements UsuarioDadosDTO {
+public class UsuarioUpdateRequestDTO implements UsuarioDadosDTO {
 
     @NotBlank(message = "Nome e obrigatorio")
     private String nome;
@@ -24,7 +24,6 @@ public class UsuarioRequestDTO implements UsuarioDadosDTO {
     @Pattern(regexp = "^\\d{11}$", message = "CPF deve conter 11 digitos")
     private String cpf;
 
-    @NotBlank(message = "Senha e obrigatoria")
     @Size(min = 6, message = "Senha deve ter no minimo 6 caracteres")
     private String senha;
 

@@ -1,0 +1,579 @@
+GUIA DE TESTES NO POSTMAN - MOBILIDADE UNIVERSITARIA
+
+Base URL:
+http://localhost:8080
+
+Headers para rotas protegidas:
+Content-Type: application/json
+Authorization: Bearer COLE_AQUI_O_TOKEN_DO_LOGIN
+
+Fluxo recomendado para popular dados:
+1. POST /api/auth/register - cria o primeiro gestor sem token
+2. POST /api/auth/login - pega o token do gestor
+3. Criar endereco
+4. Criar faculdade usando enderecoId
+5. Criar motorista usando enderecoId
+6. Criar aluno usando enderecoId e faculdadeId
+7. Criar rota
+8. Criar veiculo
+9. Criar viagem usando motoristaId, veiculoId e rotaId
+10. Criar reserva/presenca usando alunoId e viagemId
+
+Observacao:
+Datas de viagem e vencimento de CNH precisam estar no futuro.
+
+============================================================
+AUTH
+============================================================
+
+POST /api/auth/register
+Cria o primeiro gestor. Publico apenas quando ainda nao existe gestor.
+
+Body:
+{
+  "nome": "Gestor Principal",
+  "email": "gestor@teste.com",
+  "cpf": "11122233344",
+  "senha": "123456",
+  "telefone": "(11) 99999-0000",
+  "endereco": {
+    "cep": "01001000",
+    "rua": "Praca da Se",
+    "bairro": "Se",
+    "numero": "100",
+    "complemento": "Sala 1",
+    "tipoLocal": "RESIDENCIAL"
+  }
+}
+
+POST /api/auth/login
+Body:
+{
+  "email": "gestor@teste.com",
+  "senha": "123456"
+}
+
+============================================================
+ENDERECOS
+============================================================
+
+POST /api/enderecos
+Body:
+{
+  "cep": "01001000",
+  "rua": "Praca da Se",
+  "bairro": "Se",
+  "numero": "100",
+  "complemento": "Bloco A",
+  "tipoLocal": "RESIDENCIAL"
+}
+
+GET /api/enderecos
+
+GET /api/enderecos/{id}
+Exemplo:
+GET /api/enderecos/1
+
+PUT /api/enderecos/{id}
+Exemplo:
+PUT /api/enderecos/1
+Body:
+{
+  "cep": "01002000",
+  "rua": "Rua Atualizada",
+  "bairro": "Centro",
+  "numero": "200",
+  "complemento": "Casa",
+  "tipoLocal": "RESIDENCIAL"
+}
+
+DELETE /api/enderecos/{id}
+Exemplo:
+DELETE /api/enderecos/1
+
+Valores aceitos para tipoLocal:
+RESIDENCIAL, FACULDADE
+
+============================================================
+FACULDADES
+============================================================
+
+POST /api/faculdades
+Body:
+{
+  "nome": "Universidade Teste",
+  "enderecoId": 1
+}
+
+GET /api/faculdades
+
+GET /api/faculdades/{id}
+Exemplo:
+GET /api/faculdades/1
+
+PUT /api/faculdades/{id}
+Exemplo:
+PUT /api/faculdades/1
+Body:
+{
+  "nome": "Universidade Teste Atualizada",
+  "enderecoId": 1
+}
+
+DELETE /api/faculdades/{id}
+Exemplo:
+DELETE /api/faculdades/1
+
+============================================================
+GESTORES
+============================================================
+
+POST /api/gestores
+Requer token de gestor.
+
+Body:
+{
+  "nome": "Gestor Dois",
+  "email": "gestor2@teste.com",
+  "cpf": "22233344455",
+  "senha": "123456",
+  "enderecoId": 1,
+  "telefone": "(11) 98888-0000"
+}
+
+GET /api/gestores
+
+GET /api/gestores/{id}
+Exemplo:
+GET /api/gestores/1
+
+PUT /api/gestores/{id}
+Exemplo:
+PUT /api/gestores/1
+Body:
+{
+  "nome": "Gestor Atualizado",
+  "email": "gestor@teste.com",
+  "cpf": "11122233344",
+  "senha": "1234567",
+  "enderecoId": 1,
+  "telefone": "(11) 97777-0000"
+}
+
+DELETE /api/gestores/{id}
+Exemplo:
+DELETE /api/gestores/2
+
+============================================================
+ALUNOS
+============================================================
+
+POST /api/alunos
+Requer token de gestor.
+
+Body:
+{
+  "nome": "Aluno Teste",
+  "email": "aluno@teste.com",
+  "cpf": "33344455566",
+  "senha": "123456",
+  "enderecoId": 1,
+  "telefone": "(11) 96666-0000",
+  "faculdadeId": 1,
+  "statusMatricula": "ATIVA"
+}
+
+GET /api/alunos
+
+GET /api/alunos/{id}
+Exemplo:
+GET /api/alunos/3
+
+PUT /api/alunos/{id}
+Exemplo:
+PUT /api/alunos/3
+Body:
+{
+  "nome": "Aluno Atualizado",
+  "email": "aluno@teste.com",
+  "cpf": "33344455566",
+  "senha": "1234567",
+  "enderecoId": 1,
+  "telefone": "(11) 95555-0000",
+  "faculdadeId": 1,
+  "statusMatricula": "ATIVA"
+}
+
+GET /api/alunos/{id}/viagens
+Exemplo:
+GET /api/alunos/3/viagens
+
+GET /api/alunos/{id}/presencas
+Exemplo:
+GET /api/alunos/3/presencas
+
+DELETE /api/alunos/{id}
+Exemplo:
+DELETE /api/alunos/3
+
+Valores aceitos para statusMatricula:
+PENDENTE, ATIVA, TRANCADA, CANCELADA, CONCLUIDA, REPROVADA
+
+============================================================
+MOTORISTAS
+============================================================
+
+POST /api/motoristas
+Requer token de gestor.
+
+Body:
+{
+  "nome": "Motorista Teste",
+  "email": "motorista@teste.com",
+  "cpf": "44455566677",
+  "senha": "123456",
+  "enderecoId": 1,
+  "telefone": "(11) 94444-0000",
+  "cnhNumero": "12345678900",
+  "vencimentoCnh": "31/12/2030"
+}
+
+GET /api/motoristas
+
+GET /api/motoristas/{id}
+Exemplo:
+GET /api/motoristas/4
+
+PUT /api/motoristas/{id}
+Exemplo:
+PUT /api/motoristas/4
+Body:
+{
+  "nome": "Motorista Atualizado",
+  "email": "motorista@teste.com",
+  "cpf": "44455566677",
+  "senha": "1234567",
+  "enderecoId": 1,
+  "telefone": "(11) 93333-0000",
+  "cnhNumero": "12345678900",
+  "vencimentoCnh": "31/12/2031"
+}
+
+GET /api/motoristas/{id}/viagens
+Exemplo:
+GET /api/motoristas/4/viagens
+
+DELETE /api/motoristas/{id}
+Exemplo:
+DELETE /api/motoristas/4
+
+============================================================
+ROTAS
+============================================================
+
+POST /api/rotas
+Body:
+{
+  "nomeRota": "Rota Centro",
+  "descricao": "Linha entre centro e universidade",
+  "pontoParada": "Terminal Central"
+}
+
+GET /api/rotas
+
+GET /api/rotas/{id}
+Exemplo:
+GET /api/rotas/1
+
+GET /api/rotas/stats
+
+PUT /api/rotas/{id}
+Exemplo:
+PUT /api/rotas/1
+Body:
+{
+  "nomeRota": "Rota Centro Atualizada",
+  "descricao": "Linha atualizada",
+  "pontoParada": "Terminal Norte"
+}
+
+DELETE /api/rotas/{id}
+Exemplo:
+DELETE /api/rotas/1
+
+Aliases equivalentes:
+GET /api/routes
+GET /api/routes/stats
+GET /api/routes/{id}
+POST /api/routes
+PUT /api/routes/{id}
+DELETE /api/routes/{id}
+
+============================================================
+VEICULOS
+============================================================
+
+POST /api/veiculos
+Body:
+{
+  "placa": "ABC1D23",
+  "modelo": "Micro-onibus",
+  "capacidadeTotal": 30
+}
+
+GET /api/veiculos
+
+GET /api/veiculos/{id}
+Exemplo:
+GET /api/veiculos/1
+
+GET /api/veiculos/stats
+
+PUT /api/veiculos/{id}
+Exemplo:
+PUT /api/veiculos/1
+Body:
+{
+  "placa": "ABC1D23",
+  "modelo": "Onibus Urbano",
+  "capacidadeTotal": 40
+}
+
+DELETE /api/veiculos/{id}
+Exemplo:
+DELETE /api/veiculos/1
+
+Formatos aceitos para placa:
+ABC-1234, ABC1234, ABC1D23
+
+Aliases equivalentes:
+GET /api/vehicles
+GET /api/vehicles/stats
+GET /api/vehicles/{id}
+POST /api/vehicles
+PUT /api/vehicles/{id}
+DELETE /api/vehicles/{id}
+
+============================================================
+VIAGENS
+============================================================
+
+POST /api/viagens
+Body:
+{
+  "dataHoraPartida": "20/12/2026 07:30",
+  "dataHoraChegadaPrevista": "20/12/2026 08:30",
+  "motoristaId": 4,
+  "veiculoId": 1,
+  "rotaId": 1
+}
+
+GET /api/viagens
+
+GET /api/viagens/{id}
+Exemplo:
+GET /api/viagens/1
+
+GET /api/viagens/proximas
+
+GET /api/viagens/hoje
+
+GET /api/viagens/motorista/{motoristaId}
+Exemplo:
+GET /api/viagens/motorista/4
+
+GET /api/viagens/stats
+
+POST /api/viagens/{id}/qrcode
+Exemplo:
+POST /api/viagens/1/qrcode
+
+PUT /api/viagens/{id}
+Exemplo:
+PUT /api/viagens/1
+Body:
+{
+  "dataHoraPartida": "21/12/2026 07:30",
+  "dataHoraChegadaPrevista": "21/12/2026 08:30",
+  "motoristaId": 4,
+  "veiculoId": 1,
+  "rotaId": 1
+}
+
+DELETE /api/viagens/{id}
+Exemplo:
+DELETE /api/viagens/1
+
+Valores possiveis de status na resposta:
+AGENDADA, EM_ANDAMENTO, FINALIZADA, CANCELADA
+
+Aliases equivalentes:
+GET /api/trips
+GET /api/trips/stats
+GET /api/trips/upcoming
+GET /api/trips/{id}
+POST /api/trips
+PUT /api/trips/{id}
+DELETE /api/trips/{id}
+
+============================================================
+PRESENCAS / RESERVAS
+============================================================
+
+POST /api/presencas
+Body:
+{
+  "alunoId": 3,
+  "viagemId": 1
+}
+
+POST /api/presencas/confirmar-qrcode
+Use o qrData retornado por POST /api/viagens/{id}/qrcode.
+
+Body:
+{
+  "alunoId": 3,
+  "qrData": "COLE_AQUI_O_QRDATA"
+}
+
+GET /api/presencas/viagem/{viagemId}
+Exemplo:
+GET /api/presencas/viagem/1
+
+GET /api/presencas/aluno/{alunoId}
+Exemplo:
+GET /api/presencas/aluno/3
+
+DELETE /api/presencas/{id}
+Exemplo:
+DELETE /api/presencas/1
+
+Valores possiveis de status na resposta:
+RESERVADA, CONFIRMADA, CANCELADA
+
+============================================================
+NOTIFICACOES
+============================================================
+
+GET /api/notificacoes
+
+GET /api/notificacoes/{id}
+Exemplo:
+GET /api/notificacoes/1
+
+PATCH /api/notificacoes/{id}/lida
+Exemplo:
+PATCH /api/notificacoes/1/lida
+
+PATCH /api/notificacoes/lidas
+Marca todas como lidas para o usuario logado.
+
+GET /api/notificacoes/nao-lidas/count
+
+Observacao:
+Nao existe endpoint POST de notificacao no controller atual, apesar de existir NotificacaoRequestDTO no codigo.
+
+============================================================
+USUARIOS
+============================================================
+
+GET /api/usuarios
+
+GET /api/usuarios/{id}
+Exemplo:
+GET /api/usuarios/1
+
+GET /api/usuarios/tipo/{tipoUsuario}
+Exemplo:
+GET /api/usuarios/tipo/ALUNO
+
+GET /api/usuarios/stats
+
+DELETE /api/usuarios/{id}
+Exemplo:
+DELETE /api/usuarios/3
+
+Valores aceitos para tipoUsuario:
+GESTOR, ALUNO, MOTORISTA
+
+Aliases equivalentes:
+GET /api/users
+GET /api/users/stats
+GET /api/users/{id}
+DELETE /api/users/{id}
+
+============================================================
+PERFIL DO USUARIO LOGADO
+============================================================
+
+GET /api/me
+
+PUT /api/me
+Body:
+{
+  "nome": "Meu Perfil Atualizado",
+  "email": "gestor@teste.com",
+  "cpf": "11122233344",
+  "senha": "1234567",
+  "enderecoId": 1,
+  "telefone": "(11) 92222-0000"
+}
+
+============================================================
+DASHBOARD
+============================================================
+
+GET /api/dashboard/gestor
+
+GET /api/dashboard/ocupacao-por-rota
+
+GET /api/dashboard/demanda-por-dia
+
+============================================================
+APP DO ALUNO
+============================================================
+
+Use token de um usuario ALUNO.
+
+GET /api/student/viagens
+
+GET /api/student/presencas
+
+POST /api/student/trips/{viagemId}/reserve
+Exemplo:
+POST /api/student/trips/1/reserve
+
+POST /api/student/qrcode/scan
+Body:
+{
+  "qrData": "COLE_AQUI_O_QRDATA"
+}
+
+============================================================
+APP DO MOTORISTA
+============================================================
+
+Use token de um usuario MOTORISTA.
+
+GET /api/driver/trips/today
+
+GET /api/driver/trips/{tripId}/students
+Exemplo:
+GET /api/driver/trips/1/students
+
+GET /api/driver/trips/{tripId}/occupancy
+Exemplo:
+GET /api/driver/trips/1/occupancy
+
+POST /api/driver/trips/{tripId}/qrcode
+Exemplo:
+POST /api/driver/trips/1/qrcode
+
+POST /api/driver/trips/{tripId}/start
+Exemplo:
+POST /api/driver/trips/1/start
+
+POST /api/driver/trips/{tripId}/finish
+Exemplo:
+POST /api/driver/trips/1/finish
+
