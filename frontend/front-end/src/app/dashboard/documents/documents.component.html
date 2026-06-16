@@ -1,0 +1,124 @@
+<!-- Hidden File Input -->
+<input #fileInput type="file" accept="*/*" style="display:none" (change)="onFileSelected($event)">
+
+<!-- Upload Success Toast -->
+@if (uploadSuccess) {
+  <div class="upload-toast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    {{ uploadSuccess }}
+  </div>
+}
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Documentos</h1>
+    <p class="page-subtitle">Gerencie documentos do sistema</p>
+  </div>
+  <button class="btn-primary" (click)="triggerUpload()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="21 15 21 21 3 21 3 15"></polyline>
+      <polyline points="17 8 12 3 7 8"></polyline>
+      <line x1="12" y1="3" x2="12" y2="15"></line>
+    </svg>
+    Upload
+  </button>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row">
+  <div class="mini-stat">
+    <span class="mini-stat-label">Total</span>
+    <span class="mini-stat-value white">{{ total }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Contratos</span>
+    <span class="mini-stat-value blue">{{ contracts }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Licenças</span>
+    <span class="mini-stat-value cyan">{{ licenses }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Relatórios</span>
+    <span class="mini-stat-value yellow">{{ reports }}</span>
+  </div>
+</div>
+
+<!-- Documents List -->
+<div class="docs-card">
+  <div class="docs-card-header">
+    <h3 class="docs-card-title">Arquivos Recentes</h3>
+    <button class="btn-upload-sm" (click)="triggerUpload()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="21 15 21 21 3 21 3 15"></polyline>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      Enviar Arquivo
+    </button>
+  </div>
+
+  <div class="docs-list">
+    @for (doc of documents; track doc.id) {
+      <div class="doc-row">
+        <!-- Icon -->
+        <div [class]="'doc-icon-wrap ' + doc.type.toLowerCase()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+        </div>
+
+        <!-- Info -->
+        <div class="doc-info">
+          <span class="doc-name">{{ doc.name }}</span>
+          <div class="doc-meta">
+            <span class="doc-type-badge" [class]="'type-' + doc.type.toLowerCase()">{{ doc.type }}</span>
+            <span class="doc-separator">•</span>
+            <span class="doc-size">{{ doc.size }}</span>
+            <span class="doc-separator">•</span>
+            <span class="doc-date">{{ doc.date }}</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="doc-actions">
+          <button class="action-btn view" title="Visualizar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+          <button class="action-btn download" title="Download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="8 17 12 21 16 17"></polyline>
+              <line x1="12" y1="12" x2="12" y2="21"></line>
+              <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path>
+            </svg>
+          </button>
+          <button class="action-btn delete" title="Excluir">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (documents.length === 0) {
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <p>Nenhum documento encontrado</p>
+        <button class="btn-primary" (click)="triggerUpload()">Fazer Upload</button>
+      </div>
+    }
+  </div>
+</div>

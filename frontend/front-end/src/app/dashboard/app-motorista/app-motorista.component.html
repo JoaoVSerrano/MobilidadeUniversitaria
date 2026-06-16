@@ -1,0 +1,285 @@
+<div class="simulator-wrapper">
+  <!-- Phone Frame Container -->
+  <div class="phone-frame">
+    <!-- Phone Bezel/Notch & Status Bar -->
+    <div class="phone-status-bar">
+      <span class="phone-time">07:28</span>
+      <div class="phone-notch"></div>
+      <div class="phone-status-icons">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="phone-icon">
+          <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+          <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+          <line x1="12" y1="20" x2="12.01" y2="20"></line>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="phone-icon">
+          <rect x="2" y="7" width="16" height="10" rx="2" ry="2"></rect>
+          <line x1="22" y1="11" x2="22" y2="13"></line>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Phone Screen Content Area -->
+    <div class="phone-screen-content">
+
+      <!-- ── TAB: VIAGEM ── -->
+      @if (currentTab === 'viagem') {
+        <div class="tab-view viagem-view">
+          <div class="view-header-blue">
+            <h1 class="welcome-title">Lista de Viagem</h1>
+            <div class="trip-meta-info">
+              <span class="meta-item"><strong>Rota:</strong> {{ route }}</span>
+              <span class="meta-item"><strong>Horário:</strong> {{ time }}</span>
+              <span class="meta-item"><strong>Veículo:</strong> {{ vehicle }}</span>
+            </div>
+          </div>
+
+          <div class="view-body">
+            <!-- Header section row -->
+            <div class="list-section-header">
+              <h2 class="section-title">Alunos Confirmados</h2>
+              <div class="section-header-actions">
+                <span class="occupancy-badge">
+                  {{ confirmedCount }}/{{ totalCount }} embarcados
+                </span>
+                <button class="icon-only-btn" aria-label="Editar lista">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pencil-icon">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Passengers List -->
+            <div class="passengers-list">
+              @for (passenger of passengers; track passenger.id) {
+                <div class="passenger-card" [class.confirmed]="passenger.confirmed">
+                  <div class="passenger-card-left">
+                    <span class="passenger-name">{{ passenger.name }}</span>
+                    <span class="passenger-mat">Mat: {{ passenger.mat }}</span>
+                  </div>
+                  <div class="passenger-card-right">
+                    @if (passenger.confirmed) {
+                      <button (click)="confirmPassenger(passenger)" class="btn-passenger-confirmed">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="checkmark-icon">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Confirmado
+                      </button>
+                    } @else {
+                      <button (click)="confirmPassenger(passenger)" class="btn-passenger-action">
+                        Confirmar
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ── TAB: SCANNER ── -->
+      @if (currentTab === 'scanner') {
+        <div class="tab-view scanner-view">
+          <div class="view-header-blue">
+            <h1 class="welcome-title">Scanner QR Code</h1>
+            <p class="welcome-subtitle">Valide o embarque dos alunos</p>
+          </div>
+
+          <div class="view-body">
+            <!-- Camera View Box Card -->
+            <div class="scanner-card">
+              <div class="camera-simulator">
+                <!-- Blue corner brackets -->
+                <div class="bracket top-left"></div>
+                <div class="bracket top-right"></div>
+                <div class="bracket bottom-left"></div>
+                <div class="bracket bottom-right"></div>
+                
+                @if (scanning) {
+                  <div class="scanner-line-active"></div>
+                  <div class="spinner"></div>
+                } @else {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="camera-focus-icon">
+                    <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                    <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                    <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                    <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                    <rect x="7" y="7" width="10" height="10" rx="1"></rect>
+                  </svg>
+                }
+              </div>
+
+              <span class="scanner-instruction">Aponte a câmera para o QR Code do aluno</span>
+              
+              <button (click)="simulateScan()" class="btn-action-primary block-btn" [disabled]="scanning">
+                Simular Scan
+              </button>
+            </div>
+
+            <!-- Recent Validations Card -->
+            <div class="app-card validations-card">
+              <span class="card-label">Últimas Validações</span>
+              
+              @if (recentValidations.length > 0) {
+                <div class="validation-history-list">
+                  @for (log of recentValidations; track log.mat) {
+                    <div class="validation-log-row">
+                      <div class="log-left">
+                        <span class="log-dot green"></span>
+                        <div class="log-text">
+                          <span class="log-name">{{ log.passengerName }}</span>
+                          <span class="log-mat">Mat: {{ log.mat }}</span>
+                        </div>
+                      </div>
+                      <span class="log-time">{{ log.time }}</span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="no-validations">
+                  <span class="no-validations-text">Nenhum aluno embarcado recentemente</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ── TAB: STATUS ── -->
+      @if (currentTab === 'status') {
+        <div class="tab-view status-view">
+          <div class="view-header-blue">
+            <h1 class="welcome-title">Controle de Viagem</h1>
+            <p class="welcome-subtitle">{{ route }} • {{ time }}</p>
+          </div>
+
+          <div class="view-body">
+            <!-- Travel Status -->
+            <div class="app-card travel-status-card">
+              <span class="card-label">Status da Viagem</span>
+              <div class="status-pill-row">
+                <span class="status-badge-pill" [ngClass]="{
+                  'waiting': tripStatus === 'Aguardando início',
+                  'active': tripStatus === 'Em andamento',
+                  'finished': tripStatus === 'Finalizada'
+                }">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pill-icon">
+                    @if (tripStatus === 'Aguardando início') {
+                      <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+                    } @else if (tripStatus === 'Em andamento') {
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    } @else {
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    }
+                  </svg>
+                  {{ tripStatus }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Occupancy Card -->
+            <div class="app-card occupancy-status-card">
+              <div class="occupancy-header">
+                <div class="occupancy-title-block">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-icon">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  <span class="occupancy-title">Ocupação</span>
+                </div>
+                <span class="occupancy-val-large">{{ confirmedCount }}/{{ totalCount }}</span>
+              </div>
+              <div class="app-progress-bar-bg full-width">
+                <div class="app-progress-bar-fill" 
+                     [style.width.%]="(confirmedCount / totalCount) * 100"
+                     [class.low]="confirmedCount < 3"
+                     [class.medium]="confirmedCount >= 3 && confirmedCount < 5"
+                     [class.high]="confirmedCount >= 5">
+                </div>
+              </div>
+            </div>
+
+            <!-- LifeCycle Trigger button -->
+            <button (click)="toggleTripStatus()" class="btn-trip-action" [ngClass]="{
+              'green': tripStatus === 'Aguardando início',
+              'red': tripStatus === 'Em andamento',
+              'blue': tripStatus === 'Finalizada'
+            }">
+              @if (tripStatus === 'Aguardando início') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                  <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                Iniciar Rota
+              } @else if (tripStatus === 'Em andamento') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                </svg>
+                Finalizar Rota
+              } @else {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                </svg>
+                Resetar Simulação
+              }
+            </button>
+
+            <!-- Lembre-se box -->
+            <div class="remember-card-warning">
+              <div class="remember-title-block">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+                  <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span class="remember-title">Lembre-se:</span>
+              </div>
+              <ul class="remember-bullet-list">
+                <li>Validar todos os QR Codes antes de iniciar</li>
+                <li>Registrar cada parada da rota</li>
+                <li>Finalizar a viagem ao chegar no destino</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- Phone Simulated Bottom Navigation Bar -->
+    <div class="phone-nav-bar">
+      <!-- Tab: Viagem -->
+      <button (click)="selectTab('viagem')" class="nav-tab-btn" [class.active]="currentTab === 'viagem'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span class="nav-label">Viagem</span>
+      </button>
+
+      <!-- Tab: Scanner -->
+      <button (click)="selectTab('scanner')" class="nav-tab-btn" [class.active]="currentTab === 'scanner'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect>
+          <rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect>
+        </svg>
+        <span class="nav-label">Scanner</span>
+      </button>
+
+      <!-- Tab: Status -->
+      <button (click)="selectTab('status')" class="nav-tab-btn" [class.active]="currentTab === 'status'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <span class="nav-label">Status</span>
+      </button>
+    </div>
+
+    <!-- Phone Simulated Toast -->
+    @if (toastMessage) {
+      <div class="phone-toast animate-toast">
+        <span>{{ toastMessage }}</span>
+      </div>
+    }
+  </div>
+</div>

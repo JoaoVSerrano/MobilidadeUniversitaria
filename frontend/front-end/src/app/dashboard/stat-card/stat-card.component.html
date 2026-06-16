@@ -1,0 +1,81 @@
+<div class="card-container">
+  <!-- Card Header -->
+  <div class="card-header">
+    <span class="card-title">{{ title }}</span>
+    <div [class]="'card-icon-wrapper ' + icon">
+      <!-- Users Icon -->
+      @if (icon === 'users') {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      }
+      <!-- Percentage Icon -->
+      @if (icon === 'percentage') {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="5" x2="5" y2="19"></line>
+          <circle cx="6.5" cy="6.5" r="2.5"></circle>
+          <circle cx="17.5" cy="17.5" r="2.5"></circle>
+        </svg>
+      }
+      <!-- Bus Icon -->
+      @if (icon === 'bus') {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+          <path d="M6 18v2"></path>
+          <path d="M18 18v2"></path>
+          <path d="M2 10h20"></path>
+        </svg>
+      }
+      <!-- Wallet Icon -->
+      @if (icon === 'wallet') {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <path d="M12 10h10v4H12z"></path>
+          <circle cx="17" cy="12" r="1"></circle>
+        </svg>
+      }
+    </div>
+  </div>
+
+  <!-- Card Body / Value -->
+  <div class="card-body">
+    <h2 class="card-value">{{ value }}</h2>
+  </div>
+
+  <!-- Card Footer / Trend & Info -->
+  @if (trend || info) {
+    <div class="card-footer">
+      @if (trend) {
+        <div [class]="'trend-wrapper ' + trendDirection">
+          <!-- Up Arrow -->
+          @if (trendDirection === 'up') {
+            <svg class="trend-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+          }
+          <!-- Down Arrow -->
+          @if (trendDirection === 'down') {
+            <svg class="trend-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+          }
+          <!-- Check Mark/Neutral Indicator -->
+          @if (trendDirection === 'neutral' && icon === 'bus') {
+            <svg class="trend-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          }
+          <span class="trend-text">{{ trend }}</span>
+        </div>
+      }
+      @if (info) {
+        <span class="info-text">{{ info }}</span>
+      }
+    </div>
+  }
+</div>

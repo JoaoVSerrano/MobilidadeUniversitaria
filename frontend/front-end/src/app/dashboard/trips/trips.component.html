@@ -1,0 +1,170 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Gestão de Viagens</h1>
+    <p class="page-subtitle">Agende e gerencie as viagens de transporte</p>
+  </div>
+  <button class="btn-primary" (click)="openCreateModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    Agendar Viagem
+  </button>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row">
+  <div class="mini-stat">
+    <span class="mini-stat-label">Agendadas Hoje</span>
+    <span class="mini-stat-value white">{{ scheduledToday }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Total de Passageiros</span>
+    <span class="mini-stat-value cyan">{{ totalPassengers }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Concluídas</span>
+    <span class="mini-stat-value white">{{ completed }}</span>
+  </div>
+</div>
+
+<!-- Trips List -->
+<div class="trips-card">
+  <div class="trips-card-header">
+    <h3 class="trips-card-title">Próximas Viagens</h3>
+    <button class="btn-primary sm" (click)="openCreateModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Agendar Viagem
+    </button>
+  </div>
+
+  <div class="trips-list">
+    @for (trip of trips; track trip.id) {
+      <div class="trip-row">
+        <!-- Left block: route name -->
+        <div class="trip-main">
+          <span class="trip-route">{{ trip.route }}</span>
+          <div class="trip-meta">
+            <!-- Date -->
+            <span class="trip-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              {{ trip.date }}
+            </span>
+            <!-- Time -->
+            <span class="trip-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              {{ trip.time }}
+            </span>
+            <!-- Driver -->
+            <span class="trip-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              {{ trip.driver }}
+            </span>
+            <!-- Vehicle -->
+            <span class="trip-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                <path d="M6 18v2"></path><path d="M18 18v2"></path><path d="M2 10h20"></path>
+              </svg>
+              {{ trip.vehicle }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Right block: count + badge -->
+        <div class="trip-right">
+          <div class="student-count">
+            <span class="count-num">{{ trip.studentsCount }}</span>
+            <span class="count-label">alunos</span>
+          </div>
+          <span [class]="'trip-badge ' + trip.status">{{ getStatusLabel(trip.status) }}</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal de Nova Viagem -->
+@if (showCreateModal) {
+  <div class="modal-overlay" (click)="closeCreateModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Agendar Viagem</h3>
+        <button class="modal-close" (click)="closeCreateModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form (submit)="createTrip()" class="modal-form">
+        <div class="form-group">
+          <label class="form-label">Rota</label>
+          <select [(ngModel)]="newTrip.route" name="route" class="form-select">
+            @for (route of routes; track route.id) {
+              <option [value]="route.name">{{ route.name }} — {{ route.originDest }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Data</label>
+            <input type="text" [(ngModel)]="newTrip.date" name="date" required class="form-input" placeholder="DD/MM/AAAA">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Horário</label>
+            <input type="text" [(ngModel)]="newTrip.time" name="time" required class="form-input" placeholder="Ex: 07:30">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Motorista</label>
+          <select [(ngModel)]="newTrip.driver" name="driver" class="form-select">
+            @if (drivers.length === 0) {
+              <option value="">Nenhum motorista disponível</option>
+            }
+            @for (driver of drivers; track driver.id) {
+              <option [value]="driver.name">{{ driver.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Veículo</label>
+          <select [(ngModel)]="newTrip.vehicle" name="vehicle" class="form-select">
+            @if (vehicles.length === 0) {
+              <option value="">Nenhum veículo disponível</option>
+            }
+            @for (vehicle of vehicles; track vehicle.id) {
+              <option [value]="vehicle.code">{{ vehicle.code }} — {{ vehicle.model }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nº de Alunos</label>
+            <input type="number" [(ngModel)]="newTrip.studentsCount" name="studentsCount" class="form-input" placeholder="Ex: 35" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select [(ngModel)]="newTrip.status" name="status" class="form-select">
+              <option value="agendada">Agendada</option>
+              <option value="in-progress">Em Trânsito</option>
+              <option value="concluida">Concluída</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeCreateModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">Confirmar Viagem</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

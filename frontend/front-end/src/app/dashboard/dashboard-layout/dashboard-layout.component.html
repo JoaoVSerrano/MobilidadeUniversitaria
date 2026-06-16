@@ -1,0 +1,19 @@
+<div class="dashboard-root">
+  @if (currentView === 'gestor') {
+    <app-sidebar [isOpen]="sidebarOpen" (closeSidebar)="sidebarOpen = false"></app-sidebar>
+  }
+
+  <div class="main-panel" [class.full-width]="currentView !== 'gestor'">
+    <app-header [currentView]="currentView" (viewChange)="currentView = $event" (toggleSidebar)="toggleSidebar()"></app-header>
+
+    <main class="content-container">
+      @if (currentView === 'gestor') {
+        <router-outlet></router-outlet>
+      } @else if (currentView === 'aluno') {
+        <app-aluno></app-aluno>
+      } @else if (currentView === 'motorista') {
+        <app-motorista></app-motorista>
+      }
+    </main>
+  </div>
+</div>
