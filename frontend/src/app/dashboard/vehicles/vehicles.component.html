@@ -1,0 +1,101 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Gestão de Veículos</h1>
+    <p class="page-subtitle">Gerencie a frota de transporte</p>
+  </div>
+  <button class="btn-primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    Novo Veículo
+  </button>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row">
+  <div class="mini-stat">
+    <span class="mini-stat-label">Total de Veículos</span>
+    <span class="mini-stat-value white">{{ totalVehicles }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Em Operação</span>
+    <span class="mini-stat-value blue">{{ activeVehicles }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Em Manutenção</span>
+    <span class="mini-stat-value yellow">{{ maintenanceVehicles }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Capacidade Total</span>
+    <span class="mini-stat-value cyan">{{ totalCapacity }}</span>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar">
+  <div class="search-wrap">
+    <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input type="text" class="search-input" placeholder="Buscar por código, placa ou modelo..." (input)="onSearch($event)">
+  </div>
+  <select class="filter-select" (change)="onStatusChange($event)">
+    <option value="Todos">Todos</option>
+    <option value="ativo">Ativo</option>
+    <option value="manutencao">Manutenção</option>
+    <option value="inativo">Inativo</option>
+  </select>
+</div>
+
+<!-- Vehicle Cards Grid -->
+<div class="vehicles-grid">
+  @for (vehicle of filtered; track vehicle.id) {
+    <div class="vehicle-card">
+      <!-- Card Header -->
+      <div class="vehicle-card-header">
+        <div class="vehicle-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+            <path d="M6 18v2"></path><path d="M18 18v2"></path><path d="M2 10h20"></path>
+          </svg>
+        </div>
+        <div class="vehicle-id-block">
+          <span class="vehicle-code">{{ vehicle.code }}</span>
+          <span class="vehicle-plate">{{ vehicle.plate }}</span>
+        </div>
+        <span [class]="'vehicle-badge ' + vehicle.status">{{ vehicle.status }}</span>
+      </div>
+
+      <!-- Model & Year -->
+      <div class="vehicle-model">{{ vehicle.model }}</div>
+      <div class="vehicle-year">Ano: {{ vehicle.year }}</div>
+
+      <!-- Capacity & KM -->
+      <div class="vehicle-chips">
+        <div class="vchip">
+          <span class="vchip-label">Capacidade</span>
+          <span class="vchip-value">{{ vehicle.capacity }}</span>
+        </div>
+        <div class="vchip">
+          <span class="vchip-label">KM Rodados</span>
+          <span class="vchip-value">{{ vehicle.mileage }}</span>
+        </div>
+      </div>
+
+      <!-- Next revision -->
+      <div class="revision-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        Próxima revisão: {{ vehicle.nextRevision }}
+      </div>
+
+      <!-- CTA -->
+      <button class="btn-details-full">Ver Detalhes</button>
+    </div>
+  }
+</div>

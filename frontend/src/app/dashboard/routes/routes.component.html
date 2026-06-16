@@ -1,0 +1,126 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Gestão de Rotas</h1>
+    <p class="page-subtitle">Configure e gerencie as rotas de transporte</p>
+  </div>
+  <button class="btn-primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    Nova Rota
+  </button>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row">
+  <div class="mini-stat">
+    <span class="mini-stat-label">Total de Rotas</span>
+    <span class="mini-stat-value white">{{ totalRoutes }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Rotas Ativas</span>
+    <span class="mini-stat-value blue">{{ activeRoutes }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Distância Total</span>
+    <span class="mini-stat-value cyan">{{ totalDistance }}</span>
+  </div>
+  <div class="mini-stat">
+    <span class="mini-stat-label">Capacidade Total</span>
+    <span class="mini-stat-value yellow">{{ totalCapacity }}</span>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar">
+  <div class="search-wrap">
+    <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input type="text" class="search-input" placeholder="Buscar rotas..." (input)="onSearch($event)">
+  </div>
+  <select class="filter-select" (change)="onStatusChange($event)">
+    <option value="Todas">Todas</option>
+    <option value="Ativa">Ativa</option>
+    <option value="Inativa">Inativa</option>
+  </select>
+</div>
+
+<!-- Route Cards Grid -->
+<div class="routes-grid">
+  @for (route of filtered; track route.id) {
+    <div class="route-card">
+      <!-- Card Header -->
+      <div class="route-card-header">
+        <div>
+          <h3 class="route-name">{{ route.name }}</h3>
+          <p class="route-desc">{{ route.description }}</p>
+        </div>
+        <span [class]="'route-status ' + (route.status === 'Ativa' ? 'ativa' : 'inativa')">{{ route.status }}</span>
+      </div>
+
+      <!-- Origin / Dest -->
+      <div class="route-origin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+        </svg>
+        {{ route.originDest }}
+      </div>
+
+      <!-- Info chips -->
+      <div class="route-chips">
+        <div class="chip">
+          <span class="chip-label">Distância</span>
+          <span class="chip-value">{{ route.distance }}</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label">Tempo</span>
+          <span class="chip-value">{{ route.time }}</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label">Capacidade</span>
+          <span class="chip-value">{{ route.capacity }}</span>
+        </div>
+      </div>
+
+      <!-- Stops -->
+      <div class="stops-section">
+        <div class="stops-header">
+          <span>Paradas ({{ route.stops.length }})</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+        @for (stop of route.stops; track stop.name) {
+          <div class="stop-row">
+            <span class="stop-name">{{ stop.name }}</span>
+            <span class="stop-time">{{ stop.time }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Actions -->
+      <div class="route-actions">
+        <button class="btn-details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Ver Detalhes
+        </button>
+        <button class="action-btn edit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+        </button>
+        <button class="action-btn delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  }
+</div>

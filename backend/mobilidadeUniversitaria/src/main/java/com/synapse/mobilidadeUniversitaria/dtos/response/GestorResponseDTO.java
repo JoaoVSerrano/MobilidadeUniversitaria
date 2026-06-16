@@ -1,0 +1,11 @@
+package com.synapse.mobilidadeUniversitaria.dtos.response;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@NoArgsConstructor
+public class GestorResponseDTO extends UsuarioResponseDTO {
+}

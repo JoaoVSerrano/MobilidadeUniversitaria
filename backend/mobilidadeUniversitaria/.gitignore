@@ -33,3 +33,5 @@ build/
 .vscode/
 
 /go-campus-api-prompt.md
+/IMPLEMENTATION.md
+.env
