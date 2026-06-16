@@ -1,6 +1,7 @@
 package com.synapse.mobilidadeUniversitaria.dtos.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -12,12 +13,11 @@ import java.time.LocalDate;
 @Setter
 public class MotoristaRequestDTO extends UsuarioRequestDTO {
 
-    @NotBlank(message = "numero da CNH obrigatório")
+    @NotBlank(message = "Numero da CNH e obrigatorio")
     private String cnhNumero;
 
-    @NotNull(message = "data de vencimento obrigatória")
+    @NotNull(message = "Data de vencimento da CNH e obrigatoria")
+    @Future(message = "Vencimento da CNH deve ser uma data futura")
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate vencimentoCnh;
-
-
 }

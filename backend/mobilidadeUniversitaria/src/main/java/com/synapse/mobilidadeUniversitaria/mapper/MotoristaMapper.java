@@ -2,6 +2,7 @@ package com.synapse.mobilidadeUniversitaria.mapper;
 
 import com.synapse.mobilidadeUniversitaria.Entities.Motorista;
 import com.synapse.mobilidadeUniversitaria.dtos.request.MotoristaRequestDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.request.MotoristaUpdateRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.MotoristaResponseDTO;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,14 @@ public class MotoristaMapper extends UsuarioMapper {
     }
 
     public void updateEntity(Motorista motorista, MotoristaRequestDTO dto) {
+        if (motorista == null || dto == null) return;
+
+        updateCommon(motorista, dto);
+        motorista.setCnhNumero(dto.getCnhNumero());
+        motorista.setVencimentoCnh(dto.getVencimentoCnh());
+    }
+
+    public void updateEntity(Motorista motorista, MotoristaUpdateRequestDTO dto) {
         if (motorista == null || dto == null) return;
 
         updateCommon(motorista, dto);

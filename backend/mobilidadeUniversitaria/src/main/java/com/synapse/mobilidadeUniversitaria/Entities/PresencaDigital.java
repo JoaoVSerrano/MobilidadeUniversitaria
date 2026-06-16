@@ -1,5 +1,6 @@
 package com.synapse.mobilidadeUniversitaria.Entities;
 
+import com.synapse.mobilidadeUniversitaria.Entities.enums.PresencaStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,9 +31,11 @@ public class PresencaDigital {
     private Viagem viagem;
 
     @CreationTimestamp
+    private LocalDateTime dataHoraReserva;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PresencaStatus status = PresencaStatus.RESERVADA;
+
     private LocalDateTime dataHoraValidacao;
-
-
-
-
 }

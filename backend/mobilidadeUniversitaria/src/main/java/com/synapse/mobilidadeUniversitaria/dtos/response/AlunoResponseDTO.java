@@ -1,8 +1,10 @@
 package com.synapse.mobilidadeUniversitaria.dtos.response;
 
-import com.synapse.mobilidadeUniversitaria.Entities.Faculdade;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.StatusMatricula;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
@@ -12,7 +14,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class AlunoResponseDTO extends UsuarioResponseDTO {
 
-    private Faculdade faculdade;
+    private FaculdadeResponseDTO faculdade;
     private StatusMatricula statusMatricula;
-
 }

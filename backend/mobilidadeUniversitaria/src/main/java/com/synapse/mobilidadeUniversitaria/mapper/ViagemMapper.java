@@ -23,6 +23,9 @@ public class ViagemMapper {
                 viagem.getId(),
                 viagem.getDataHoraPartida(),
                 viagem.getDataHoraChegadaPrevista(),
+                viagem.getDataHoraInicio(),
+                viagem.getDataHoraChegadaReal(),
+                viagem.getStatus(),
                 motoristaMapper.toResponse(viagem.getMotorista()),
                 veiculoMapper.toResponse(viagem.getVeiculo()),
                 rotaMapper.toResponse(viagem.getRota())

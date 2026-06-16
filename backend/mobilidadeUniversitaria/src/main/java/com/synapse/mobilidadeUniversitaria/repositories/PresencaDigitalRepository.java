@@ -1,6 +1,7 @@
 package com.synapse.mobilidadeUniversitaria.repositories;
 
 import com.synapse.mobilidadeUniversitaria.Entities.PresencaDigital;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.PresencaStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,6 @@ public interface PresencaDigitalRepository extends JpaRepository<PresencaDigital
     List<PresencaDigital> findByViagemId(Long viagemId);
 
     Optional<PresencaDigital> findByAlunoIdAndViagemId(Long alunoId, Long viagemId);
+
+    long countByViagemIdAndStatusNot(Long viagemId, PresencaStatus status);
 }

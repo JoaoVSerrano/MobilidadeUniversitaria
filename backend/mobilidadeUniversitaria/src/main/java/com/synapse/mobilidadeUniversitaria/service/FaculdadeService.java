@@ -30,21 +30,15 @@ public class FaculdadeService {
 
     public FaculdadeResponseDTO criar(FaculdadeRequestDTO dto) {
         Faculdade faculdade = new Faculdade();
-        faculdade.setNome(String.valueOf(dto.nome()));
-
-        if (dto.endereco() != null && dto.endereco().getId() != null) {
-            Endereco endereco = enderecoRepository.findById(dto.endereco().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Endereco nao encontrado com id: " + dto.endereco().getId()));
-            faculdade.setEndereco(endereco);
-        }
+        faculdade.setNome(dto.nome());
+        faculdade.setEndereco(buscarEndereco(dto.enderecoId()));
 
         Faculdade salva = faculdadeRepository.save(faculdade);
         return faculdadeMapper.toResponse(salva);
     }
 
     public FaculdadeResponseDTO buscarPorId(Long id) {
-        Faculdade faculdade = faculdadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Faculdade nao encontrada com id: " + id));
+        Faculdade faculdade = buscarFaculdadePorId(id);
         return faculdadeMapper.toResponse(faculdade);
     }
 
@@ -56,24 +50,27 @@ public class FaculdadeService {
     }
 
     public FaculdadeResponseDTO atualizar(Long id, FaculdadeRequestDTO dto) {
-        Faculdade faculdade = faculdadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Faculdade nao encontrada com id: " + id));
+        Faculdade faculdade = buscarFaculdadePorId(id);
 
-        faculdade.setNome(String.valueOf(dto.nome()));
-
-        if (dto.endereco() != null && dto.endereco().getId() != null) {
-            Endereco endereco = enderecoRepository.findById(dto.endereco().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Endereco nao encontrado com id: " + dto.endereco().getId()));
-            faculdade.setEndereco(endereco);
-        }
+        faculdade.setNome(dto.nome());
+        faculdade.setEndereco(buscarEndereco(dto.enderecoId()));
 
         Faculdade atualizada = faculdadeRepository.save(faculdade);
         return faculdadeMapper.toResponse(atualizada);
     }
 
     public void deletar(Long id) {
-        Faculdade faculdade = faculdadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Faculdade nao encontrada com id: " + id));
+        Faculdade faculdade = buscarFaculdadePorId(id);
         faculdadeRepository.delete(faculdade);
+    }
+
+    private Faculdade buscarFaculdadePorId(Long id) {
+        return faculdadeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Faculdade nao encontrada com id: " + id));
+    }
+
+    private Endereco buscarEndereco(Long enderecoId) {
+        return enderecoRepository.findById(enderecoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Endereco nao encontrado com id: " + enderecoId));
     }
 }

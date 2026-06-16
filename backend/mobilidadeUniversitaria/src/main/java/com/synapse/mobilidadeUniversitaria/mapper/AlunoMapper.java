@@ -1,8 +1,8 @@
 package com.synapse.mobilidadeUniversitaria.mapper;
 
 import com.synapse.mobilidadeUniversitaria.Entities.Aluno;
-import com.synapse.mobilidadeUniversitaria.Entities.enums.StatusMatricula;
 import com.synapse.mobilidadeUniversitaria.dtos.request.AlunoRequestDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.request.AlunoUpdateRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoResponseDTO;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ public class AlunoMapper extends UsuarioMapper {
 
         Aluno aluno = new Aluno();
         updateCommon(aluno, dto);
-        aluno.setStatusMatricula(StatusMatricula.valueOf(dto.getStatusMatricula()));
+        aluno.setStatusMatricula(dto.getStatusMatricula());
         return aluno;
     }
 
@@ -29,7 +29,14 @@ public class AlunoMapper extends UsuarioMapper {
         if (aluno == null || dto == null) return;
 
         updateCommon(aluno, dto);
-        aluno.setStatusMatricula(StatusMatricula.valueOf(dto.getStatusMatricula()));
+        aluno.setStatusMatricula(dto.getStatusMatricula());
+    }
+
+    public void updateEntity(Aluno aluno, AlunoUpdateRequestDTO dto) {
+        if (aluno == null || dto == null) return;
+
+        updateCommon(aluno, dto);
+        aluno.setStatusMatricula(dto.getStatusMatricula());
     }
 
     public AlunoResponseDTO toResponse(Aluno aluno) {
@@ -37,7 +44,7 @@ public class AlunoMapper extends UsuarioMapper {
 
         AlunoResponseDTO dto = new AlunoResponseDTO();
         commonResponse(dto, aluno);
-        dto.setFaculdade(aluno.getFaculdade());
+        dto.setFaculdade(faculdadeMapper.toResponse(aluno.getFaculdade()));
         dto.setStatusMatricula(aluno.getStatusMatricula());
         return dto;
     }

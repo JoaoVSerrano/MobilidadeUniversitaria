@@ -1,6 +1,5 @@
 package com.synapse.mobilidadeUniversitaria.dtos.response;
 
-import com.synapse.mobilidadeUniversitaria.Entities.Endereco;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class UsuarioResponseDTO {
+public class UsuarioResponseDTO {
 
     private Long id;
     private String nome;

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface MotoristaRepository extends JpaRepository<Motorista, Integer> {
+public interface MotoristaRepository extends JpaRepository<Motorista, Long> {
 
-    Optional<Motorista> findByCnhNumero(Integer cnhNumero);
+    Optional<Motorista> findByCnhNumero(String cnhNumero);
 
 }

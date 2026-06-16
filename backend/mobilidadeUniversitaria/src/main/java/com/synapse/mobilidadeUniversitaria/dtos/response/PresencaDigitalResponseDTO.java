@@ -1,5 +1,7 @@
 package com.synapse.mobilidadeUniversitaria.dtos.response;
 
+import com.synapse.mobilidadeUniversitaria.Entities.enums.PresencaStatus;
+
 import java.time.LocalDateTime;
 
 public record PresencaDigitalResponseDTO(
@@ -7,6 +9,8 @@ public record PresencaDigitalResponseDTO(
         Long alunoId,
         String alunoNome,
         Long viagemId,
-        LocalDateTime dataHoraValidacao
+        LocalDateTime dataHoraReserva,
+        LocalDateTime dataHoraValidacao,
+        PresencaStatus status
 ) {
 }
