@@ -1,0 +1,19 @@
+<div class="login-page">
+  <div class="login-card">
+    <h2>Login</h2>
+    <form (submit)="login($event)">
+      <input type="email" [(ngModel)]="credentials.email" name="email" placeholder="E-mail" required>
+      <input type="password" [(ngModel)]="credentials.senha" name="senha" placeholder="Senha" required>
+      <button type="submit" class="btn-primary">Entrar</button>
+    </form>
+
+    <div class="test-buttons">
+      <p>Entrar como (Desenvolvimento):</p>
+      <button (click)="fillTestUser('gestor')" class="btn-secondary">Gestor</button>
+      <button (click)="fillTestUser('aluno')" class="btn-secondary">Aluno</button>
+      <button (click)="fillTestUser('motorista')" class="btn-secondary">Motorista</button>
+    </div>
+
+    <p>Não possui uma conta? <a routerLink="/register">Cadastre-se</a></p>
+  </div>
+</div>
