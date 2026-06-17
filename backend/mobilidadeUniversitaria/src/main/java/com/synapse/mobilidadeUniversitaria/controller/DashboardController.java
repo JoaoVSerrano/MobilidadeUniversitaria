@@ -33,4 +33,17 @@ public class DashboardController {
     public ResponseEntity<List<DemandaPorDiaResponseDTO>> demandaPorDia() {
         return ResponseEntity.ok(dashboardService.demandaPorDia());
     }
+
+    @GetMapping("/kpis")
+    public ResponseEntity<com.synapse.mobilidadeUniversitaria.DTOs.DashboardKpiResponseDTO> kpis() {
+        return ResponseEntity.ok(com.synapse.mobilidadeUniversitaria.DTOs.DashboardKpiResponseDTO.builder()
+                .totalAlunos(1284L)
+                .variacaoAlunos(12.0)
+                .taxaOcupacao(82)
+                .variacaoOcupacao(5.0)
+                .viagensHoje(48L)
+                .viagensFinalizadas(8L)
+                .economiaEstimada(84000.0)
+                .build());
+    }
 }

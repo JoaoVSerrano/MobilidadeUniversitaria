@@ -1,0 +1,6 @@
+ALTER TABLE veiculo ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ATIVO';
+ALTER TABLE veiculo ADD COLUMN ano INTEGER;
+ALTER TABLE veiculo ADD COLUMN km_rodados INTEGER;
+ALTER TABLE veiculo ADD COLUMN proxima_revisao DATE;
+ALTER TABLE veiculo ADD COLUMN ultima_manutencao DATE;
+ALTER TABLE veiculo ADD CONSTRAINT ck_veiculo_status CHECK (status IN ('ATIVO', 'MANUTENCAO', 'INATIVO'));
