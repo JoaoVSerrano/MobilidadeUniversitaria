@@ -3,11 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
-import { MotoristaDashboardComponent } from './app-motorista-dashboard.component';
-import { MotoristaViagensComponent } from './app-motorista-viagens/app-motorista-viagens.component';
-import { MotoristaQrComponent } from './app-motorista-qr/app-motorista-qr.component';
-import { MotoristaNotificacoesComponent } from './app-motorista-notificacoes/app-motorista-notificacoes.component';
-import { MotoristaPerfilComponent } from './app-motorista-perfil/app-motorista-perfil.component';
+import { AppMotoristaDashboardComponent } from './app-motorista-dashboard.component';
+import { AppMotoristaViagensComponent } from './app-motorista-viagens.component';
+import { AppMotoristaQrComponent } from './app-motorista-qr.component';
+import { AppMotoristaNotificacoesComponent } from './app-motorista-notificacoes.component';
+import { AppMotoristaPerfilComponent } from './app-motorista-perfil.component';
 
 type Screen = 'dashboard' | 'viagens' | 'qr' | 'notificacoes' | 'perfil';
 
@@ -32,7 +32,7 @@ interface Viagem {
 @Component({
   selector: 'app-motorista',
   standalone: true,
-  imports: [FormsModule, RouterLink, CommonModule, MotoristaDashboardComponent, MotoristaViagensComponent, MotoristaQrComponent, MotoristaNotificacoesComponent, MotoristaPerfilComponent],
+  imports: [FormsModule, RouterLink, CommonModule, AppMotoristaDashboardComponent, AppMotoristaViagensComponent, AppMotoristaQrComponent, AppMotoristaNotificacoesComponent, AppMotoristaPerfilComponent],
   templateUrl: './app-motorista.component.html',
   styleUrl: './app-motorista.component.css'
 })

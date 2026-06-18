@@ -17,25 +17,25 @@
   </nav>
 
   <main>
-    <ng-container [ngSwitch]="currentScreen()">
-      <ng-container *ngSwitchCase="'dashboard'">
-        <app-aluno-dashboard></app-aluno-dashboard>
-      </ng-container>
-      <ng-container *ngSwitchCase="'reserva'">
-        <app-aluno-reserva></app-aluno-reserva>
-      </ng-container>
-      <ng-container *ngSwitchCase="'qrcode'">
-        <app-aluno-qrcode></app-aluno-qrcode>
-      </ng-container>
-      <ng-container *ngSwitchCase="'rastreamento'">
-        <app-aluno-rastreamento></app-aluno-rastreamento>
-      </ng-container>
-      <ng-container *ngSwitchCase="'notificacoes'">
-        <app-aluno-notificacoes></app-aluno-notificacoes>
-      </ng-container>
-      <ng-container *ngSwitchCase="'perfil'">
-        <app-aluno-perfil></app-aluno-perfil>
-      </ng-container>
-    </ng-container>
+    @switch (currentScreen()) {
+      @case ('dashboard') {
+        <app-aluno-dashboard />
+      }
+      @case ('reserva') {
+        <app-aluno-reserva />
+      }
+      @case ('qrcode') {
+        <app-aluno-qrcode />
+      }
+      @case ('rastreamento') {
+        <app-aluno-rastreamento />
+      }
+      @case ('notificacoes') {
+        <app-aluno-notificacoes />
+      }
+      @case ('perfil') {
+        <app-aluno-perfil />
+      }
+    }
   </main>
 </div>
