@@ -1,0 +1,20 @@
+<div class="qrcode">
+  <h2>QR Code de Identificação</h2>
+
+  <div class="qr-container">
+    <div class="qr-code-display">
+      <img [src]="qrCodeImage" alt="QR Code">
+    </div>
+
+    <div class="qr-info">
+      <h3>{{ qrCodeData.nome }}</h3>
+      <p><strong>Curso:</strong> {{ qrCodeData.curso }}</p>
+      <p><strong>Validade:</strong> {{ qrCodeData.validade }}</p>
+      <p><strong>Código:</strong> {{ qrCodeData.codigo }}</p>
+    </div>
+  </div>
+
+  <p class="qr-instructions">
+    Apresente este QR Code ao motorista para validação de embarque.
+  </p>
+</div>

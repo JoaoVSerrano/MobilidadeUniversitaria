@@ -1,0 +1,61 @@
+<div class="dashboard">
+  <div class="welcome-card">
+    <h2>Bem-vindo, {{ user?.nome }}!</h2>
+    <p>Sua próxima viagem está agendada para:</p>
+    <div class="trip-info">
+      <span class="trip-route">{{ proximaViagem.rota }}</span>
+      <span class="trip-time">{{ proximaViagem.horario }}</span>
+      <span class="trip-passengers">{{ proximaViagem.passageiros }} passageiros</span>
+      <span class="trip-status">{{ proximaViagem.status }}</span>
+    </div>
+  </div>
+
+  <div class="stats-container">
+    <div class="stat-card">
+      <h3>Total de Viagens</h3>
+      <p class="stat-value">{{ estatisticas.totalViagens }}</p>
+    </div>
+    <div class="stat-card">
+      <h3>Finalizadas</h3>
+      <p class="stat-value">{{ estatisticas.finalizadas }}</p>
+    </div>
+    <div class="stat-card">
+      <h3>Canceladas</h3>
+      <p class="stat-value">{{ estatisticas.canceladas }}</p>
+    </div>
+    <div class="stat-card">
+      <h3>Atrasadas</h3>
+      <p class="stat-value">{{ estatisticas.atrasadas }}</p>
+    </div>
+  </div>
+
+  <div class="today-trips">
+    <h3>Viagens de Hoje</h3>
+    <table class="trips-table">
+      <thead>
+        <tr>
+          <th>Horário</th>
+          <th>Rota</th>
+          <th>Status</th>
+          <th>Passageiros</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let viagem of viagensHoje">
+          <td>{{ viagem.horario }}</td>
+          <td>{{ viagem.rota }}</td>
+          <td [class.status]="viagem.status.toLowerCase()">{{ viagem.status }}</td>
+          <td>{{ viagem.passageiros }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <p>Carregando dados...</p>
+  </div>
+
+  <div *ngIf="errorMessage && !isLoading" class="error">
+    <p>{{ errorMessage }}</p>
+  </div>
+</div>

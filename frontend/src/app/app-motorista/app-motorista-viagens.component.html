@@ -1,0 +1,18 @@
+<div class="viagens">
+  <h2>Minhas Viagens</h2>
+
+  <div class="viagem" *ngFor="let viagem of viagens">
+    <div class="viagem-header">
+      <span class="viagem-rota">{{ viagem.rota }}</span>
+      <span class="viagem-horario">{{ viagem.horario }}</span>
+    </div>
+    <div class="viagem-body">
+      <span class="viagem-status [viagem.status.toLowerCase()]">{{ viagem.status }}</span>
+      <span class="viagem-passageiros">{{ viagem.passageiros }} passageiros ({{ viagem.ocupacao }}% ocupação)</span>
+    </div>
+  </div>
+
+  <div *ngIf="viagens.length === 0" class="empty-state">
+    <p>Não há viagens agendadas.</p>
+  </div>
+</div>

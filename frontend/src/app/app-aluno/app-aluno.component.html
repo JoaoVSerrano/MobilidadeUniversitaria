@@ -1,0 +1,41 @@
+<div class="app-aluno">
+  <header>
+    <h1>Go Campus - Aluno</h1>
+    <div class="user-info">
+      <span>Olá, {{ user()?.nome }}!</span>
+      <button (click)="logout()">Sair</button>
+    </div>
+  </header>
+
+  <nav>
+    <button (click)="setScreen('dashboard')" [class.active]="currentScreen() === 'dashboard'">Dashboard</button>
+    <button (click)="setScreen('reserva')" [class.active]="currentScreen() === 'reserva'">Reservar Viagem</button>
+    <button (click)="setScreen('qrcode')" [class.active]="currentScreen() === 'qrcode'">QR Code</button>
+    <button (click)="setScreen('rastreamento')" [class.active]="currentScreen() === 'rastreamento'">Rastreamento</button>
+    <button (click)="setScreen('notificacoes')" [class.active]="currentScreen() === 'notificacoes'">Notificações</button>
+    <button (click)="setScreen('perfil')" [class.active]="currentScreen() === 'perfil'">Perfil</button>
+  </nav>
+
+  <main>
+    <ng-container [ngSwitch]="currentScreen()">
+      <ng-container *ngSwitchCase="'dashboard'">
+        <app-aluno-dashboard></app-aluno-dashboard>
+      </ng-container>
+      <ng-container *ngSwitchCase="'reserva'">
+        <app-aluno-reserva></app-aluno-reserva>
+      </ng-container>
+      <ng-container *ngSwitchCase="'qrcode'">
+        <app-aluno-qrcode></app-aluno-qrcode>
+      </ng-container>
+      <ng-container *ngSwitchCase="'rastreamento'">
+        <app-aluno-rastreamento></app-aluno-rastreamento>
+      </ng-container>
+      <ng-container *ngSwitchCase="'notificacoes'">
+        <app-aluno-notificacoes></app-aluno-notificacoes>
+      </ng-container>
+      <ng-container *ngSwitchCase="'perfil'">
+        <app-aluno-perfil></app-aluno-perfil>
+      </ng-container>
+    </ng-container>
+  </main>
+</div>
