@@ -3,12 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
-import { AppAlunoDashboardComponent } from './app-aluno-dashboard/app-aluno-dashboard.component';
-import { AppAlunoReservaComponent } from './app-aluno-reserva/app-aluno-reserva.component';
-import { AppAlunoQrcodeComponent } from './app-aluno-qrcode/app-aluno-qrcode.component';
-import { AppAlunoRastreamentoComponent } from './app-aluno-rastreamento/app-aluno-rastreamento.component';
-import { AppAlunoNotificacoesComponent } from './app-aluno-notificacoes/app-aluno-notificacoes.component';
-import { AppAlunoPerfilComponent } from './app-aluno-perfil/app-aluno-perfil.component';
+import { AppAlunoDashboardComponent } from './app-aluno-dashboard.component';
+import { AppAlunoReservaComponent } from './app-aluno-reserva.component';
+import { AppAlunoQrcodeComponent } from './app-aluno-qrcode.component';
+import { AppAlunoRastreamentoComponent } from './app-aluno-rastreamento.component';
+import { AppAlunoNotificacoesComponent } from './app-aluno-notificacoes.component';
+import { AppAlunoPerfilComponent } from './app-aluno-perfil.component';
 
 type Screen = 'dashboard' | 'reserva' | 'qrcode' | 'rastreamento' | 'notificacoes' | 'perfil';
 
@@ -31,7 +31,7 @@ interface Rota {
 @Component({
   selector: 'app-aluno',
   standalone: true,
-  imports: [FormsModule, RouterLink, CommonModule, AlunoDashboardComponent, AlunoReservaComponent, AlunoQrcodeComponent, AlunoRastreamentoComponent, AlunoNotificacoesComponent, AlunoPerfilComponent],
+  imports: [FormsModule, CommonModule, AppAlunoDashboardComponent, AppAlunoReservaComponent, AppAlunoQrcodeComponent, AppAlunoRastreamentoComponent, AppAlunoNotificacoesComponent, AppAlunoPerfilComponent],
   templateUrl: './app-aluno.component.html',
   styleUrl: './app-aluno.component.css'
 })
