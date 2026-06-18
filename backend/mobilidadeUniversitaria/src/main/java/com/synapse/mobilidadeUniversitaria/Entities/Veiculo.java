@@ -26,5 +26,12 @@ public class Veiculo {
     @Column(nullable = false)
     private int capacidadeTotal;
 
+    @Column(nullable = false)
+    private String status = "ATIVO";
+
+    private Integer ano;
+    private Integer kmRodados;
+    private java.time.LocalDate proximaRevisao;
+    private java.time.LocalDate ultimaManutencao;
 
 }

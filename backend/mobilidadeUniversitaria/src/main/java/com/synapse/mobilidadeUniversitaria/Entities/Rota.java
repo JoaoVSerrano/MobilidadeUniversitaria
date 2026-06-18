@@ -24,4 +24,7 @@ public class Rota {
     @Column(nullable = false)
     private String pontoParada;
 
+    @Column(nullable = false)
+    private Boolean ativa = true;
+
 }

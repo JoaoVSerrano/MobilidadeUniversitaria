@@ -24,4 +24,6 @@ public class Aluno extends Usuario {
     @Column(nullable = false)
     private StatusMatricula statusMatricula;
 
+    @Column
+    private String fotoPerfil;
 }

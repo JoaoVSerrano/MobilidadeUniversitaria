@@ -1,0 +1,37 @@
+<div class="app-motorista">
+  <header>
+    <h1>Go Campus - Motorista</h1>
+    <div class="user-info">
+      <span>Olá, {{ user()?.nome }}!</span>
+      <button (click)="logout()">Sair</button>
+    </div>
+  </header>
+
+  <nav>
+    <button (click)="setScreen('dashboard')" [class.active]="currentScreen() === 'dashboard'">Dashboard</button>
+    <button (click)="setScreen('viagens')" [class.active]="currentScreen() === 'viagens'">Viagens</button>
+    <button (click)="setScreen('qr')" [class.active]="currentScreen() === 'qr'">QR Code</button>
+    <button (click)="setScreen('notificacoes')" [class.active]="currentScreen() === 'notificacoes'">Notificações</button>
+    <button (click)="setScreen('perfil')" [class.active]="currentScreen() === 'perfil'">Perfil</button>
+  </nav>
+
+  <main>
+    <ng-container [ngSwitch]="currentScreen()">
+      <ng-container *ngSwitchCase="'dashboard'">
+        <app-motorista-dashboard></app-motorista-dashboard>
+      </ng-container>
+      <ng-container *ngSwitchCase="'viagens'">
+        <app-motorista-viagens></app-motorista-viagens>
+      </ng-container>
+      <ng-container *ngSwitchCase="'qr'">
+        <app-motorista-qr></app-motorista-qr>
+      </ng-container>
+      <ng-container *ngSwitchCase="'notificacoes'">
+        <app-motorista-notificacoes></app-motorista-notificacoes>
+      </ng-container>
+      <ng-container *ngSwitchCase="'perfil'">
+        <app-motorista-perfil></app-motorista-perfil>
+      </ng-container>
+    </ng-container>
+  </main>
+</div>

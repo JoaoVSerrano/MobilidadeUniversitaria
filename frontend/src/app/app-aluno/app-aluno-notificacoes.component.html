@@ -1,0 +1,22 @@
+<div class="notificacoes">
+  <h2>Notificações</h2>
+
+  <div class="notificacao" *ngFor="let notificacao of notificacoes" [class.nao-lida]="!notificacao.lida">
+    <div class="notificacao-header">
+      <span class="icon">{{ getNotificationIcon(notificacao.tipo) }}</span>
+      <span class="horario">{{ notificacao.horario }}</span>
+    </div>
+    <div class="notificacao-body">
+      <p class="mensagem">{{ notificacao.mensagem }}</p>
+      <p class="detalhes">{{ notificacao.detalhes }}</p>
+    </div>
+    <div class="notificacao-actions">
+      <button *ngIf="!notificacao.lida" (click)="marcarComoLida(notificacao.id)" class="btn-sm">Marcar como lida</button>
+      <button (click)="deletarNotificacao(notificacao.id)" class="btn-sm btn-danger">Excluir</button>
+    </div>
+  </div>
+
+  <div *ngIf="notificacoes.length === 0" class="empty-state">
+    <p>Não há notificações.</p>
+  </div>
+</div>
