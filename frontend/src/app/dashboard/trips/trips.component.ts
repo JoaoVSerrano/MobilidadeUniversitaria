@@ -19,26 +19,29 @@ export class TripsComponent implements OnInit {
   totalPassengers = 0;
   completed = 0;
 
-  // Modal signals
+  drivers: any[] = [];
+  vehicles: any[] = [];
+  routes: any[] = [];
+
   showCreateModal = signal(false);
   showEditModal = signal(false);
   showDeleteModal = signal(false);
   showViewModal = signal(false);
-
-  // Selected trip for view/edit/delete
   selectedTrip = signal<Trip | null>(null);
 
-  // Form data for creating/editing trips
   formData = {
-    route: '',
-    date: '',
-    time: '',
-    driver: '',
-    vehicle: ''
+    rotaId: '',
+    motoristaId: '',
+    veiculoId: '',
+    dataHoraPartida: '',
+    dataHoraChegadaPrevista: ''
   };
 
   ngOnInit() {
     this.loadTrips();
+    this.loadDrivers();
+    this.loadVehicles();
+    this.loadRoutes();
   }
 
   loadTrips() {
@@ -50,7 +53,18 @@ export class TripsComponent implements OnInit {
     });
   }
 
-  // View modal
+  loadDrivers() {
+    this.svc.getDrivers().subscribe(data => this.drivers = data);
+  }
+
+  loadVehicles() {
+    this.svc.getVehiclesList().subscribe(data => this.vehicles = data);
+  }
+
+  loadRoutes() {
+    this.svc.getRoutes().subscribe(data => this.routes = data);
+  }
+
   openViewModal(trip: Trip) {
     this.selectedTrip.set(trip);
     this.showViewModal.set(true);
@@ -61,9 +75,8 @@ export class TripsComponent implements OnInit {
     this.selectedTrip.set(null);
   }
 
-  // Create modal
   openCreateModal() {
-    this.formData = { route: '', date: '', time: '', driver: '', vehicle: '' };
+    this.formData = { rotaId: '', motoristaId: '', veiculoId: '', dataHoraPartida: '', dataHoraChegadaPrevista: '' };
     this.showCreateModal.set(true);
   }
 
@@ -72,15 +85,16 @@ export class TripsComponent implements OnInit {
   }
 
   createTrip() {
-    // Trips only support create on frontend (no update route/time)
-    // The backend handles scheduling
-    console.log('Creating trip:', this.formData);
-    // Service call would go here - for now just close
-    this.closeCreateModal();
-    this.loadTrips();
+    if (!this.formData.rotaId || !this.formData.motoristaId || !this.formData.veiculoId
+        || !this.formData.dataHoraPartida || !this.formData.dataHoraChegadaPrevista) {
+      return;
+    }
+    this.svc.createTrip(this.formData).subscribe({
+      next: () => { this.closeCreateModal(); this.loadTrips(); },
+      error: (err) => console.error('Erro ao criar viagem:', err)
+    });
   }
 
-  // Edit modal
   openEditModal(trip: Trip) {
     this.selectedTrip.set(trip);
     this.showEditModal.set(true);
@@ -92,12 +106,10 @@ export class TripsComponent implements OnInit {
   }
 
   updateTrip() {
-    console.log('Updating trip:', this.selectedTrip());
     this.closeEditModal();
     this.loadTrips();
   }
 
-  // Delete modal
   openDeleteModal(trip: Trip) {
     this.selectedTrip.set(trip);
     this.showDeleteModal.set(true);

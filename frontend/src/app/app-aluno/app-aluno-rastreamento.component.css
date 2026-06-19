@@ -1,98 +1,174 @@
-/* ── Rastreamento ── */
+/* Rastreamento */
 .rastreamento {
-  padding: 8px;
-}
-
-.rastreamento h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #f8fafc;
-  margin: 0 0 24px 0;
-}
-
-.rastreamento-card {
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 24px;
-}
-
-.rastreamento-map {
-  height: 280px;
-  background: #27272a;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-  font-size: 14px;
-}
-
-.rastreamento-info {
-  padding: 20px;
-}
-
-.rastreamento-bus {
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #27272a;
-  margin-bottom: 16px;
 }
 
-.bus-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  background: #2563eb22;
+/* Live Location Card */
+.live-location {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #34d399;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  background: #34d399;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.location-data {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.data-item {
+  text-align: center;
+}
+
+.data-label {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.data-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Waiting Card */
+.waiting {
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.waiting-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 50%;
+}
+
+.waiting-icon svg {
+  width: 32px;
+  height: 32px;
   color: #60a5fa;
 }
 
-.bus-icon-wrap svg {
-  width: 24px;
-  height: 24px;
+.waiting p {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0 0 4px 0;
 }
 
-.bus-detail-label {
-  font-size: 11px;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.waiting-hint {
+  font-size: 12px;
+  color: #6b7280;
 }
 
-.bus-detail-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: #f8fafc;
-  margin-top: 2px;
+/* Stops Timeline */
+.stops-timeline {
+  display: flex;
+  flex-direction: column;
 }
 
-.rastreamento-eta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.stop-item {
+  display: flex;
+  align-items: flex-start;
   gap: 16px;
+  position: relative;
 }
 
-.eta-item {
-  background: #27272a;
-  border-radius: 10px;
-  padding: 14px 16px;
+.stop-marker {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a24;
+  border: 2px solid #2a2a36;
+  flex-shrink: 0;
+  z-index: 1;
 }
 
-.eta-label {
-  font-size: 11px;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.stop-item.completed .stop-marker {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #34d399;
+  color: #34d399;
 }
 
-.eta-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: #f8fafc;
-  margin-top: 4px;
+.stop-marker svg {
+  width: 16px;
+  height: 16px;
+}
+
+.stop-number {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.stop-line {
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  width: 2px;
+  height: calc(100% + 8px);
+  background: #2a2a36;
+}
+
+.stop-item.completed .stop-line {
+  background: #34d399;
+}
+
+.stop-info {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 24px;
+}
+
+.stop-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.stop-item.completed .stop-name {
+  color: #34d399;
+}
+
+.stop-time {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
 }

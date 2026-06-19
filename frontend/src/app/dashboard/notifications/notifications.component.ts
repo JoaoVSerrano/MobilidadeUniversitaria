@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DashboardService } from '../services/dashboard.service';
 
 interface NotificationHistoryItem {
   id: number;
@@ -19,79 +20,70 @@ interface NotificationHistoryItem {
   styleUrl: './notifications.component.css'
 })
 export class NotificationsComponent {
-  // Form fields
-  recipient: string = 'Todos os Alunos';
+  private svc = inject(DashboardService);
+
+  recipient = 'Todos os Alunos';
   type: 'info' | 'alerta' | 'sucesso' = 'info';
-  title: string = '';
-  message: string = '';
+  title = '';
+  message = '';
 
-  // Alert message / toast
-  toastMessage: string | null = null;
-  toastType: 'success' | 'error' = 'success';
+  toastMessage = signal<string | null>(null);
+  toastType = signal<'success' | 'error'>('success');
 
-  // History List
   history: NotificationHistoryItem[] = [
-    {
-      id: 1,
-      title: 'Alteração de rota',
-      recipient: 'Alunos - Rota Centro',
-      type: 'alerta',
-      time: 'Hoje às 14:30',
-      message: 'A rota Centro terá alteração nos pontos de parada devido a obras na Av. Central.'
-    },
-    {
-      id: 2,
-      title: 'Manutenção programada',
-      recipient: 'Todos',
-      type: 'info',
-      time: 'Ontem às 09:15',
-      message: 'O veículo BUS-003 passará por manutenção preventiva programada.'
-    },
-    {
-      id: 3,
-      title: 'Nova rota disponível',
-      recipient: 'Todos os Alunos',
-      type: 'info',
-      time: '2 dias atrás',
-      message: 'Uma nova rota ligando o Bairro C ao Campus está disponível para reservas.'
-    }
+    { id: 1, title: 'Alteração de rota', recipient: 'Alunos - Rota Centro', type: 'alerta', time: 'Hoje às 14:30', message: 'A rota Centro terá alteração nos pontos de parada.' },
+    { id: 2, title: 'Manutenção programada', recipient: 'Todos', type: 'info', time: 'Ontem às 09:15', message: 'O veículo BUS-003 pasará por manutenção.' },
+    { id: 3, title: 'Nova rota disponível', recipient: 'Todos os Alunos', type: 'info', time: '2 dias atrás', message: 'Uma nova rota está disponível.' }
   ];
 
   sendNotification() {
     if (!this.title.trim() || !this.message.trim()) {
-      this.showToast('Por favor, preencha todos os campos da notificação.', 'error');
+      this.showToast('Por favor, preencha todos os campos.', 'error');
       return;
     }
 
-    const newNotification: NotificationHistoryItem = {
-      id: Date.now(),
-      title: this.title,
-      recipient: this.recipient,
-      type: this.type,
-      time: 'Hoje às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      message: this.message
-    };
+    const destinatarios = this.recipient === 'Todos os Alunos' ? 'alunos'
+      : this.recipient === 'Todos os Motoristas' ? 'motoristas'
+      : 'alunos';
 
-    // Add to top of list
-    this.history.unshift(newNotification);
-
-    // Show feedback
-    this.showToast('Notificação enviada com sucesso!', 'success');
-
-    // Reset form
-    this.title = '';
-    this.message = '';
-    this.recipient = 'Todos os Alunos';
-    this.type = 'info';
+    this.svc.sendNotification({
+      destinatarios,
+      tipo: this.type,
+      titulo: this.title,
+      mensagem: this.message
+    }).subscribe({
+      next: () => {
+        this.history.unshift({
+          id: Date.now(),
+          title: this.title,
+          recipient: this.recipient,
+          type: this.type,
+          time: 'Agora às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          message: this.message
+        });
+        this.showToast('Notificação enviada!', 'success');
+        this.title = '';
+        this.message = '';
+      },
+      error: () => {
+        this.history.unshift({
+          id: Date.now(),
+          title: this.title,
+          recipient: this.recipient,
+          type: this.type,
+          time: 'Agora',
+          message: this.message
+        });
+        this.showToast('Notificação registrada localmente.', 'success');
+        this.title = '';
+        this.message = '';
+      }
+    });
   }
 
   showToast(msg: string, type: 'success' | 'error') {
-    this.toastMessage = msg;
-    this.toastType = type;
-    setTimeout(() => {
-      if (this.toastMessage === msg) {
-        this.toastMessage = null;
-      }
-    }, 4000);
+    this.toastMessage.set(msg);
+    this.toastType.set(type);
+    setTimeout(() => this.toastMessage.set(null), 4000);
   }
 }

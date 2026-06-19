@@ -4,7 +4,7 @@
     <h1 class="page-title">Gestão de Viagens</h1>
     <p class="page-subtitle">Agende e gerencie as viagens de transporte</p>
   </div>
-  <button class="btn-primary">
+  <button class="btn-primary" (click)="openCreateModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
       <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
@@ -142,15 +142,38 @@
       <div class="modal-body">
         <div class="form-group">
           <label>Rota</label>
-          <input type="text" [(ngModel)]="formData.route" placeholder="Nome da rota">
+          <select [(ngModel)]="formData.rotaId" required>
+            <option value="">Selecione a rota</option>
+            @for (route of routes; track route.id) {
+              <option [value]="route.id">{{ route.name }}</option>
+            }
+          </select>
         </div>
         <div class="form-group">
-          <label>Data</label>
-          <input type="date" [(ngModel)]="formData.date">
+          <label>Motorista</label>
+          <select [(ngModel)]="formData.motoristaId" required>
+            <option value="">Selecione o motorista</option>
+            @for (driver of drivers; track driver.id) {
+              <option [value]="driver.id">{{ driver.nome }}</option>
+            }
+          </select>
         </div>
         <div class="form-group">
-          <label>Horário</label>
-          <input type="time" [(ngModel)]="formData.time">
+          <label>Veículo</label>
+          <select [(ngModel)]="formData.veiculoId" required>
+            <option value="">Selecione o veículo</option>
+            @for (vehicle of vehicles; track vehicle.id) {
+              <option [value]="vehicle.id">{{ vehicle.placa }} - {{ vehicle.modelo }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Partida</label>
+          <input type="datetime-local" [(ngModel)]="formData.dataHoraPartida" required>
+        </div>
+        <div class="form-group">
+          <label>Chegada Prevista</label>
+          <input type="datetime-local" [(ngModel)]="formData.dataHoraChegadaPrevista" required>
         </div>
         <div class="modal-actions">
           <button class="btn-cancel" (click)="closeCreateModal()">Cancelar</button>

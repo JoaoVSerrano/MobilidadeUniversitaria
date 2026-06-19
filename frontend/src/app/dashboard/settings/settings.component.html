@@ -99,9 +99,9 @@
   </form>
 
   <!-- Toast Notification -->
-  @if (toastMessage) {
+  @if (toastMessage()) {
     <div class="toast success">
-      <span>{{ toastMessage }}</span>
+      <span>{{ toastMessage() }}</span>
     </div>
   }
 </div>

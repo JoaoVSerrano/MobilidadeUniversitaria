@@ -1,115 +1,136 @@
-/* ── Aluno Dashboard ── */
+/* Aluno Dashboard */
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 8px;
+  gap: 16px;
 }
 
-.welcome-card {
-  background: linear-gradient(135deg, #1e3a5f 0%, #1e1e24 100%);
-  border: 1px solid #2563eb33;
-  border-radius: 16px;
-  padding: 24px;
+/* Next Trip Card */
+.next-trip {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-.welcome-card h2 {
-  font-size: 20px;
-  font-weight: 700;
-  color: #f8fafc;
-  margin: 0 0 8px 0;
-}
-
-.welcome-card p {
-  font-size: 13px;
-  color: #94a3b8;
-  margin: 0 0 20px 0;
-}
-
-.next-trip-banner {
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 12px;
-  padding: 16px 20px;
+.next-trip-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 12px;
 }
 
-.next-trip-route {
-  font-size: 16px;
-  font-weight: 600;
-  color: #f8fafc;
-}
-
-.next-trip-time {
-  font-size: 13px;
-  color: #64748b;
-  margin-top: 4px;
-}
-
-.next-trip-badge {
+.next-trip-header .label {
   font-size: 12px;
   font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 20px;
-  background: #2563eb33;
   color: #60a5fa;
-}
-
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-
-.stat-card {
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 12px;
-  padding: 16px;
-}
-
-.stat-card h3 {
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-  margin: 0 0 8px 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.stat-value {
-  font-size: 28px;
+.next-trip-content h3 {
+  font-size: 20px;
   font-weight: 700;
-  color: #f8fafc;
+  color: #fff;
+  margin: 0 0 4px 0;
+}
+
+.next-trip-content p {
+  font-size: 14px;
+  color: #9ca3af;
   margin: 0;
 }
 
-.loading {
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat-card {
+  background: #111118;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
   text-align: center;
-  padding: 32px;
-  color: #64748b;
+}
+
+.stat-card.success {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
+}
+
+.stat-card.warning {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%);
+}
+
+.stat-value {
+  display: block;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-card.success .stat-value {
+  color: #34d399;
+}
+
+.stat-card.warning .stat-value {
+  color: #fbbf24;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Trip List */
+.trip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trip-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #0a0a0f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.trip-item:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.trip-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trip-rota {
   font-size: 14px;
+  font-weight: 600;
+  color: #fff;
 }
 
-.error {
-  background: #dc262622;
-  border: 1px solid #dc262633;
-  border-radius: 10px;
-  padding: 16px;
-  color: #f87171;
-  font-size: 14px;
+.trip-data {
+  font-size: 12px;
+  color: #6b7280;
 }
 
-@media (max-width: 768px) {
-  .stats-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
+/* Responsive */
 @media (max-width: 480px) {
-  .stats-container {
+  .stats-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -93,9 +93,9 @@
   </div>
 
   <!-- Toast Notification -->
-  @if (toastMessage) {
-    <div class="toast" [ngClass]="toastType">
-      <span>{{ toastMessage }}</span>
+  @if (toastMessage()) {
+    <div class="toast" [class]="toastType()">
+      <span>{{ toastMessage() }}</span>
     </div>
   }
 </div>

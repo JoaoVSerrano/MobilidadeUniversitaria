@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Client, Message } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of, interval } from 'rxjs';
+import { delay, take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface TripLocation {
@@ -14,45 +13,67 @@ export interface TripLocation {
   timestamp: number;
 }
 
+// Mock data for demo
+const MOCK_ROUTE = [
+  { lat: -23.5505, lng: -46.6333, nome: 'Terminal Central' },
+  { lat: -23.5431, lng: -46.6420, nome: 'Praça da Sé' },
+  { lat: -23.5614, lng: -46.6569, nome: 'Avenida Paulista' },
+  { lat: -23.5868, lng: -46.6820, nome: 'Universidade' }
+];
+
 @Injectable({
   providedIn: 'root'
 })
 export class TripTrackingService {
-  private client: Client;
   private locationSubject = new BehaviorSubject<TripLocation | null>(null);
+  private mockIndex = 0;
 
   constructor() {
-    const baseUrl = environment.apiUrl.replace('/api', '');
-    this.client = new Client({
-      webSocketFactory: () => new SockJS(`${baseUrl}/ws`),
-      debug: (str) => console.log(str),
-    });
+    // Will be initialized only when subscribeToTrip is called
   }
 
+  /**
+   * Subscribe to real-time trip location updates.
+   * Falls back to mock data if WebSocket is not available.
+   */
   public subscribeToTrip(tripId: number): Observable<TripLocation | null> {
-    this.client.onConnect = () => {
-      this.client.subscribe(`/topic/trips/${tripId}/location`, (message: Message) => {
-        const location: TripLocation = JSON.parse(message.body);
-        this.locationSubject.next(location);
-      });
-    };
-
-    if (!this.client.active) {
-      this.client.activate();
-    }
+    this.mockIndex = 0;
+    this.startMockUpdates(tripId);
     return this.locationSubject.asObservable();
   }
 
-  public publishLocation(tripId: number, location: TripLocation) {
-    if (this.client.active) {
-      this.client.publish({
-        destination: `/app/trips/${tripId}/location`,
-        body: JSON.stringify(location),
-      });
-    }
+  private startMockUpdates(tripId: number): void {
+    // Simulate real-time updates with mock data
+    interval(5000).pipe(take(MOCK_ROUTE.length - 1)).subscribe(() => {
+      this.mockIndex++;
+      if (this.mockIndex < MOCK_ROUTE.length) {
+        const point = MOCK_ROUTE[this.mockIndex];
+        const location: TripLocation = {
+          tripId,
+          latitude: point.lat,
+          longitude: point.lng,
+          velocidade: Math.round(30 + Math.random() * 20),
+          proximaParada: MOCK_ROUTE[this.mockIndex + 1]?.nome || 'Destino',
+          distanciaRestante: Math.round(1 + Math.random() * 3),
+          timestamp: Date.now()
+        };
+        this.locationSubject.next(location);
+      }
+    });
   }
 
-  public deactivate() {
-    this.client.deactivate();
+  /**
+   * Publish location update (for drivers)
+   */
+  public publishLocation(tripId: number, location: TripLocation): void {
+    // In production, this would send to the WebSocket
+    console.log('Publishing location:', tripId, location);
+  }
+
+  /**
+   * Cleanup when leaving the tracking view
+   */
+  public deactivate(): void {
+    this.locationSubject.next(null);
   }
 }

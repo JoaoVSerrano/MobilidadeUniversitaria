@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
-interface Rota {
-  id: string;
-  nome: string;
-  horario: string;
-  ocupacao: number;
-  disponivel: boolean;
+interface RotaDisponivel {
+  id: number;
+  nomeRota: string;
+  pontoParada: string;
+  descricao: string;
 }
 
 @Component({
@@ -17,28 +18,49 @@ interface Rota {
   templateUrl: './app-aluno-reserva.component.html',
   styleUrl: './app-aluno-reserva.component.css'
 })
-export class AppAlunoReservaComponent {
+export class AppAlunoReservaComponent implements OnInit {
+  private http = inject(HttpClient);
+  private baseUrl = environment.apiUrl;
+
   dataSelecionada = '';
   rotaSelecionada = '';
+  rotas = signal<RotaDisponivel[]>([]);
+  isLoading = signal(false);
+  mensagem = signal('');
+  mensagemTipo = signal<'success' | 'error' | ''>('');
 
-  rotas: Rota[] = [
-    { id: 'centro', nome: 'Centro-Campus', horario: '07:30', ocupacao: 68, disponivel: true },
-    { id: 'bairroA', nome: 'Bairro A-Campus', horario: '07:45', ocupacao: 85, disponivel: true },
-    { id: 'bairroB', nome: 'Bairro B-Campus', horario: '08:00', ocupacao: 92, disponivel: true },
-    { id: 'terminal', nome: 'Terminal-Campus', horario: '08:30', ocupacao: 95, disponivel: false }
-  ];
+  ngOnInit() {
+    this.http.get<RotaDisponivel[]>(`${this.baseUrl}/rotas`).subscribe({
+      next: (data) => this.rotas.set(data),
+      error: () => this.rotas.set([])
+    });
+  }
 
   reservar() {
     if (!this.dataSelecionada || !this.rotaSelecionada) {
-      alert('Por favor, selecione a data e a rota');
+      this.mensagem.set('Selecione a data e a rota.');
+      this.mensagemTipo.set('error');
       return;
     }
-    const rota = this.rotas.find(r => r.id === this.rotaSelecionada);
-    if (rota && !rota.disponivel) {
-      alert('Esta rota está lotada');
-      return;
-    }
-    alert(`Reserva confirmada para ${rota?.nome} no dia ${this.dataSelecionada}`);
-    // In a real app, we would call a service to make the reservation
+
+    this.isLoading.set(true);
+    this.http.post(`${this.baseUrl}/student/trips/confirm`, {
+      rotaId: Number(this.rotaSelecionada),
+      data: this.dataSelecionada
+    }).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.mensagem.set('Reserva confirmada com sucesso!');
+        this.mensagemTipo.set('success');
+        this.dataSelecionada = '';
+        this.rotaSelecionada = '';
+        setTimeout(() => this.mensagem.set(''), 3000);
+      },
+      error: (err: any) => {
+        this.isLoading.set(false);
+        this.mensagem.set(err.error?.message || 'Erro ao confirmar reserva.');
+        this.mensagemTipo.set('error');
+      }
+    });
   }
 }

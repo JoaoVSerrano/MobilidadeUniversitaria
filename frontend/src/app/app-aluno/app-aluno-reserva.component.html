@@ -1,24 +1,55 @@
 <div class="reserva">
-  <h2>Reservar Viagem</h2>
+  <h2 class="page-title">Reservar Viagem</h2>
+  <p class="page-subtitle">Escolha a data e a rota para sua próxima viagem</p>
 
-  <form (ngSubmit)="reservar()">
-    <div class="form-group">
-      <label for="data">Data:</label>
-      <input type="date" id="data" [(ngModel)]="dataSelecionada" name="data" required>
+  @if (mensagem()) {
+    <div class="message" [class]="mensagemTipo()">
+      {{ mensagem() }}
+    </div>
+  }
+
+  <form (ngSubmit)="reservar()" class="reserva-form">
+    <div class="input-group">
+      <label for="data">Data da Viagem</label>
+      <input
+        type="date"
+        id="data"
+        [(ngModel)]="dataSelecionada"
+        name="data"
+        required>
     </div>
 
-    <div class="form-group">
-      <label for="rota">Rota:</label>
+    <div class="input-group">
+      <label for="rota">Selecione a Rota</label>
       <select id="rota" [(ngModel)]="rotaSelecionada" name="rota" required>
-        <option value="">Selecione uma rota</option>
-        @for (rota of rotas; track rota.id) {
-          <option [value]="rota.id" [disabled]="!rota.disponivel">
-            {{ rota.nome }} ({{ rota.horario }}) - {{ rota.ocupacao }}% ocupação
-          </option>
+        <option value="">Escolha uma rota</option>
+        @for (rota of rotas(); track rota.id) {
+          <option [value]="rota.id">{{ rota.nomeRota }}</option>
         }
       </select>
     </div>
 
-    <button type="submit" class="btn-primary">Confirmar Reserva</button>
+    @if (rotaSelecionada) {
+      <div class="selected-route">
+        <div class="route-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span>Rota selecionada</span>
+        </div>
+      </div>
+    }
+
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="isLoading() || !dataSelecionada || !rotaSelecionada">
+      @if (isLoading()) {
+        Confirmando...
+      } @else {
+        Confirmar Reserva
+      }
+    </button>
   </form>
 </div>

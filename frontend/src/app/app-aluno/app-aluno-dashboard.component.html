@@ -1,55 +1,61 @@
 <div class="dashboard">
-  <div class="welcome-card">
-    <h2>Bem-vindo, {{ user?.nome }}!</h2>
-    <p>Seu próximo embarque está agendado para:</p>
-    <div class="trip-info">
-      <span class="trip-destination">{{ proximaViagem.destino }}</span>
-      <span class="trip-time">{{ proximaViagem.horario }}</span>
-      <span class="trip-route">{{ proximaViagem.pontos }}</span>
-      <span class="trip-vagas">{{ proximaViagem.vagas }} vagas disponíveis</span>
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
     </div>
-  </div>
+  } @else {
+    @if (proximaViagem()) {
+      <div class="card next-trip">
+        <div class="next-trip-header">
+          <span class="label">Próxima Viagem</span>
+          <span class="badge" [class]="getStatusBadgeClass(proximaViagem()!.status)">
+            {{ proximaViagem()!.status }}
+          </span>
+        </div>
+        <div class="next-trip-content">
+          <h3>{{ proximaViagem()!.rota }}</h3>
+          <p>{{ proximaViagem()!.data }}</p>
+        </div>
+      </div>
+    }
 
-  <div class="stats-container">
-    <div class="stat-card">
-      <h3>Total de Viagens</h3>
-      <p class="stat-value">{{ estatisticas.totalViagens }}</p>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">{{ estatisticas().total }}</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-card success">
+        <span class="stat-value">{{ estatisticas().concluidas }}</span>
+        <span class="stat-label">Concluídas</span>
+      </div>
+      <div class="stat-card warning">
+        <span class="stat-value">{{ estatisticas().canceladas }}</span>
+        <span class="stat-label">Canceladas</span>
+      </div>
     </div>
-    <div class="stat-card">
-      <h3>Presenças</h3>
-      <p class="stat-value">{{ estatisticas.presente }}</p>
+
+    <div class="card">
+      <h3 class="card-title">Histórico de Viagens</h3>
+      @if (historicoViagens().length === 0) {
+        <div class="empty-state">
+          <p>Nenhuma viagem realizada ainda.</p>
+        </div>
+      } @else {
+        <div class="trip-list">
+          @for (viagem of historicoViagens(); track viagem.id) {
+            <div class="trip-item">
+              <div class="trip-info">
+                <span class="trip-rota">{{ viagem.rota }}</span>
+                <span class="trip-data">{{ viagem.data }}</span>
+              </div>
+              <span class="badge" [class]="getStatusBadgeClass(viagem.status)">
+                {{ viagem.status }}
+              </span>
+            </div>
+          }
+        </div>
+      }
     </div>
-    <div class="stat-card">
-      <h3>Atrasos</h3>
-      <p class="stat-value">{{ estatisticas.atrasos }}</p>
-    </div>
-  </div>
-
-  <div class="history-section">
-    <h3>Histórico de Viagens</h3>
-    <table class="history-table">
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Rota</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let viagem of historicoViagens">
-          <td>{{ viagem.data }}</td>
-          <td>{{ viagem.rota }}</td>
-          <td [class.status]="viagem.status.toLowerCase()">{{ viagem.status }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div *ngIf="isLoading" class="loading">
-    <p>Carregando dados...</p>
-  </div>
-
-  <div *ngIf="errorMessage && !isLoading" class="error">
-    <p>{{ errorMessage }}</p>
-  </div>
+  }
 </div>

@@ -24,13 +24,56 @@ export class DashboardHomeComponent implements OnInit {
   maxDemand: number = 300;
 
   ngOnInit() {
-    this.dashboardService.getStats().subscribe(data => this.stats = data);
+    // KPIs
+    this.dashboardService.getStats().subscribe((kpi: any) => {
+      this.stats = [
+        {
+          title: 'Total de Alunos',
+          value: (kpi.totalAlunos ?? 0).toString(),
+          trend: `+${kpi.variacaoAlunos ?? 0}%`,
+          trendDirection: 'up',
+          icon: 'users'
+        },
+        {
+          title: 'Taxa de Ocupação',
+          value: `${kpi.taxaOcupacao ?? 0}%`,
+          trend: `+${kpi.variacaoOcupacao ?? 0}%`,
+          trendDirection: 'up',
+          icon: 'chart'
+        },
+        {
+          title: 'Viagens Hoje',
+          value: (kpi.viagensHoje ?? 0).toString(),
+          info: `${kpi.viagensFinalizadas ?? 0} finalizadas`,
+          icon: 'clock'
+        },
+        {
+          title: 'Economia Estimada',
+          value: `R$ ${(kpi.economiaEstimada ?? 0).toLocaleString('pt-BR')}`,
+          icon: 'dashboard'
+        }
+      ];
+    });
+
+    // Viagens
     this.dashboardService.getTrips().subscribe(data => this.trips = data);
-    this.dashboardService.getDailyDemand().subscribe(data => {
-      this.dailyDemand = data;
+
+    // Demanda diária — a API retorna { dia, totalPresencas }
+    this.dashboardService.getDailyDemand().subscribe((data: any[]) => {
+      this.dailyDemand = data.map(d => ({
+        day: d.dia ?? d.day ?? '',
+        students: d.totalPresencas ?? d.students ?? 0
+      }));
       this.calculateSvgChart();
     });
-    this.dashboardService.getRouteOccupancy().subscribe(data => this.routeOccupancy = data);
+
+    // Ocupação por rota — a API retorna { nomeRota, ocupacaoPercent }
+    this.dashboardService.getRouteOccupancy().subscribe((data: any[]) => {
+      this.routeOccupancy = data.map(r => ({
+        route: r.nomeRota ?? r.route ?? '',
+        occupancy: r.ocupacaoPercent ?? r.occupancy ?? 0
+      }));
+    });
   }
 
   calculateSvgChart() {
