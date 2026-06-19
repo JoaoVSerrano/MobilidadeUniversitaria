@@ -1,0 +1,67 @@
+/* ── QR Code ── */
+.qrcode {
+  padding: 8px;
+}
+
+.qrcode h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 24px 0;
+}
+
+.qr-card {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.qr-box {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-box svg {
+  width: 180px;
+  height: 180px;
+}
+
+.qr-instructions {
+  font-size: 14px;
+  color: #94a3b8;
+  text-align: center;
+  margin: 0;
+}
+
+.qr-ticket-info {
+  background: #27272a;
+  border-radius: 10px;
+  padding: 16px 24px;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.qr-ticket-label {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.qr-ticket-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-top: 4px;
+}

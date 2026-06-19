@@ -1,37 +1,155 @@
 <div class="app-motorista">
-  <header>
-    <h1>Go Campus - Motorista</h1>
-    <div class="user-info">
-      <span>Olá, {{ user()?.nome }}!</span>
-      <button (click)="logout()">Sair</button>
+  <!-- Sidebar - Desktop Only -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Go Campus
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-nav-btn" [class.active]="currentScreen() === 'viagens'" (click)="setScreen('viagens')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        Minhas Viagens
+      </button>
+      <button class="sidebar-nav-btn" [class.active]="currentScreen() === 'qr'" (click)="setScreen('qr')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        Scanner QR
+      </button>
+      <button class="sidebar-nav-btn" [class.active]="currentScreen() === 'controle'" (click)="setScreen('controle')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        Status da Rota
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">{{ user()?.nome?.charAt(0) }}</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">{{ user()?.nome }}</div>
+          <div class="sidebar-user-role">Motorista</div>
+        </div>
+      </div>
+      <button class="sidebar-logout-btn" (click)="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- Header with gradient -->
+  <header class="header">
+    <h2>Bem-vindo, {{ user()?.nome }}!</h2>
+    <div class="header-info">
+      <span>Rota: Centro-Campus</span>
+      <span>Horário: 07:30 • BUS-001</span>
     </div>
   </header>
 
-  <nav>
-    <button (click)="setScreen('dashboard')" [class.active]="currentScreen() === 'dashboard'">Dashboard</button>
-    <button (click)="setScreen('viagens')" [class.active]="currentScreen() === 'viagens'">Viagens</button>
-    <button (click)="setScreen('qr')" [class.active]="currentScreen() === 'qr'">QR Code</button>
-    <button (click)="setScreen('notificacoes')" [class.active]="currentScreen() === 'notificacoes'">Notificações</button>
-    <button (click)="setScreen('perfil')" [class.active]="currentScreen() === 'perfil'">Perfil</button>
-  </nav>
-
-  <main>
-    <ng-container [ngSwitch]="currentScreen()">
-      <ng-container *ngSwitchCase="'dashboard'">
-        <app-motorista-dashboard></app-motorista-dashboard>
-      </ng-container>
-      <ng-container *ngSwitchCase="'viagens'">
+  <!-- Content area -->
+  <main class="content">
+    @switch (currentScreen()) {
+      @case ('viagens') {
         <app-motorista-viagens></app-motorista-viagens>
-      </ng-container>
-      <ng-container *ngSwitchCase="'qr'">
+      }
+      @case ('qr') {
         <app-motorista-qr></app-motorista-qr>
-      </ng-container>
-      <ng-container *ngSwitchCase="'notificacoes'">
-        <app-motorista-notificacoes></app-motorista-notificacoes>
-      </ng-container>
-      <ng-container *ngSwitchCase="'perfil'">
-        <app-motorista-perfil></app-motorista-perfil>
-      </ng-container>
-    </ng-container>
+      }
+      @case ('controle') {
+        <div class="controle-placeholder">
+          <h3 style="color:#f8fafc;font-size:18px;margin-bottom:16px;">Controle de Viagem</h3>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Status da Viagem</span>
+            </div>
+            <div class="route-progress">
+              <div class="route-stop">
+                <div class="route-dot active">1</div>
+                <span class="route-label active">Terminal Central</span>
+              </div>
+              <div class="route-stop">
+                <div class="route-dot pending">2</div>
+                <span class="route-label pending">Praça da República</span>
+              </div>
+              <div class="route-stop">
+                <div class="route-dot pending">3</div>
+                <span class="route-label pending">Shopping Center</span>
+              </div>
+              <div class="route-stop">
+                <div class="route-dot pending">4</div>
+                <span class="route-label pending">Campus Universitário</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="stats-row">
+              <div class="stats-label">
+                <span>Ocupação</span>
+              </div>
+              <span class="stats-value">3/6</span>
+            </div>
+            <div class="progress-bar" style="margin-top:12px;">
+              <div class="progress-fill" style="width:50%"></div>
+            </div>
+          </div>
+          <button class="btn btn-emerald btn-full" style="margin-top:16px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Iniciar Rota
+          </button>
+        </div>
+      }
+      @default {
+        <app-motorista-viagens></app-motorista-viagens>
+      }
+    }
   </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <div class="nav-buttons">
+      <button class="nav-btn" [class.active]="currentScreen() === 'viagens'" (click)="setScreen('viagens')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <span class="nav-label">Viagem</span>
+      </button>
+      <button class="nav-btn" [class.active]="currentScreen() === 'qr'" (click)="setScreen('qr')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span class="nav-label">Scanner</span>
+      </button>
+      <button class="nav-btn" [class.active]="currentScreen() === 'controle'" (click)="setScreen('controle')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <span class="nav-label">Status</span>
+      </button>
+    </div>
+  </nav>
 </div>

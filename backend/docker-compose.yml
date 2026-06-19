@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: gocampus-db
+    environment:
+      POSTGRES_DB: gocampus
+      POSTGRES_USER: gocampus
+      POSTGRES_PASSWORD: gocampus123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./mobilidadeUniversitaria
+      dockerfile: Dockerfile
+    container_name: gocampus-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:h2:file:/app/data/gocampusdb
+      H2_CONSOLE_ENABLED: "false"
+      JWT_SECRET: mobilidade-universitaria-jwt-secret-prod-2026
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173,http://localhost:4200,http://localhost:8081
+      UPLOAD_DIR: /app/uploads
+    ports:
+      - "8082:8081"
+    volumes:
+      - backend_data:/app/data
+      - uploads_data:/app/uploads
+
+volumes:
+  postgres_data:
+  backend_data:
+  uploads_data:

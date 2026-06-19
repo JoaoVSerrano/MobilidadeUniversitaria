@@ -39,7 +39,7 @@ public class SecurityConfig {
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                           UserDetailsService userDetailsService,
-                          @Value("${app.cors.allowed-origins}") String allowedOrigins) {
+                          @Value("${app_cors_allowed_origins:http://localhost:3000,http://localhost:5173,http://localhost:4200,http://localhost:8081}") String allowedOrigins) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userDetailsService = userDetailsService;
         this.allowedOrigins = allowedOrigins;

@@ -4,7 +4,7 @@
     <h1 class="page-title">Gestão de Rotas</h1>
     <p class="page-subtitle">Configure e gerencie as rotas de transporte</p>
   </div>
-  <button class="btn-primary">
+  <button class="btn-primary" (click)="openCreateModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
@@ -102,19 +102,19 @@
 
       <!-- Actions -->
       <div class="route-actions">
-        <button class="btn-details">
+        <button class="btn-details" (click)="openViewModal(route)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>
           </svg>
           Ver Detalhes
         </button>
-        <button class="action-btn edit">
+        <button class="action-btn edit" (click)="openEditModal(route)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
           </svg>
         </button>
-        <button class="action-btn delete">
+        <button class="action-btn delete" (click)="openDeleteModal(route)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6"></polyline>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
@@ -123,4 +123,114 @@
       </div>
     </div>
   }
+
+<!-- View Modal -->
+@if (showViewModal()) {
+  <div class="modal-overlay" (click)="closeViewModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Detalhes da Rota</h2>
+        <button class="modal-close" (click)="closeViewModal()">✕</button>
+      </div>
+      @if (selectedRoute()) {
+        <div class="modal-body">
+          <div class="detail-row"><label>Nome</label><span>{{ selectedRoute()!.name }}</span></div>
+          <div class="detail-row"><label>Descrição</label><span>{{ selectedRoute()!.description }}</span></div>
+          <div class="detail-row"><label>Ponto de Parada</label><span>{{ selectedRoute()!.originDest }}</span></div>
+          <div class="detail-row"><label>Distância</label><span>{{ selectedRoute()!.distance }}</span></div>
+          <div class="detail-row"><label>Tempo</label><span>{{ selectedRoute()!.time }}</span></div>
+          <div class="detail-row"><label>Capacidade</label><span>{{ selectedRoute()!.capacity }}</span></div>
+          <div class="detail-row"><label>Status</label><span>{{ selectedRoute()!.status }}</span></div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Create Modal -->
+@if (showCreateModal()) {
+  <div class="modal-overlay" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Nova Rota</h2>
+        <button class="modal-close" (click)="closeCreateModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nome da Rota</label>
+          <input type="text" [(ngModel)]="formData.name" (ngModelChange)="onFormChange()" placeholder="Ex: Rota Centro">
+        </div>
+        <div class="form-group">
+          <label>Descrição</label>
+          <input type="text" [(ngModel)]="formData.description" (ngModelChange)="onFormChange()" placeholder="Breve descrição">
+        </div>
+        <div class="form-group">
+          <label>Ponto de Parada</label>
+          <input type="text" [(ngModel)]="formData.originDest" (ngModelChange)="onFormChange()" placeholder="Ex: Av. Principal, 100">
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" (click)="closeCreateModal()">Cancelar</button>
+          <button class="btn-confirm" (click)="createRoute()">Criar Rota</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit Modal -->
+@if (showEditModal()) {
+  <div class="modal-overlay" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Editar Rota</h2>
+        <button class="modal-close" (click)="closeEditModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nome da Rota</label>
+          <input type="text" [(ngModel)]="formData.name">
+        </div>
+        <div class="form-group">
+          <label>Descrição</label>
+          <input type="text" [(ngModel)]="formData.description">
+        </div>
+        <div class="form-group">
+          <label>Ponto de Parada</label>
+          <input type="text" [(ngModel)]="formData.originDest">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="formData.status">
+            <option value="Ativa">Ativa</option>
+            <option value="Inativa">Inativa</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" (click)="closeEditModal()">Cancelar</button>
+          <button class="btn-confirm" (click)="updateRoute()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Modal -->
+@if (showDeleteModal()) {
+  <div class="modal-overlay" (click)="closeDeleteModal()">
+    <div class="modal-content modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Excluir Rota</h2>
+        <button class="modal-close" (click)="closeDeleteModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text">Tem certeza que deseja excluir a rota <strong>{{ selectedRoute()?.name }}</strong>?</p>
+        <div class="modal-actions">
+          <button class="btn-cancel" (click)="closeDeleteModal()">Cancelar</button>
+          <button class="btn-danger" (click)="confirmDelete()">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
 </div>
