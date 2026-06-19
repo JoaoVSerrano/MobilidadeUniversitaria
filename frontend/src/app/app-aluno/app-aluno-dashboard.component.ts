@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AlunoService } from '../../services/aluno.service';
-import { AuthService } from '../../services/auth.service';
+import { AlunoService } from '../services/aluno.service';
+import { AuthService } from '../services/auth.service';
 
 interface Viagem {
   id: number;

@@ -1,28 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { MotoristaService } from '../services/motorista.service';
-import { AuthService } from '../services/auth.service';
-import { Observable } from 'rxjs';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface Motorista {
-  id: number;
-  nome: string;
-  email: string;
-  cpf: string;
-  telefone: string;
-  userType: string;
-  cnhNumero: string;
-  vencimentoCNH: string;
-}
-
-export interface Viagem {
-  id: number;
-  rota: string;
-  horario: string;
-  status: string;
-  passageiros: number;
-  ocupacao: number;
-}
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
+import { MotoristaService } from '../services/motorista.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-motorista-dashboard',
@@ -32,121 +13,62 @@ export interface Viagem {
   styleUrl: './app-motorista-dashboard.component.css'
 })
 export class AppMotoristaDashboardComponent implements OnInit {
-  // User data
-  user: Motorista | null = null;
+  private auth = inject(AuthService);
+  private motoristaService = inject(MotoristaService);
+  private http = inject(HttpClient);
+  private baseUrl = environment.apiUrl;
 
-  // Dashboard data
-  proximaViagem = {
-    rota: 'Centro-Campus',
-    horario: '06:30',
-    passageiros: 32,
-    status: 'AGENDADA'
-  };
+  motorista = signal<any>(null);
+  viagens = signal<any[]>([]);
+  isLoading = signal(true);
+  erro = signal('');
 
-  viagensHoje: Viagem[] = [
-    { id: 1, rota: 'Centro-Campus', horario: '06:30', status: 'AGENDADA', passageiros: 32, ocupacao: 71 },
-    { id: 2, rota: 'Bairro-Campus', horario: '08:15', status: 'EM_ANDAMENTO', passageiros: 28, ocupacao: 70 },
-    { id: 3, rota: 'Centro-Campus', horario: '12:00', status: 'FINALIZADA', passageiros: 45, ocupacao: 100 }
-  ];
+  proximaViagem = computed(() =>
+    this.viagens().find(v => v.status === 'AGENDADA' || v.status === 'EM_ANDAMENTO') ?? null
+  );
 
-  estatisticas = {
-    totalViagens: 150,
-    finalizadas: 140,
-    canceladas: 5,
-    atrasadas: 3
-  };
+  estatisticas = computed(() => ({
+    total:      this.viagens().length,
+    finalizadas: this.viagens().filter(v => v.status === 'FINALIZADA').length,
+    canceladas:  this.viagens().filter(v => v.status === 'CANCELADA').length,
+    agendadas:   this.viagens().filter(v => v.status === 'AGENDADA').length
+  }));
 
-  // Loading states
-  isLoading = false;
-  errorMessage = '';
+  ngOnInit() {
+    const user = this.auth.user();
+    if (!user) { this.isLoading.set(false); return; }
 
-  constructor(
-    private motoristaService: MotoristaService,
-    private authService: AuthService
-  ) {}
+    // Carregar dados do motorista
+    this.motoristaService.getMotoristaById(user.id).subscribe({
+      next: (m) => this.motorista.set(m),
+      error: () => this.motorista.set(user)
+    });
 
-  ngOnInit(): void {
-    this.loadUserData();
+    // Carregar viagens de hoje
+    this.http.get<any[]>(`${this.baseUrl}/driver/trips/today`).subscribe({
+      next: (data) => { this.viagens.set(data); this.isLoading.set(false); },
+      error: () => {
+        // Fallback: carregar todas as viagens do motorista
+        this.motoristaService.getViagensByMotoristaId(user.id).subscribe({
+          next: (data) => { this.viagens.set(data); this.isLoading.set(false); },
+          error: () => { this.isLoading.set(false); }
+        });
+      }
+    });
   }
 
-  private loadUserData(): void {
-    const user = this.authService.user();
-    if (user) {
-      this.isLoading = true;
-      this.errorMessage = '';
-
-      // Get motorista data from backend
-      this.motoristaService.getMotoristaById(user.id).subscribe({
-        next: (motoristaData: Motorista) => {
-          this.user = motoristaData;
-          this.isLoading = false;
-
-          // Load additional data
-          this.loadViagensHoje();
-          this.loadEstatisticas();
-        },
-        error: (error: any) => {
-          this.errorMessage = 'Erro ao carregar dados do usuário';
-          this.isLoading = false;
-          console.error('Error loading user data:', error);
-        }
-      });
-    }
+  getStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      AGENDADA: 'badge-info',
+      EM_ANDAMENTO: 'badge-warning',
+      FINALIZADA: 'badge-success',
+      CANCELADA: 'badge-danger'
+    };
+    return map[status] ?? 'badge-info';
   }
 
-  private loadViagensHoje(): void {
-    const user = this.authService.user();
-    if (user) {
-      this.motoristaService.getViagensByMotoristaId(user.id).subscribe({
-        next: (viagens) => {
-          // Update viagensHoje with real data
-          this.viagensHoje = viagens.map((v: any) => ({
-            id: v.id,
-            rota: v.rota,
-            horario: v.horario,
-            status: v.status,
-            passageiros: v.passageiros,
-            ocupacao: v.ocupacao ?? 0
-          }));
-
-          // Update proximaViagem with the next upcoming trip
-          const proxima = viagens.find(v => v.status === 'AGENDADA' || v.status === 'EM_ANDAMENTO');
-          if (proxima) {
-            this.proximaViagem = {
-              rota: proxima.rota,
-              horario: proxima.horario,
-              passageiros: proxima.passageiros,
-              status: proxima.status
-            };
-          }
-        },
-        error: (error) => {
-          console.error('Error loading viagens:', error);
-          // Keep mock data if there's an error
-        }
-      });
-    }
-  }
-
-  private loadEstatisticas(): void {
-    const user = this.authService.user();
-    if (user) {
-      // In a real app, we would call a service to get statistics
-      // For now, we'll keep the mock data or we could make another API call
-      // Let's assume we have an endpoint for statistics
-      // Since we don't have one, we'll leave it as mock for now.
-      // Alternatively, we could calculate from viagensHoje and other data.
-    }
-  }
-
-  private calculateEstatisticas(viagens: Viagem[]): void {
-    this.estatisticas.totalViagens = viagens.length;
-    this.estatisticas.finalizadas = viagens.filter(v => v.status === 'FINALIZADA').length;
-    this.estatisticas.canceladas = viagens.filter(v => v.status === 'CANCELADA').length;
-    this.estatisticas.atrasadas = viagens.filter(v => v.status === 'ATRASADA').length; // Assuming we have this status
-  }
-
-  logout(): void {
-    this.authService.logout();
+  formatHora(dt: string): string {
+    if (!dt) return '--:--';
+    return new Date(dt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 }

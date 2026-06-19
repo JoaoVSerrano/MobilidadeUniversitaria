@@ -1,0 +1,130 @@
+<div class="scanner-page">
+  <div class="page-header">
+    <h2>Scanner QR Code</h2>
+    <p>Valide o embarque dos alunos</p>
+  </div>
+
+  @if (sucesso()) {
+    <div class="alert-success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      {{ sucesso() }}
+    </div>
+  }
+
+  @if (erro()) {
+    <div class="alert-error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ erro() }}
+    </div>
+  }
+
+  <div class="scanner-viewport">
+    <div class="scanner-frame">
+      <div class="corner top-left"></div>
+      <div class="corner top-right"></div>
+      <div class="corner bottom-left"></div>
+      <div class="corner bottom-right"></div>
+      <div class="scanner-line"></div>
+    </div>
+    <div class="scanner-icon-center">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+        <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+        <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+        <line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="8" x2="10" y2="8"/>
+        <line x1="7" y1="16" x2="10" y2="16"/><line x1="14" y1="8" x2="17" y2="8"/>
+        <line x1="14" y1="16" x2="17" y2="16"/>
+      </svg>
+    </div>
+  </div>
+
+  <p class="scanner-hint">Aponte a câmera para o QR Code do aluno</p>
+
+  <button class="btn-simulate" (click)="simularScan()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+      <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+      <path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+    </svg>
+    Simular Scan
+  </button>
+
+  <div class="scanner-card">
+    <div class="card-header">
+      <h3 class="card-title">Validação Manual</h3>
+      <span class="card-badge">QR</span>
+    </div>
+
+    <div class="input-group">
+      <label>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Código QR do Aluno
+      </label>
+      <textarea
+        [(ngModel)]="qrInput"
+        placeholder="Cole ou digite o código QR aqui... Ex: GOCAMPUS-5-1718808000000"
+        rows="2"
+        class="qr-textarea"
+        (keydown.enter)="$event.preventDefault(); validarQR()">
+      </textarea>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-scan" (click)="validarQR()" [disabled]="isLoading() || !qrInput.trim()">
+        @if (isLoading()) {
+          <div class="spinner-sm"></div>
+          Validando...
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Confirmar
+        }
+      </button>
+
+      @if (qrInput) {
+        <button class="btn-clear" (click)="limpar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Histórico da sessão -->
+  @if (historico().length > 0) {
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Últimas Validações</h3>
+        <span class="historico-count">{{ historico().length }}</span>
+      </div>
+      <div class="historico-list">
+        @for (item of historico(); track $index) {
+          <div class="historico-item">
+            <div class="historico-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div class="historico-info">
+              <span class="historico-nome">{{ item.nome }}</span>
+              <span class="historico-mat">Matrícula validada</span>
+            </div>
+            <div class="historico-time">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              {{ item.hora }}
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

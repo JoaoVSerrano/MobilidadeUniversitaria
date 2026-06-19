@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
-import { MotoristaService } from '../services/motorista.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-motorista-perfil',
@@ -12,21 +12,23 @@ import { MotoristaService } from '../services/motorista.service';
 })
 export class AppMotoristaPerfilComponent implements OnInit {
   private authService = inject(AuthService);
-  private motoristaService = inject(MotoristaService);
+  private router = inject(Router);
 
-  user: any = null;
-  isLoading = true;
+  user = signal<any>(null);
+  isLoading = signal(true);
 
   ngOnInit() {
     const authUser = this.authService.user();
-    if (!authUser) return;
+    console.log('Auth user:', authUser);
 
-    this.motoristaService.getMotoristaById(authUser.id).subscribe({
-      next: (data) => { this.user = data; this.isLoading = false; },
-      error: () => {
-        this.user = authUser;
-        this.isLoading = false;
-      }
-    });
+    if (authUser) {
+      this.user.set(authUser);
+    }
+    this.isLoading.set(false);
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

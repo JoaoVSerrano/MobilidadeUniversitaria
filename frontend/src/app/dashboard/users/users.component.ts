@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../services/dashboard.service';
 import { User } from '../models/dashboard.model';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-users',
@@ -13,6 +14,9 @@ import { User } from '../models/dashboard.model';
 })
 export class UsersComponent implements OnInit {
   private svc = inject(DashboardService);
+  private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   users: User[] = [];
   filtered: User[] = [];
@@ -45,6 +49,7 @@ export class UsersComponent implements OnInit {
 
   isLoading = signal(false);
   errorMessage = signal('');
+  private hasLoadedOnce = false;
 
   private saveFormToStorage() {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.formData));
@@ -65,13 +70,28 @@ export class UsersComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log('UsersComponent ngOnInit called');
     this.loadUsers();
+
+    // Listen to route changes to reload data when tab is opened
+    this.router.events.subscribe((event) => {
+      if (event.constructor.name === 'NavigationEnd') {
+        // Check if the current route is the users route
+        if (this.router.url === '/dashboard/usuarios') {
+          console.log('Users route activated, reloading data');
+          this.loadUsers();
+        }
+      }
+    });
   }
 
   loadUsers() {
+    console.log('Loading users...');
     this.isLoading.set(true);
+    this.errorMessage.set('');
     this.svc.getUsers().subscribe({
       next: (data) => {
+        console.log('Users loaded successfully:', data);
         this.users = data;
         this.filtered = data;
         this.totalUsers = data.length;
@@ -79,11 +99,13 @@ export class UsersComponent implements OnInit {
         this.totalMotoristas = data.filter(u => u.type === 'motorista').length;
         this.totalPendentes = data.filter(u => u.status === 'Pendente').length;
         this.isLoading.set(false);
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.errorMessage.set('Erro ao carregar usuários');
+        console.error('Error loading users:', err);
+        this.errorMessage.set('Erro ao carregar usuários: ' + (err.message || 'Erro desconhecido'));
         this.isLoading.set(false);
-        console.error(err);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -146,10 +168,17 @@ export class UsersComponent implements OnInit {
   }
 
   createUser() {
+    console.log('createUser called with formData:', this.formData);
+    
     if (!this.formData.name || !this.formData.email || !this.formData.cpf) {
+      console.log('Validation failed: missing required fields');
+      this.errorMessage.set('Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    
     this.svc.createUser({
       name: this.formData.name,
       email: this.formData.email,
@@ -157,13 +186,17 @@ export class UsersComponent implements OnInit {
       phone: this.formData.phone,
       type: this.formData.type as any
     }).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('User created successfully:', response);
         this.clearStorage();
         this.closeCreateModal();
         this.loadUsers();
+        this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Erro ao criar usuário:', err);
+        console.error('Error creating user:', err);
+        this.errorMessage.set('Erro ao criar usuário: ' + (err.message || 'Erro desconhecido'));
+        this.isLoading.set(false);
       }
     });
   }
@@ -187,20 +220,31 @@ export class UsersComponent implements OnInit {
   }
 
   updateUser() {
+    console.log('updateUser called with formData:', this.formData);
     const user = this.selectedUser();
-    if (!user) return;
+    if (!user) {
+      console.log('No user selected for update');
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.svc.updateUser(user.id, {
       name: this.formData.name,
       email: this.formData.email,
       phone: this.formData.phone
     }).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('User updated successfully:', response);
         this.closeEditModal();
         this.loadUsers();
+        this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Erro ao atualizar usuário:', err);
+        console.error('Error updating user:', err);
+        this.errorMessage.set('Erro ao atualizar usuário: ' + (err.message || 'Erro desconhecido'));
+        this.isLoading.set(false);
       }
     });
   }
@@ -217,16 +261,27 @@ export class UsersComponent implements OnInit {
   }
 
   confirmDelete() {
+    console.log('confirmDelete called');
     const user = this.selectedUser();
-    if (!user) return;
+    if (!user) {
+      console.log('No user selected for delete');
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.svc.deleteUser(user.id).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('User deleted successfully:', response);
         this.closeDeleteModal();
         this.loadUsers();
+        this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Erro ao excluir usuário:', err);
+        console.error('Error deleting user:', err);
+        this.errorMessage.set('Erro ao excluir usuário: ' + (err.message || 'Erro desconhecido'));
+        this.isLoading.set(false);
       }
     });
   }

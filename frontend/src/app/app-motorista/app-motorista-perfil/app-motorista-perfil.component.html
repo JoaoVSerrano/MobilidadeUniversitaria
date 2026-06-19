@@ -1,30 +1,96 @@
-<div class="perfil">
-  <h2>Meu Perfil</h2>
+<div class="perfil-wrap">
+  @if (isLoading()) {
+    <div class="loading"><div class="spinner"></div><p>Carregando...</p></div>
+  } @else if (user()) {
+    <div class="avatar-block">
+      <div class="avatar-circle">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+      </div>
+      <h2 class="perfil-nome">{{ user()?.nome || 'Motorista' }}</h2>
+      <span class="perfil-role">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+          <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+        </svg>
+        Motorista
+      </span>
+    </div>
 
-  <div class="perfil-info">
-    <div class="info-item">
-      <label>Nome</label>
-      <span>{{ user.nome }}</span>
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-card-icon email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="info-card-content">
+          <span class="info-card-label">Email</span>
+          <span class="info-card-value">{{ user()?.email || '—' }}</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-icon phone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </div>
+        <div class="info-card-content">
+          <span class="info-card-label">Telefone</span>
+          <span class="info-card-value">{{ user()?.telefone || '—' }}</span>
+        </div>
+      </div>
     </div>
-    <div class="info-item">
-      <label>Email</label>
-      <span>{{ user.email }}</span>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Documentos</h3>
+      </div>
+      <div class="info-list">
+        <div class="info-row">
+          <span class="info-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            CPF
+          </span>
+          <span class="info-value">{{ user()?.cpf || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+            Nº CNH
+          </span>
+          <span class="info-value">{{ user()?.cnhNumero || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Vencimento CNH
+          </span>
+          <span class="info-value">{{ user()?.vencimentoCnh || '—' }}</span>
+        </div>
+      </div>
     </div>
-    <div class="info-item">
-      <label>CPF</label>
-      <span>{{ user.cpf }}</span>
+
+    <button class="btn-logout" (click)="logout()">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+      </svg>
+      Sair
+    </button>
+  } @else {
+    <div class="message error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      Não foi possível carregar o perfil.
     </div>
-    <div class="info-item">
-      <label>Telefone</label>
-      <span>{{ user.telefone }}</span>
-    </div>
-    <div class="info-item">
-      <label>CNH</label>
-      <span>{{ user.cnhNumero }}</span>
-    </div>
-    <div class="info-item">
-      <label>Vencimento CNH</label>
-      <span>{{ user.vencimentoCNH }}</span>
-    </div>
-  </div>
+  }
 </div>

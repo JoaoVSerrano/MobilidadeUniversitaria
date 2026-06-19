@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../services/dashboard.service';
 import { Trip } from '../models/dashboard.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-trips',
@@ -13,6 +14,8 @@ import { Trip } from '../models/dashboard.model';
 })
 export class TripsComponent implements OnInit {
   private svc = inject(DashboardService);
+  private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   trips: Trip[] = [];
   scheduledToday = 0;
@@ -38,18 +41,41 @@ export class TripsComponent implements OnInit {
   };
 
   ngOnInit() {
+    console.log('TripsComponent ngOnInit called');
     this.loadTrips();
     this.loadDrivers();
     this.loadVehicles();
     this.loadRoutes();
+
+    // Listen to route changes to reload data when tab is opened
+    this.router.events.subscribe((event) => {
+      if (event.constructor.name === 'NavigationEnd') {
+        // Check if the current route is the trips route
+        if (this.router.url === '/dashboard/viagens') {
+          console.log('Trips route activated, reloading data');
+          this.loadTrips();
+          this.loadDrivers();
+          this.loadVehicles();
+          this.loadRoutes();
+        }
+      }
+    });
   }
 
   loadTrips() {
-    this.svc.getTrips().subscribe(data => {
-      this.trips = data;
-      this.scheduledToday = data.filter(t => t.status === 'agendada').length;
-      this.totalPassengers = data.reduce((acc, t) => acc + t.studentsCount, 0);
-      this.completed = data.filter(t => t.status === 'concluida').length;
+    console.log('Loading trips...');
+    this.svc.getTrips().subscribe({
+      next: (data) => {
+        console.log('Trips loaded successfully:', data);
+        this.trips = data;
+        this.scheduledToday = data.filter(t => t.status === 'agendada').length;
+        this.totalPassengers = data.reduce((acc, t) => acc + t.studentsCount, 0);
+        this.completed = data.filter(t => t.status === 'concluida').length;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading trips:', err);
+      }
     });
   }
 
@@ -85,12 +111,18 @@ export class TripsComponent implements OnInit {
   }
 
   createTrip() {
+    console.log('createTrip called with formData:', this.formData);
     if (!this.formData.rotaId || !this.formData.motoristaId || !this.formData.veiculoId
         || !this.formData.dataHoraPartida || !this.formData.dataHoraChegadaPrevista) {
+      console.log('Validation failed: missing required fields');
       return;
     }
     this.svc.createTrip(this.formData).subscribe({
-      next: () => { this.closeCreateModal(); this.loadTrips(); },
+      next: (response) => {
+        console.log('Trip created successfully:', response);
+        this.closeCreateModal();
+        this.loadTrips();
+      },
       error: (err) => console.error('Erro ao criar viagem:', err)
     });
   }
@@ -106,6 +138,7 @@ export class TripsComponent implements OnInit {
   }
 
   updateTrip() {
+    console.log('updateTrip called');
     this.closeEditModal();
     this.loadTrips();
   }
@@ -121,11 +154,16 @@ export class TripsComponent implements OnInit {
   }
 
   confirmDelete() {
+    console.log('confirmDelete called');
     const trip = this.selectedTrip();
     if (trip) {
-      this.svc.deleteTrip(trip.id).subscribe(() => {
-        this.closeDeleteModal();
-        this.loadTrips();
+      this.svc.deleteTrip(trip.id).subscribe({
+        next: (response) => {
+          console.log('Trip deleted successfully:', response);
+          this.closeDeleteModal();
+          this.loadTrips();
+        },
+        error: (err) => console.error('Erro ao excluir viagem:', err)
       });
     }
   }

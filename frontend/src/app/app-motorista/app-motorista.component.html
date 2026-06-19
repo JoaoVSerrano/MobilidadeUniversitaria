@@ -1,124 +1,25 @@
 <div class="app-motorista">
-  <!-- Sidebar - Desktop Only -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-        Go Campus
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      @for (item of navItems; track item.id) {
-        <button class="sidebar-nav-btn" [class.active]="currentScreen === item.id" (click)="setScreen(item.id)">
-          <span [innerHTML]="getIconSvg(item.icon)"></span>
-          {{ item.label }}
-        </button>
-      }
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <div class="sidebar-user-avatar">{{ user()?.nome?.charAt(0) || 'M' }}</div>
-        <div class="sidebar-user-info">
-          <div class="sidebar-user-name">{{ user()?.nome || 'Motorista' }}</div>
-          <div class="sidebar-user-role">Motorista</div>
-        </div>
-      </div>
-      <button class="sidebar-logout-btn" (click)="logout()">
-        <span [innerHTML]="getIconSvg('logout')"></span>
-        Sair
-      </button>
-    </div>
-  </aside>
-
-  <!-- Header with gradient -->
   <header class="header">
-    <div class="header-content">
-      <div>
-        <h2>Bem-vindo, {{ user()?.nome || 'Motorista' }}!</h2>
-        <p class="header-sub">Go Campus</p>
-      </div>
-      <button class="btn-logout" (click)="logout()" title="Sair">
-        <span [innerHTML]="getIconSvg('logout')"></span>
-      </button>
+    <div class="header-info">
+      <h2>Olá, {{ user()?.nome || 'Motorista' }} 👋</h2>
+      <p>Go Campus — Painel do Motorista</p>
     </div>
+    <button class="btn-logout" (click)="logout()" title="Sair">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+      </svg>
+    </button>
   </header>
 
-  <!-- Content area -->
   <main class="content">
     @switch (currentScreen) {
-      @case ('viagens') {
-        <app-motorista-viagens></app-motorista-viagens>
-      }
-      @case ('qr') {
-        <app-motorista-qr></app-motorista-qr>
-      }
-      @case ('controle') {
-        <div class="controle-content">
-          <h2 class="page-title">Controle de Viagem</h2>
-          <p class="page-subtitle">Gerencie o status da sua viagem atual</p>
-          
-          <div class="card">
-            <h3 class="card-title">Status da Rota</h3>
-            <div class="route-progress">
-              <div class="route-stop">
-                <div class="route-dot completed">1</div>
-                <div class="route-info">
-                  <span class="route-name">Terminal Central</span>
-                  <span class="route-status completed">Concluído</span>
-                </div>
-              </div>
-              <div class="route-stop">
-                <div class="route-dot active">2</div>
-                <div class="route-info">
-                  <span class="route-name">Praça da República</span>
-                  <span class="route-status active">Em andamento</span>
-                </div>
-              </div>
-              <div class="route-stop">
-                <div class="route-dot pending">3</div>
-                <div class="route-info">
-                  <span class="route-name">Shopping Center</span>
-                  <span class="route-status pending">Próximo</span>
-                </div>
-              </div>
-              <div class="route-stop">
-                <div class="route-dot pending">4</div>
-                <div class="route-info">
-                  <span class="route-name">Campus Universitário</span>
-                  <span class="route-status pending">Final</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="occupancy-info">
-              <span class="occupancy-label">Ocupação do Veículo</span>
-              <span class="occupancy-value">3/6 alunos</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width:50%"></div>
-            </div>
-          </div>
-
-          <button class="btn btn-emerald btn-full">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            Iniciar Rota
-          </button>
-        </div>
-      }
+      @case ('dashboard') { <app-motorista-dashboard /> }
+      @case ('viagens')   { <app-motorista-viagens />   }
+      @case ('qr')        { <app-motorista-qr />        }
+      @case ('perfil')    { <app-motorista-perfil />    }
     }
   </main>
 
-  <!-- Bottom Navigation - Mobile Only -->
   <nav class="bottom-nav">
     @for (item of navItems; track item.id) {
       <button class="nav-item" [class.active]="currentScreen === item.id" (click)="setScreen(item.id)">

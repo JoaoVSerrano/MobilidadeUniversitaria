@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../services/dashboard.service';
 import { Route } from '../models/dashboard.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-routes',
@@ -13,6 +14,8 @@ import { Route } from '../models/dashboard.model';
 })
 export class RoutesComponent implements OnInit {
   private svc = inject(DashboardService);
+  private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   routes: Route[] = [];
   filtered: Route[] = [];
@@ -51,18 +54,38 @@ export class RoutesComponent implements OnInit {
   private clearStorage() { localStorage.removeItem(this.STORAGE_KEY); }
 
   ngOnInit() {
+    console.log('RoutesComponent ngOnInit called');
     this.loadRoutes();
+
+    // Listen to route changes to reload data when tab is opened
+    this.router.events.subscribe((event) => {
+      if (event.constructor.name === 'NavigationEnd') {
+        // Check if the current route is the routes route
+        if (this.router.url === '/dashboard/rotas') {
+          console.log('Routes route activated, reloading data');
+          this.loadRoutes();
+        }
+      }
+    });
   }
 
   loadRoutes() {
-    this.svc.getRoutes().subscribe(data => {
-      this.routes = data;
-      this.filtered = data;
-      this.totalRoutes = data.length;
-      this.activeRoutes = data.filter(r => r.status === 'Ativa').length;
-      this.totalCapacity = data.reduce((acc, r) => acc + r.capacity, 0);
-      const totalKm = data.reduce((acc, r) => acc + parseFloat(r.distance), 0);
-      this.totalDistance = totalKm.toFixed(1) + ' km';
+    console.log('Loading routes...');
+    this.svc.getRoutes().subscribe({
+      next: (data) => {
+        console.log('Routes loaded successfully:', data);
+        this.routes = data;
+        this.filtered = data;
+        this.totalRoutes = data.length;
+        this.activeRoutes = data.filter(r => r.status === 'Ativa').length;
+        this.totalCapacity = data.reduce((acc, r) => acc + r.capacity, 0);
+        const totalKm = data.reduce((acc, r) => acc + parseFloat(r.distance), 0);
+        this.totalDistance = totalKm.toFixed(1) + ' km';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading routes:', err);
+      }
     });
   }
 
@@ -110,7 +133,11 @@ export class RoutesComponent implements OnInit {
   }
 
   createRoute() {
-    if (!this.formData.name) return;
+    console.log('createRoute called with formData:', this.formData);
+    if (!this.formData.name) {
+      console.log('Validation failed: missing name');
+      return;
+    }
     this.clearStorage();
     this.svc.createRoute({
       name: this.formData.name,
@@ -118,9 +145,10 @@ export class RoutesComponent implements OnInit {
       originDest: this.formData.originDest,
       status: this.formData.status as any
     }).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Route created successfully:', response);
         this.closeCreateModal();
-        this.ngOnInit();
+        this.loadRoutes();
       },
       error: (err) => console.error('Erro ao criar rota:', err)
     });
@@ -144,15 +172,20 @@ export class RoutesComponent implements OnInit {
   }
 
   updateRoute() {
+    console.log('updateRoute called with formData:', this.formData);
     const route = this.selectedRoute();
-    if (!route) return;
+    if (!route) {
+      console.log('No route selected for update');
+      return;
+    }
     this.svc.updateRoute(route.id, {
       name: this.formData.name,
       description: this.formData.description,
       originDest: this.formData.originDest,
       status: this.formData.status as any
     }).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Route updated successfully:', response);
         this.closeEditModal();
         this.loadRoutes();
       },
@@ -172,10 +205,15 @@ export class RoutesComponent implements OnInit {
   }
 
   confirmDelete() {
+    console.log('confirmDelete called');
     const route = this.selectedRoute();
-    if (!route) return;
+    if (!route) {
+      console.log('No route selected for delete');
+      return;
+    }
     this.svc.deleteRoute(route.id).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Route deleted successfully:', response);
         this.closeDeleteModal();
         this.loadRoutes();
       },
