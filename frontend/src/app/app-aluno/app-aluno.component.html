@@ -1,13 +1,18 @@
 <div class="app-aluno">
-  <!-- Header with gradient -->
+  <!-- Header -->
   <header class="header">
-    <h2>Olá, {{ user()?.nome }}!</h2>
-    <p class="header-sub">Bem-vindo ao Go Campus</p>
+    <div class="header-info">
+      <h2>Olá, {{ user()?.nome || 'Usuário' }}</h2>
+      <p class="subtitle">Go Campus</p>
+    </div>
+    <button class="btn-logout" (click)="logout()" title="Sair">
+      <span [innerHTML]="getIconSvg('logout')"></span>
+    </button>
   </header>
 
-  <!-- Content area -->
+  <!-- Content -->
   <main class="content">
-    @switch (currentScreen()) {
+    @switch (currentScreen) {
       @case ('dashboard') {
         <app-aluno-dashboard />
       }
@@ -20,9 +25,6 @@
       @case ('rastreamento') {
         <app-aluno-rastreamento />
       }
-      @case ('notificacoes') {
-        <app-aluno-notificacoes />
-      }
       @case ('perfil') {
         <app-aluno-perfil />
       }
@@ -31,46 +33,14 @@
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <div class="nav-buttons">
-      <button class="nav-btn" [class.active]="currentScreen() === 'dashboard'" (click)="setScreen('dashboard')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-          <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </svg>
-        <span class="nav-label">Home</span>
+    @for (item of navItems; track item.id) {
+      <button
+        class="nav-item"
+        [class.active]="currentScreen === item.id"
+        (click)="setScreen(item.id)">
+        <span class="nav-icon" [innerHTML]="getIconSvg(item.icon)"></span>
+        <span class="nav-label">{{ item.label }}</span>
       </button>
-      <button class="nav-btn" [class.active]="currentScreen() === 'reserva'" (click)="setScreen('reserva')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="16" y1="2" x2="16" y2="6"></line>
-          <line x1="8" y1="2" x2="8" y2="6"></line>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>
-        <span class="nav-label">Reservas</span>
-      </button>
-      <button class="nav-btn" [class.active]="currentScreen() === 'qrcode'" (click)="setScreen('qrcode')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-        <span class="nav-label">QR Code</span>
-      </button>
-      <button class="nav-btn" [class.active]="currentScreen() === 'notificacoes'" (click)="setScreen('notificacoes')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
-        <span class="nav-label">Notificações</span>
-      </button>
-      <button class="nav-btn" [class.active]="currentScreen() === 'perfil'" (click)="setScreen('perfil')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        <span class="nav-label">Perfil</span>
-      </button>
-    </div>
+    }
   </nav>
 </div>

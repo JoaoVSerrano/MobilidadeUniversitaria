@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DashboardService } from '../services/dashboard.service';
 
 @Component({
   selector: 'app-settings',
@@ -9,25 +10,52 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })
-export class SettingsComponent {
-  // General settings
-  nomeInstituicao: string = 'Universidade Go Campus';
-  emailContato: string = 'contato@gocampus.edu.br';
-  telefone: string = '(11) 3000-0000';
+export class SettingsComponent implements OnInit {
+  private svc = inject(DashboardService);
 
-  // Operational settings
-  reservasAut: boolean = true;
-  notifEmail: boolean = false;
-  rastreamentoGps: boolean = true;
+  nomeInstituicao = '';
+  emailContato = '';
+  telefone = '';
+  reservasAut = true;
+  notifEmail = false;
+  rastreamentoGps = false;
 
-  // Toast notification
-  toastMessage: string | null = null;
+  toastMessage = signal<string | null>(null);
+  toastType = signal<'success' | 'error'>('success');
+  isLoading = signal(false);
+
+  ngOnInit() {
+    this.svc.getSystemSettings().subscribe({
+      next: (s: any) => {
+        this.nomeInstituicao = s.nomeInstituicao ?? '';
+        this.emailContato    = s.emailContato ?? '';
+        this.telefone        = s.telefone ?? '';
+        this.reservasAut     = s.reservasAutomaticas ?? true;
+        this.notifEmail      = s.notificacoesEmail ?? false;
+        this.rastreamentoGps = s.rastreamentoGps ?? false;
+      },
+      error: () => this.showToast('Erro ao carregar configurações', 'error')
+    });
+  }
 
   salvarConfiguracoes() {
-    // Show toast
-    this.toastMessage = 'Configurações salvas com sucesso!';
-    setTimeout(() => {
-      this.toastMessage = null;
-    }, 3000);
+    this.isLoading.set(true);
+    this.svc.updateSystemSettings({
+      nomeInstituicao: this.nomeInstituicao,
+      emailContato:    this.emailContato,
+      telefone:        this.telefone,
+      reservasAutomaticas: this.reservasAut,
+      notificacoesEmail:   this.notifEmail,
+      rastreamentoGps:     this.rastreamentoGps
+    }).subscribe({
+      next: () => { this.isLoading.set(false); this.showToast('Configurações salvas!', 'success'); },
+      error: () => { this.isLoading.set(false); this.showToast('Erro ao salvar configurações', 'error'); }
+    });
+  }
+
+  private showToast(msg: string, type: 'success' | 'error') {
+    this.toastMessage.set(msg);
+    this.toastType.set(type);
+    setTimeout(() => this.toastMessage.set(null), 3500);
   }
 }

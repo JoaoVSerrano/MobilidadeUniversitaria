@@ -1,20 +1,34 @@
 <div class="viagens">
   <h2>Minhas Viagens</h2>
 
-  @for (viagem of viagens; track viagem.id) {
+  @if (isLoading()) {
+    <div class="loading">Carregando...</div>
+  }
+
+  @if (erro()) {
+    <div class="erro">{{ erro() }}</div>
+  }
+
+  @for (viagem of viagens(); track viagem.id) {
     <div class="viagem">
       <div class="viagem-header">
-        <span class="viagem-rota">{{ viagem.rota }}</span>
-        <span class="viagem-horario">{{ viagem.horario }}</span>
+        <span class="viagem-rota">{{ viagem.rota?.nomeRota || 'Rota' }}</span>
+        <span class="viagem-horario">{{ viagem.dataHoraPartida ? (viagem.dataHoraPartida | date:'HH:mm') : '--:--' }}</span>
       </div>
       <div class="viagem-body">
-        <span class="viagem-status" [class]="viagem.status.toLowerCase()">{{ viagem.status }}</span>
-        <span class="viagem-passageiros">{{ viagem.passageiros }} passageiros ({{ viagem.ocupacao }}% ocupação)</span>
+        <span class="viagem-status" [class]="viagem.status?.toLowerCase()">{{ viagem.status }}</span>
+        <span class="viagem-passageiros">{{ viagem.presencasConfirmadas || 0 }} passageiros</span>
       </div>
+      @if (viagem.status === 'AGENDADA') {
+        <button class="btn-action" (click)="iniciar(viagem.id)">Iniciar</button>
+      }
+      @if (viagem.status === 'EM_ANDAMENTO') {
+        <button class="btn-action" (click)="finalizar(viagem.id)">Finalizar</button>
+      }
     </div>
   }
 
-  @if (viagens.length === 0) {
+  @if (!isLoading() && viagens().length === 0) {
     <div class="empty-state">
       <p>Não há viagens agendadas.</p>
     </div>

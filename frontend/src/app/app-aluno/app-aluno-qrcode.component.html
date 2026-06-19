@@ -1,20 +1,54 @@
 <div class="qrcode">
-  <h2>QR Code de Identificação</h2>
+  <h2 class="page-title">QR Code de Embarque</h2>
+  <p class="page-subtitle">Apresente este código ao motorista para validar seu embarque</p>
 
-  <div class="qr-container">
-    <div class="qr-code-display">
-      <img [src]="qrCodeImage" alt="QR Code">
+  @if (isLoading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Gerando QR Code...</p>
+    </div>
+  } @else if (erro()) {
+    <div class="card">
+      <div class="message error">{{ erro() }}</div>
+      <button class="btn btn-primary" (click)="carregar()">Tentar Novamente</button>
+    </div>
+  } @else if (qrData()) {
+    <div class="qr-card">
+      <div class="qr-display">
+        <div class="qr-frame">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <span class="qr-code">{{ qrData().qrData }}</span>
+      </div>
+
+      <div class="qr-info">
+        <div class="info-item">
+          <span class="info-label">Código de Embarque</span>
+          <span class="info-value">{{ qrData().qrData }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Validade</span>
+          <span class="info-value">{{ qrData().validade ? (qrData().validade | date:'dd/MM/yyyy HH:mm') : '10 minutos' }}</span>
+        </div>
+      </div>
     </div>
 
-    <div class="qr-info">
-      <h3>{{ qrCodeData.nome }}</h3>
-      <p><strong>Curso:</strong> {{ qrCodeData.curso }}</p>
-      <p><strong>Validade:</strong> {{ qrCodeData.validade }}</p>
-      <p><strong>Código:</strong> {{ qrCodeData.codigo }}</p>
-    </div>
-  </div>
+    <p class="instructions">
+      Apresente este QR Code ao motorista no momento do embarque
+    </p>
 
-  <p class="qr-instructions">
-    Apresente este QR Code ao motorista para validação de embarque.
-  </p>
+    <button class="btn btn-primary" (click)="refresh()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <polyline points="1 20 1 14 7 14"></polyline>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+      Atualizar QR Code
+    </button>
+  }
 </div>

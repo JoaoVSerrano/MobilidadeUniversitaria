@@ -1,26 +1,34 @@
 <div class="perfil">
-  <h2>Meu Perfil</h2>
+  <h2 class="page-title">Meu Perfil</h2>
+  <p class="page-subtitle">Suas informações pessoais</p>
 
-  <div class="perfil-info">
-    <div class="info-item">
-      <label>Nome</label>
-      <span>{{ user.nome }}</span>
+  <div class="card">
+    <div class="profile-header">
+      <div class="avatar">
+        {{ user()?.nome?.charAt(0) || "U" }}
+      </div>
+      <div class="profile-info">
+        <h3>{{ user()?.nome || "Usuário" }}</h3>
+        <span class="badge badge-info">Aluno</span>
+      </div>
     </div>
-    <div class="info-item">
-      <label>Email</label>
-      <span>{{ user.email }}</span>
+
+    <div class="profile-details">
+      <div class="detail-item">
+        <span class="detail-label">Email</span>
+        <span class="detail-value">{{ user()?.email || "—" }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">ID do Usuário</span>
+        <span class="detail-value">#{{ user()?.id || "—" }}</span>
+      </div>
     </div>
-    <div class="info-item">
-      <label>CPF</label>
-      <span>{{ user.cpf }}</span>
-    </div>
-    <div class="info-item">
-      <label>Telefone</label>
-      <span>{{ user.telefone }}</span>
-    </div>
-    <div class="info-item">
-      <label>Data de Nascimento</label>
-      <span>{{ user.dataNascimento }}</span>
-    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="card-title">Sobre o Go Campus</h3>
+    <p class="about-text">
+      O Go Campus é um sistema de mobilidade universitária que facilita o transporte entre diferentes pontos da cidade e o campus universitário.
+    </p>
   </div>
 </div>

@@ -1,40 +1,65 @@
-/* ── Perfil (Student Profile) ── */
+/* Perfil */
 .perfil {
-  padding: 8px;
-}
-
-.perfil h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #f8fafc;
-  margin: 0 0 24px 0;
-}
-
-.perfil-info {
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 12px;
-  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.info-item {
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.profile-info h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 6px 0;
+}
+
+.profile-details {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.info-item label {
-  font-size: 12px;
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.detail-value {
+  font-size: 14px;
   font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #fff;
 }
 
-.info-item span {
-  font-size: 15px;
-  color: #f8fafc;
+.about-text {
+  font-size: 14px;
+  color: #9ca3af;
+  line-height: 1.6;
+  margin: 0;
 }

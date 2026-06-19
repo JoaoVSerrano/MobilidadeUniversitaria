@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../services/auth.service';
+import { MotoristaService } from '../services/motorista.service';
 
 @Component({
   selector: 'app-motorista-perfil',
@@ -8,14 +10,23 @@ import { CommonModule } from '@angular/common';
   templateUrl: './app-motorista-perfil/app-motorista-perfil.component.html',
   styleUrl: './app-motorista-perfil/app-motorista-perfil.component.css'
 })
-export class AppMotoristaPerfilComponent {
-  // In a real app, we would get the user data from the auth service or a service
-  user = {
-    nome: 'Motorista Teste',
-    email: 'motorista@gocampus.com',
-    cpf: '123.456.789-01',
-    telefone: '(11) 99999-0002',
-    cnhNumero: '1234567890',
-    vencimentoCNH: '31/12/2028'
-  };
+export class AppMotoristaPerfilComponent implements OnInit {
+  private authService = inject(AuthService);
+  private motoristaService = inject(MotoristaService);
+
+  user: any = null;
+  isLoading = true;
+
+  ngOnInit() {
+    const authUser = this.authService.user();
+    if (!authUser) return;
+
+    this.motoristaService.getMotoristaById(authUser.id).subscribe({
+      next: (data) => { this.user = data; this.isLoading = false; },
+      error: () => {
+        this.user = authUser;
+        this.isLoading = false;
+      }
+    });
+  }
 }

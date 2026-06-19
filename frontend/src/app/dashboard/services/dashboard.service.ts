@@ -159,12 +159,29 @@ export class DashboardService {
     );
   }
 
-  public createTrip(trip: Partial<Trip>): Observable<Trip> {
+  public createTrip(trip: any): Observable<Trip> {
+    const formatDate = (dt: string) => {
+      if (!dt) return '';
+      const [date, time] = dt.split('T');
+      const [y, m, d] = date.split('-');
+      return `${d}/${m}/${y} ${time || '00:00'}`;
+    };
+
     return this.api.post('/viagens', {
-      rotaId: trip.route,
-      dataHora: trip.date,
-      horaSaida: trip.time
+      rotaId: Number(trip.rotaId),
+      motoristaId: Number(trip.motoristaId),
+      veiculoId: Number(trip.veiculoId),
+      dataHoraPartida: formatDate(trip.dataHoraPartida),
+      dataHoraChegadaPrevista: formatDate(trip.dataHoraChegadaPrevista)
     }) as Observable<Trip>;
+  }
+
+  public getDrivers(): Observable<any[]> {
+    return this.api.get('/motoristas');
+  }
+
+  public getVehiclesList(): Observable<any[]> {
+    return this.api.get('/veiculos');
   }
 
   public deleteTrip(id: number): Observable<any> {

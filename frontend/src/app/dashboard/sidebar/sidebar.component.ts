@@ -23,14 +23,13 @@ export class SidebarComponent {
   @Output() closeSidebar = new EventEmitter<void>();
 
   menuItems: SidebarItem[] = [
-    { name: 'Dashboard',     icon: 'dashboard', route: '/dashboard'         },
-    { name: 'Usuários',      icon: 'users',     route: '/dashboard/usuarios'  },
-    { name: 'Rotas',         icon: 'route',     route: '/dashboard/rotas'     },
-    { name: 'Veículos',      icon: 'bus',       route: '/dashboard/veiculos'  },
-    { name: 'Viagens',       icon: 'clock',     route: '/dashboard/viagens'   },
-    { name: 'Documentos',    icon: 'file',      route: '/dashboard/documentos'},
-    { name: 'Relatórios',    icon: 'chart',     route: '/dashboard/relatorios'},
-    { name: 'Notificações',  icon: 'bell',      route: '/dashboard/notificacoes'},
+    { name: 'Dashboard',     icon: 'dashboard', route: '/dashboard'              },
+    { name: 'Usuários',      icon: 'users',     route: '/dashboard/usuarios'     },
+    { name: 'Rotas',         icon: 'route',     route: '/dashboard/rotas'        },
+    { name: 'Veículos',      icon: 'bus',       route: '/dashboard/veiculos'     },
+    { name: 'Viagens',       icon: 'clock',     route: '/dashboard/viagens'      },
+    { name: 'Documentos',    icon: 'file',      route: '/dashboard/documentos'   },
+    { name: 'Notificações',  icon: 'bell',      route: '/dashboard/notificacoes' },
     { name: 'Configurações', icon: 'settings',  route: '/dashboard/configuracoes'}
   ];
 

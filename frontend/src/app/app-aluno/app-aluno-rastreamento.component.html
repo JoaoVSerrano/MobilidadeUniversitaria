@@ -1,27 +1,64 @@
 <div class="rastreamento">
-  <h2>Rastreamento em Tempo Real</h2>
+  <h2 class="page-title">Rastrear Ônibus</h2>
+  <p class="page-subtitle">Acompanhe em tempo real a localização do seu ônibus</p>
 
-  <div class="bus-info">
-    <h3>Ônibus: {{ onibus.linha }}</h3>
-    <p><strong>Velocidade:</strong> {{ onibus.velocidade }} km/h</p>
-    <p><strong>Última atualização:</strong> {{ onibus.ultimoUpdate }}</p>
-    <p><strong>Próxima parada:</strong> {{ onibus.proximaParada }}</p>
-    <p><strong>Distância até próxima parada:</strong> {{ onibus.distanciaProxima }}</p>
-  </div>
+  @if (location()) {
+    <div class="card live-location">
+      <div class="live-indicator">
+        <span class="pulse"></span>
+        <span>Ao Vivo</span>
+      </div>
+      <div class="location-data">
+        <div class="data-item">
+          <span class="data-label">Velocidade</span>
+          <span class="data-value">{{ location()!.velocidade }} km/h</span>
+        </div>
+        <div class="data-item">
+          <span class="data-label">Próxima Parada</span>
+          <span class="data-value">{{ location()!.proximaParada || 'Em trânsito' }}</span>
+        </div>
+        <div class="data-item">
+          <span class="data-label">Distância</span>
+          <span class="data-value">{{ location()!.distanciaRestante }} km</span>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="card waiting">
+      <div class="waiting-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+      <p>Aguardando dados de localização...</p>
+      <span class="waiting-hint">Isso pode levar alguns segundos</span>
+    </div>
+  }
 
-  <div class="map-placeholder">
-    <p>Mapa em tempo real seria exibido aqui</p>
-    <!-- In a real app, we would embed a map (e.g., Google Maps, OpenStreetMap) -->
-  </div>
-
-  <div class="route-stops">
-    <h3>Paradas da Rota</h3>
-    <ul class="stops-list">
-      <li *ngFor="let parada of rota" [class.chegada]="parada.chegou">
-        <span class="stop-name">{{ parada.nome }}</span>
-        <span class="stop-time">{{ parada.hora }}</span>
-        <span *ngIf="parada.chegou" class="check">✓</span>
-      </li>
-    </ul>
+  <div class="card">
+    <h3 class="card-title">Paradas da Rota</h3>
+    <div class="stops-timeline">
+      @for (parada of rota; track parada.nome; let i = $index; let last = $last) {
+        <div class="stop-item" [class.completed]="parada.chegou">
+          <div class="stop-marker">
+            @if (parada.chegou) {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 9"></polyline>
+              </svg>
+            } @else {
+              <span class="stop-number">{{ i + 1 }}</span>
+            }
+          </div>
+          @if (!last) {
+            <div class="stop-line" [class.completed]="parada.chegou"></div>
+          }
+          <div class="stop-info">
+            <span class="stop-name">{{ parada.nome }}</span>
+            <span class="stop-time">{{ parada.hora }}</span>
+          </div>
+        </div>
+      }
+    </div>
   </div>
 </div>
