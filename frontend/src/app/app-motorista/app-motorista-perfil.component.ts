@@ -5,8 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-motorista-perfil',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './app-motorista-perfil.component.html',
-  styleUrl: './app-motorista-perfil.component.css'
+  templateUrl: './app-motorista-perfil/app-motorista-perfil.component.html',
+  styleUrl: './app-motorista-perfil/app-motorista-perfil.component.css'
 })
 export class AppMotoristaPerfilComponent {
   // In a real app, we would get the user data from the auth service or a service

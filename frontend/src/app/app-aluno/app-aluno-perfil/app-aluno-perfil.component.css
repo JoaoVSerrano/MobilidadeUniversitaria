@@ -1,0 +1,40 @@
+/* ── Perfil (Student Profile) ── */
+.perfil {
+  padding: 8px;
+}
+
+.perfil h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 24px 0;
+}
+
+.perfil-info {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-item label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-item span {
+  font-size: 15px;
+  color: #f8fafc;
+}

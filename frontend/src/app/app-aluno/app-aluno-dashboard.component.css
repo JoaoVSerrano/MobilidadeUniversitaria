@@ -1,0 +1,115 @@
+/* ── Aluno Dashboard ── */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, #1e3a5f 0%, #1e1e24 100%);
+  border: 1px solid #2563eb33;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.welcome-card h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 8px 0;
+}
+
+.welcome-card p {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0 0 20px 0;
+}
+
+.next-trip-banner {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.next-trip-route {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.next-trip-time {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.next-trip-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #2563eb33;
+  color: #60a5fa;
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.stat-card {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.stat-card h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 32px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.error {
+  background: #dc262622;
+  border: 1px solid #dc262633;
+  border-radius: 10px;
+  padding: 16px;
+  color: #f87171;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+}

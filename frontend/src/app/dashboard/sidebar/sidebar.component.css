@@ -150,6 +150,35 @@
   color: #64748b;
 }
 
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  margin-top: 12px;
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+.logout-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* ── Backdrop ── */
 .sidebar-backdrop {
   position: fixed;

@@ -8,11 +8,11 @@ INSERT INTO endereco (id, cep, rua, bairro, numero, tipo_local) VALUES
 (3, '02030-100', 'Avenida Brazil', 'Jardim América', '500', 'RESIDENCIAL');
 
 -- Seed Users (Passwords are 'password' hashed with bcrypt)
--- Hash: $2a$10$dXJ3SW6G7P50lGmMkkmwe.20VeQQubODod.a6T5aL/X.Fj1u51OQy = 'password'
+-- Hash: $2a$10$tp9lNfP7st0/lgTBSZdeLeTdKAU94yYM55drvghWMSXnnnZSwHHSG = 'password'
 INSERT INTO usuario (id, nome, email, senha, cpf, telefone, user_type, endereco_id) VALUES
-(1, 'Gestor Admin', 'admin@gocampus.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20VeQQubODod.a6T5aL/X.Fj1u51OQy', '12345678901', '(11) 99999-0001', 'GESTOR', 1),
-(2, 'Motorista Teste', 'motorista@gocampus.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20VeQQubODod.a6T5aL/X.Fj1u51OQy', '12345678902', '(11) 99999-0002', 'MOTORISTA', 2),
-(3, 'Aluno Teste', 'aluno@gocampus.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20VeQQubODod.a6T5aL/X.Fj1u51OQy', '12345678903', '(11) 99999-0003', 'ALUNO', 3);
+(1, 'Gestor Admin', 'admin@gocampus.com', '$2a$10$tp9lNfP7st0/lgTBSZdeLeTdKAU94yYM55drvghWMSXnnnZSwHHSG', '12345678901', '(11) 99999-0001', 'GESTOR', 1),
+(2, 'Motorista Teste', 'motorista@gocampus.com', '$2a$10$tp9lNfP7st0/lgTBSZdeLeTdKAU94yYM55drvghWMSXnnnZSwHHSG', '12345678902', '(11) 99999-0002', 'MOTORISTA', 2),
+(3, 'Aluno Teste', 'aluno@gocampus.com', '$2a$10$tp9lNfP7st0/lgTBSZdeLeTdKAU94yYM55drvghWMSXnnnZSwHHSG', '12345678903', '(11) 99999-0003', 'ALUNO', 3);
 
 -- Seed Vehicles
 INSERT INTO veiculo (id, placa, modelo, capacidade_total, status, ano, km_rodados) VALUES

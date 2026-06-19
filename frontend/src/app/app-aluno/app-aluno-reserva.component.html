@@ -11,9 +11,11 @@
       <label for="rota">Rota:</label>
       <select id="rota" [(ngModel)]="rotaSelecionada" name="rota" required>
         <option value="">Selecione uma rota</option>
-        <option *ngFor="let rota of rotas" [value]="rota.id">
-          {{ rota.nome }} ({{ rota.horario }}) - {{ rota.ocupacao }}% ocupação
-        </option>
+        @for (rota of rotas; track rota.id) {
+          <option [value]="rota.id" [disabled]="!rota.disponivel">
+            {{ rota.nome }} ({{ rota.horario }}) - {{ rota.ocupacao }}% ocupação
+          </option>
+        }
       </select>
     </div>
 

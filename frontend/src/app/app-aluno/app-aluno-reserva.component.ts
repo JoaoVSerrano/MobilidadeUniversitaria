@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface Rota {
@@ -12,7 +13,7 @@ interface Rota {
 @Component({
   selector: 'app-aluno-reserva',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './app-aluno-reserva.component.html',
   styleUrl: './app-aluno-reserva.component.css'
 })

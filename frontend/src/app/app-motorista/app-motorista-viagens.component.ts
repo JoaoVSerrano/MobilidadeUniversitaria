@@ -5,8 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-motorista-viagens',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './app-motorista-viagens.component.html',
-  styleUrl: './app-motorista-viagens.component.css'
+  templateUrl: './app-motorista-viagens/app-motorista-viagens.component.html',
+  styleUrl: './app-motorista-viagens/app-motorista-viagens.component.css'
 })
 export class AppMotoristaViagensComponent {
   // In a real app, we would get the viagens from the motorista service

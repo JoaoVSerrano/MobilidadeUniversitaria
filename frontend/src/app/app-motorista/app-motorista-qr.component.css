@@ -1,0 +1,58 @@
+/* ── QR Scanner ── */
+.qr-scanner {
+  padding: 8px;
+}
+
+.qr-scanner h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 24px 0;
+}
+
+.qr-camera {
+  background: #18181b;
+  border: 2px dashed #27272a;
+  border-radius: 16px;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #64748b;
+}
+
+.qr-camera svg {
+  width: 64px;
+  height: 64px;
+  opacity: 0.5;
+}
+
+.qr-camera p {
+  font-size: 15px;
+  margin: 0;
+}
+
+.qr-status {
+  margin-top: 16px;
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.qr-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+.qr-status-text {
+  font-size: 14px;
+  color: #f8fafc;
+}

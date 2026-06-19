@@ -20,7 +20,7 @@ public class QRCodeService {
 
     private final String secret;
 
-    public QRCodeService(@Value("${app.qrcode.secret:mobilidade-universitaria-dev-secret}") String secret) {
+    public QRCodeService(@Value("${app_qrcode_secret:mobilidade-universitaria-dev-secret}") String secret) {
         this.secret = secret;
     }
 

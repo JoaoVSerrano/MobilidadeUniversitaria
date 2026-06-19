@@ -5,11 +5,10 @@ import { CommonModule } from '@angular/common';
   selector: 'app-aluno-perfil',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './app-aluno-perfil.component.html',
-  styleUrl: './app-aluno-perfil.component.css'
+  templateUrl: './app-aluno-perfil/app-aluno-perfil.component.html',
+  styleUrl: './app-aluno-perfil/app-aluno-perfil.component.css'
 })
 export class AppAlunoPerfilComponent {
-  // In a real app, we would get the user data from the auth service or a service
   user = {
     nome: 'Aluno Teste',
     email: 'aluno@gocampus.com',
