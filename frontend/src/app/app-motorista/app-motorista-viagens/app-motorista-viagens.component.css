@@ -1,113 +1,122 @@
-.viagens {
-  padding: 20px;
+.viagens-page { display: flex; flex-direction: column; gap: 16px; }
+.page-header h2 { font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 4px; }
+.page-header p  { font-size: 14px; color: #6b7280; margin: 0; }
+
+.alert-error {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px; border-radius: 12px;
+  background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); color: #f87171; font-size: 14px;
 }
 
-.viagens h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 24px;
+.viagens-stats {
+  display: flex; gap: 12px;
+}
+.stat-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; background: #111118; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; font-size: 13px; color: #9ca3af;
+}
+.stat-item svg { color: #60a5fa; }
+
+.card { background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; }
+
+.empty-state { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+.empty-icon {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(59,130,246,.1); border: 2px solid rgba(59,130,246,.2);
+  display: flex; align-items: center; justify-content: center;
+  color: #60a5fa; margin-bottom: 8px;
+}
+.empty-state h3 { font-size: 16px; font-weight: 600; color: #9ca3af; margin: 0; }
+.empty-state p  { font-size: 14px; color: #6b7280; margin: 0; }
+.empty-hint {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #4b5563; margin-top: 8px;
 }
 
-.viagem {
-  background-color: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 12px;
-  transition: all 0.2s;
-}
+.viagens-list { display: flex; flex-direction: column; gap: 14px; }
 
-.viagem:hover {
-  border-color: #3f3f46;
-  transform: translateX(4px);
+.viagem-card {
+  background: #111118; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 18px;
+  display: flex; flex-direction: column; gap: 14px;
+  transition: all 0.2s ease;
 }
+.viagem-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.viagem-card.status-agendada      { border-left: 3px solid #3b82f6; }
+.viagem-card.status-em_andamento { border-left: 3px solid #f59e0b; }
+.viagem-card.status-finalizada   { border-left: 3px solid #10b981; }
+.viagem-card.status-cancelada    { border-left: 3px solid #ef4444; }
 
-.viagem-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
+.viagem-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 
-.viagem-rota {
-  font-size: 16px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.viagem-horario {
-  font-size: 14px;
-  color: #94a3b8;
-  background-color: #27272a;
-  padding: 4px 12px;
-  border-radius: 20px;
-}
-
-.viagem-body {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.viagem-status {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 20px;
-  text-transform: uppercase;
-}
-
-.viagem-status.agendada,
-.viagem-status.AGENDADA {
-  background-color: #2563eb33;
+.viagem-rota { display: flex; align-items: center; gap: 12px; }
+.rota-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3);
+  display: flex; align-items: center; justify-content: center;
   color: #60a5fa;
 }
 
-.viagem-status.em_andamento,
-.viagem-status.EM_ANDAMENTO {
-  background-color: #ca8a0433;
-  color: #facc15;
+.rota-nome { display: block; font-size: 16px; font-weight: 700; color: #fff; }
+.rota-hora {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px; color: #9ca3af; margin-top: 2px;
 }
 
-.viagem-status.finalizada,
-.viagem-status.FINALIZADA {
-  background-color: #16a34a33;
-  color: #4ade80;
+.badge { display: inline-flex; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.status-badge-agendada     { background: rgba(59,130,246,.15); color: #60a5fa; border: 1px solid rgba(59,130,246,.3); }
+.status-badge-em_andamento{ background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.3); }
+.status-badge-finalizada   { background: rgba(16,185,129,.15); color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+.status-badge-cancelada    { background: rgba(239,68,68,.15);  color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+
+.viagem-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.meta-chip {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #9ca3af; background: #0a0a0f;
+  padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);
 }
 
-.viagem-status.cancelada,
-.viagem-status.CANCELADA {
-  background-color: #dc262633;
-  color: #f87171;
+.viagem-progress { display: flex; align-items: center; gap: 12px; }
+.progress-bar {
+  flex: 1; height: 6px; background: #1f2937; border-radius: 3px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.progress-agendada .progress-fill      { width: 0%; background: #6b7280; }
+.progress-em_andamento .progress-fill  { width: 50%; background: #f59e0b; }
+.progress-finalizada .progress-fill    { width: 100%; background: #10b981; }
+.progress-cancelada .progress-fill     { width: 0%; background: #ef4444; }
+
+.progress-label { font-size: 12px; color: #6b7280; min-width: 80px; text-align: right; }
+.progress-agendada .progress-label      { color: #6b7280; }
+.progress-em_andamento .progress-label  { color: #f59e0b; }
+.progress-finalizada .progress-label    { color: #10b981; }
+.progress-cancelada .progress-label     { color: #ef4444; }
+
+.viagem-actions { display: flex; gap: 10px; }
+
+.btn-action {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px; border: none; border-radius: 12px;
+  font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s;
+}
+.btn-start  { background: #2563eb; color: #fff; }
+.btn-start:hover  { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.4); }
+.btn-finish { background: #059669; color: #fff; }
+.btn-finish:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,.4); }
+.btn-scan {
+  background: #111118; color: #60a5fa; border: 1px solid rgba(59,130,246,.3);
+}
+.btn-scan:hover { background: rgba(59,130,246,.1); transform: translateY(-1px); }
+
+.status-done {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 14px; color: #34d399; font-weight: 600; padding: 12px;
 }
 
-.viagem-passageiros {
-  font-size: 13px;
-  color: #64748b;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 48px 24px;
-  color: #64748b;
-}
-
-.empty-state p {
-  font-size: 16px;
-  margin: 0;
-}
-
-@media (max-width: 640px) {
-  .viagem-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .viagem-body {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-}
+.loading { display: flex; flex-direction: column; align-items: center; padding: 48px; color: #6b7280; }
+.spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }

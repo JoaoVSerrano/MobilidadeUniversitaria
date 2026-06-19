@@ -1,13 +1,16 @@
 <div class="app-aluno">
   <!-- Header -->
   <header class="header">
-    <div class="header-info">
-      <h2>Olá, {{ user()?.nome || 'Usuário' }}</h2>
-      <p class="subtitle">Go Campus</p>
+    <div class="header-content">
+      <div class="header-welcome">
+        <h1 class="header-title">Olá, {{ user()?.nome || 'Usuário' }} 👋</h1>
+        <p class="header-subtitle">{{ getCurrentScreenDescription() }}</p>
+      </div>
+      <button class="btn-logout" (click)="logout()" title="Sair">
+        <span [innerHTML]="getIconSvg('logout')"></span>
+        <span class="logout-text">Sair</span>
+      </button>
     </div>
-    <button class="btn-logout" (click)="logout()" title="Sair">
-      <span [innerHTML]="getIconSvg('logout')"></span>
-    </button>
   </header>
 
   <!-- Content -->

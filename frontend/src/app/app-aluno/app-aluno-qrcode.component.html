@@ -1,54 +1,62 @@
-<div class="qrcode">
-  <h2 class="page-title">QR Code de Embarque</h2>
-  <p class="page-subtitle">Apresente este código ao motorista para validar seu embarque</p>
+<div class="qrcode-page">
+  <div class="page-header">
+    <h2>QR Code de Embarque</h2>
+    <p>Apresente ao motorista para validar seu embarque</p>
+  </div>
 
   @if (isLoading()) {
     <div class="loading">
       <div class="spinner"></div>
       <p>Gerando QR Code...</p>
     </div>
-  } @else if (erro()) {
-    <div class="card">
-      <div class="message error">{{ erro() }}</div>
-      <button class="btn btn-primary" (click)="carregar()">Tentar Novamente</button>
-    </div>
   } @else if (qrData()) {
     <div class="qr-card">
-      <div class="qr-display">
-        <div class="qr-frame">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-          </svg>
-        </div>
-        <span class="qr-code">{{ qrData().qrData }}</span>
+      <div class="qr-badge">
+        <span class="pulse-dot"></span>
+        Código ativo
       </div>
 
-      <div class="qr-info">
-        <div class="info-item">
-          <span class="info-label">Código de Embarque</span>
-          <span class="info-value">{{ qrData().qrData }}</span>
+      <div class="qr-frame" [innerHTML]="qrSvg()"></div>
+
+      <div class="qr-meta">
+        <div class="meta-row">
+          <span class="meta-label">Código</span>
+          <span class="meta-value mono">{{ qrData().qrData | slice:0:20 }}...</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">Validade</span>
-          <span class="info-value">{{ qrData().validade ? (qrData().validade | date:'dd/MM/yyyy HH:mm') : '10 minutos' }}</span>
-        </div>
+        @if (getExpiresAt()) {
+          <div class="meta-row">
+            <span class="meta-label">Válido até</span>
+            <span class="meta-value">{{ getExpiresAt() | date:'HH:mm' }}</span>
+          </div>
+        }
       </div>
     </div>
 
     <p class="instructions">
-      Apresente este QR Code ao motorista no momento do embarque
+      Mantenha a tela visível e apresente ao motorista no momento do embarque.
     </p>
 
     <button class="btn btn-primary" (click)="refresh()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
         <polyline points="23 4 23 10 17 10"></polyline>
         <polyline points="1 20 1 14 7 14"></polyline>
         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
       </svg>
       Atualizar QR Code
     </button>
+  } @else {
+    <div class="card">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="56" height="56">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <h3>Nenhum QR Code ativo</h3>
+        <p>Reserve uma viagem para gerar seu código de embarque.</p>
+      </div>
+      <button class="btn btn-primary" (click)="carregar()">Tentar novamente</button>
+    </div>
   }
 </div>

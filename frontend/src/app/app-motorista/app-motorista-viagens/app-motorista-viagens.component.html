@@ -1,36 +1,131 @@
-<div class="viagens">
-  <h2>Minhas Viagens</h2>
+<div class="viagens-page">
+  <div class="page-header">
+    <h2>Minhas Viagens</h2>
+    <p>Gerencie suas viagens do dia</p>
+  </div>
 
   @if (isLoading()) {
-    <div class="loading">Carregando...</div>
-  }
-
-  @if (erro()) {
-    <div class="erro">{{ erro() }}</div>
-  }
-
-  @for (viagem of viagens(); track viagem.id) {
-    <div class="viagem">
-      <div class="viagem-header">
-        <span class="viagem-rota">{{ viagem.rota?.nomeRota || 'Rota' }}</span>
-        <span class="viagem-horario">{{ viagem.dataHoraPartida ? (viagem.dataHoraPartida | date:'HH:mm') : '--:--' }}</span>
-      </div>
-      <div class="viagem-body">
-        <span class="viagem-status" [class]="viagem.status?.toLowerCase()">{{ viagem.status }}</span>
-        <span class="viagem-passageiros">{{ viagem.presencasConfirmadas || 0 }} passageiros</span>
-      </div>
-      @if (viagem.status === 'AGENDADA') {
-        <button class="btn-action" (click)="iniciar(viagem.id)">Iniciar</button>
-      }
-      @if (viagem.status === 'EM_ANDAMENTO') {
-        <button class="btn-action" (click)="finalizar(viagem.id)">Finalizar</button>
-      }
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando viagens...</p>
     </div>
-  }
+  } @else if (erro()) {
+    <div class="alert-error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ erro() }}
+    </div>
+  } @else if (viagens().length === 0) {
+    <div class="card empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+          <rect x="2" y="6" width="20" height="12" rx="2"/>
+          <path d="M6 18v2"/><path d="M18 18v2"/><path d="M2 10h20"/>
+        </svg>
+      </div>
+      <h3>Nenhuma viagem hoje</h3>
+      <p>Você não tem viagens agendadas para hoje.</p>
+      <div class="empty-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+        </svg>
+        As viagens aparecerão aqui quando forem agendadas.
+      </div>
+    </div>
+  } @else {
+    <div class="viagens-stats">
+      <div class="stat-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>{{ viagens().length }} viagem(ns)</span>
+      </div>
+    </div>
 
-  @if (!isLoading() && viagens().length === 0) {
-    <div class="empty-state">
-      <p>Não há viagens agendadas.</p>
+    <div class="viagens-list">
+      @for (viagem of viagens(); track viagem.id) {
+        <div class="viagem-card" [class]="'status-' + viagem.status?.toLowerCase()">
+          <div class="viagem-header">
+            <div class="viagem-rota">
+              <div class="rota-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>
+                </svg>
+              </div>
+              <div>
+                <span class="rota-nome">{{ viagem.rota?.nomeRota || 'Rota' }}</span>
+                <span class="rota-hora">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  {{ formatHora(viagem.dataHoraPartida) }}
+                </span>
+              </div>
+            </div>
+            <span [class]="'badge status-badge-' + viagem.status?.toLowerCase()">
+              {{ viagem.status }}
+            </span>
+          </div>
+
+          <div class="viagem-meta">
+            @if (viagem.veiculo) {
+              <span class="meta-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                  <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                </svg>
+                {{ viagem.veiculo.modelo }}
+              </span>
+            }
+            <span class="meta-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              12 alunos
+            </span>
+          </div>
+
+          <div class="viagem-progress" [class]="'progress-' + viagem.status?.toLowerCase()">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width]="getProgressWidth(viagem.status)"></div>
+            </div>
+            <span class="progress-label">{{ getProgressLabel(viagem.status) }}</span>
+          </div>
+
+          <div class="viagem-actions">
+            @if (viagem.status === 'AGENDADA') {
+              <button class="btn-action btn-start" (click)="iniciar(viagem.id)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Iniciar Rota
+              </button>
+            }
+            @if (viagem.status === 'EM_ANDAMENTO') {
+              <button class="btn-action btn-finish" (click)="finalizar(viagem.id)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Finalizar Rota
+              </button>
+              <button class="btn-action btn-scan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                </svg>
+                Scanner
+              </button>
+            }
+            @if (viagem.status === 'FINALIZADA') {
+              <span class="status-done">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                Viagem concluída
+              </span>
+            }
+          </div>
+        </div>
+      }
     </div>
   }
 </div>

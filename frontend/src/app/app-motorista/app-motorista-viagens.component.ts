@@ -28,17 +28,40 @@ export class AppMotoristaViagensComponent implements OnInit {
     });
   }
 
+  formatHora(dt: string): string {
+    if (!dt) return '--:--';
+    return new Date(dt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
   iniciar(id: number) {
     this.http.post<any>(`${this.baseUrl}/driver/trips/${id}/start`, {}).subscribe({
       next: (updated) => this.viagens.update(vs => vs.map(v => v.id === id ? updated : v)),
-      error: (err: any) => alert(err.error?.message || 'Erro ao iniciar viagem.')
+      error: (err: any) => this.erro.set(err.error?.message || 'Erro ao iniciar viagem.')
     });
   }
 
   finalizar(id: number) {
     this.http.post<any>(`${this.baseUrl}/driver/trips/${id}/finish`, {}).subscribe({
       next: (updated) => this.viagens.update(vs => vs.map(v => v.id === id ? updated : v)),
-      error: (err: any) => alert(err.error?.message || 'Erro ao finalizar viagem.')
+      error: (err: any) => this.erro.set(err.error?.message || 'Erro ao finalizar viagem.')
     });
+  }
+
+  getProgressWidth(status?: string): string {
+    switch (status) {
+      case 'AGENDADA': return '0%';
+      case 'EM_ANDAMENTO': return '50%';
+      case 'FINALIZADA': return '100%';
+      default: return '0%';
+    }
+  }
+
+  getProgressLabel(status?: string): string {
+    switch (status) {
+      case 'AGENDADA': return 'Aguardando';
+      case 'EM_ANDAMENTO': return 'Em andamento';
+      case 'FINALIZADA': return 'Concluída';
+      default: return '';
+    }
   }
 }

@@ -1,0 +1,35 @@
+<div class="perfil-wrap">
+  @if (isLoading()) {
+    <div class="loading"><div class="spinner"></div><p>Carregando perfil...</p></div>
+  } @else if (user()) {
+    <div class="avatar-block">
+      <div class="avatar-circle">{{ user()!.nome.charAt(0).toUpperCase() }}</div>
+      <h2 class="perfil-nome">{{ user()!.nome }}</h2>
+      <span class="perfil-role">Aluno</span>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Informações Pessoais</h3>
+      <div class="info-list">
+        <div class="info-row">
+          <span class="info-label">Nome</span>
+          <span class="info-value">{{ user()!.nome }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ user()!.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">CPF</span>
+          <span class="info-value">{{ user()!.cpf }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Telefone</span>
+          <span class="info-value">{{ user()!.telefone }}</span>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="message error">Não foi possível carregar o perfil.</div>
+  }
+</div>

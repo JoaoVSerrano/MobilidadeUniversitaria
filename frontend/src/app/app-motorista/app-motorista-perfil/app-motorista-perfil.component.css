@@ -1,40 +1,73 @@
-/* ── Perfil (Driver Profile) ── */
-.perfil {
-  padding: 8px;
+.perfil-wrap { display: flex; flex-direction: column; gap: 20px; }
+
+.avatar-block {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 24px; background: linear-gradient(135deg, rgba(29,78,216,0.15) 0%, rgba(29,78,216,0.05) 100%);
+  border: 1px solid rgba(59,130,246,0.2); border-radius: 20px;
+}
+.avatar-circle {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 32px; font-weight: 700; margin-bottom: 12px;
+  box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+}
+.perfil-nome { font-size: 22px; font-weight: 700; color: #fff; margin: 0 0 6px; text-align: center; }
+.perfil-role {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 14px; color: #60a5fa; font-weight: 500;
 }
 
-.perfil h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #f8fafc;
-  margin: 0 0 24px 0;
+.info-cards { display: flex; flex-direction: column; gap: 12px; }
+.info-card {
+  display: flex; align-items: center; gap: 14px;
+  background: #111118; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px; padding: 16px;
+}
+.info-card-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.info-card-icon.email  { background: rgba(59,130,246,.15); color: #60a5fa; }
+.info-card-icon.phone { background: rgba(16,185,129,.15); color: #34d399; }
+.info-card-content { display: flex; flex-direction: column; gap: 2px; }
+.info-card-label { font-size: 12px; color: #6b7280; font-weight: 500; }
+.info-card-value { font-size: 14px; color: #fff; font-weight: 600; }
+
+.card { background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; }
+.card-header { margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 600; color: #fff; margin: 0; }
+
+.info-list { display: flex; flex-direction: column; gap: 12px; }
+.info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.info-row:last-child { border-bottom: none; }
+.info-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: #6b7280;
+}
+.info-value { font-size: 14px; color: #fff; font-weight: 500; }
+
+.btn-logout {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 14px; margin-top: 8px;
+  background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);
+  border-radius: 12px; color: #f87171; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-logout:hover {
+  background: rgba(239,68,68,.2);
+  border-color: rgba(239,68,68,.5);
 }
 
-.perfil-info {
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+.loading { display: flex; flex-direction: column; align-items: center; padding: 48px; color: #6b7280; }
+.spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.info-item label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.info-item span {
-  font-size: 15px;
-  color: #f8fafc;
+.message.error {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px; border-radius: 12px;
+  background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); color: #f87171;
 }
