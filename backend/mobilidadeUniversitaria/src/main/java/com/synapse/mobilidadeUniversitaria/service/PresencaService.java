@@ -153,6 +153,24 @@ public class PresencaService {
         presencaRepository.delete(presenca);
     }
 
+    public PresencaDigitalResponseDTO confirmarPresencaById(Long id) {
+        PresencaDigital presenca = presencaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Presenca nao encontrada com id: " + id));
+
+        if (PresencaStatus.CANCELADA.equals(presenca.getStatus())) {
+            throw new BadRequestException("Reserva de presenca cancelada");
+        }
+        if (PresencaStatus.CONFIRMADA.equals(presenca.getStatus())) {
+            throw new ResourceAlreadyExistsException("Presenca ja confirmada");
+        }
+
+        validarViagemPodeConfirmarPresenca(presenca.getViagem());
+
+        presenca.setStatus(PresencaStatus.CONFIRMADA);
+        presenca.setDataHoraValidacao(LocalDateTime.now());
+        return toResponse(presencaRepository.save(presenca));
+    }
+
     private PresencaDigitalResponseDTO toResponse(PresencaDigital presenca) {
         return new PresencaDigitalResponseDTO(
                 presenca.getId(),

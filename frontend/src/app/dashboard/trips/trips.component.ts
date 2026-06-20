@@ -114,7 +114,7 @@ export class TripsComponent implements OnInit {
     console.log('createTrip called with formData:', this.formData);
     if (!this.formData.rotaId || !this.formData.motoristaId || !this.formData.veiculoId
         || !this.formData.dataHoraPartida || !this.formData.dataHoraChegadaPrevista) {
-      console.log('Validation failed: missing required fields');
+      alert('Por favor, preencha todos os campos da viagem.');
       return;
     }
     this.svc.createTrip(this.formData).subscribe({
@@ -123,7 +123,9 @@ export class TripsComponent implements OnInit {
         this.closeCreateModal();
         this.loadTrips();
       },
-      error: (err) => console.error('Erro ao criar viagem:', err)
+      error: (err) => {
+        alert('Erro ao criar viagem: ' + (err.error?.message || err.message || 'Verifique os campos e tente novamente'));
+      }
     });
   }
 

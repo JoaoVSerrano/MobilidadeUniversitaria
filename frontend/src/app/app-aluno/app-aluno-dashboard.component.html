@@ -5,12 +5,6 @@
       <p>Carregando...</p>
     </div>
   } @else {
-    <!-- Header com gradiente -->
-    <div class="header-gradient">
-      <h1 class="welcome-text">Olá, {{ user()?.nome || 'Usuário' }}</h1>
-      <p class="subtitle">Bem-vindo ao Go Campus</p>
-    </div>
-
     <!-- Botão Principal -->
     <button class="btn-main" (click)="irParaReservas()">
       Reservar Presença

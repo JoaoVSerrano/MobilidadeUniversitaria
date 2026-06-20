@@ -44,8 +44,13 @@ public class AuthController {
 
     @PostMapping("/register/student-request")
     public ResponseEntity<String> registerStudentRequest(@Valid @RequestBody StudentRegistrationRequestDTO dto) {
-        studentRegistrationService.createStudentRequest(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Solicitação de cadastro enviada com sucesso");
+        try {
+            studentRegistrationService.createStudentRequest(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Solicitação de cadastro enviada com sucesso");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Erro ao processar solicitação: " + e.getMessage());
+        }
     }
 
     @GetMapping("/student-requests")

@@ -71,7 +71,20 @@ public class UsuarioService {
         }
 
         // Cria usuário
-        Usuario usuario = new Usuario();
+        Usuario usuario;
+        if (userType == UserType.ALUNO) {
+            com.synapse.mobilidadeUniversitaria.Entities.Aluno aluno = new com.synapse.mobilidadeUniversitaria.Entities.Aluno();
+            aluno.setStatusMatricula(com.synapse.mobilidadeUniversitaria.Entities.enums.StatusMatricula.ATIVA);
+            usuario = aluno;
+        } else if (userType == UserType.MOTORISTA) {
+            com.synapse.mobilidadeUniversitaria.Entities.Motorista motorista = new com.synapse.mobilidadeUniversitaria.Entities.Motorista();
+            motorista.setCnhNumero("00000000000"); // default value
+            motorista.setVencimentoCnh(java.time.LocalDate.now().plusYears(1)); // default value
+            usuario = motorista;
+        } else {
+            usuario = new Usuario();
+        }
+
         // Não setar ID - deixar JPA gerar automaticamente
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());

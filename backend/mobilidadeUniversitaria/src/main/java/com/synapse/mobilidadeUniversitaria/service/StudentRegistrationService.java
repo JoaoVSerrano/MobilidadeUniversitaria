@@ -20,6 +20,31 @@ public class StudentRegistrationService {
     private final PasswordEncoder passwordEncoder;
 
     public void createStudentRequest(StudentRegistrationRequestDTO dto) {
+        // Verifica se a tabela STUDENT_REGISTRATION_REQUEST existe
+        try {
+            jdbcTemplate.queryForObject("SELECT COUNT(*) FROM STUDENT_REGISTRATION_REQUEST", Integer.class);
+        } catch (Exception e) {
+            // Tenta criar a tabela se não existir
+            try {
+                jdbcTemplate.update(
+                    "CREATE TABLE STUDENT_REGISTRATION_REQUEST (" +
+                    "ID BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                    "NOME VARCHAR(255) NOT NULL, " +
+                    "EMAIL VARCHAR(255) NOT NULL UNIQUE, " +
+                    "CPF VARCHAR(11) NOT NULL UNIQUE, " +
+                    "SENHA VARCHAR(255) NOT NULL, " +
+                    "TELEFONE VARCHAR(20) NOT NULL, " +
+                    "ENDERECO_ID BIGINT NOT NULL, " +
+                    "STATUS VARCHAR(20) NOT NULL DEFAULT 'PENDING', " +
+                    "CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                    "UPDATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, " +
+                    "FOREIGN KEY (ENDERECO_ID) REFERENCES ENDERECO(ID))"
+                );
+            } catch (Exception ex) {
+                throw new RuntimeException("Erro ao criar tabela STUDENT_REGISTRATION_REQUEST: " + ex.getMessage());
+            }
+        }
+
         // Verifica se email ou CPF já existem
         Integer countEmail = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM USUARIO WHERE EMAIL = ?", Integer.class, dto.email());
@@ -42,8 +67,29 @@ public class StudentRegistrationService {
         }
 
         // Busca ou cria endereço
-        Long enderecoId = 1L;
-        if (jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ENDERECO WHERE ID = ?", Integer.class, 1L) == 0) {
+        Long enderecoId;
+        try {
+            // Tenta usar endereço existente com ID 1
+            Integer enderecoCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM ENDERECO WHERE ID = ?", Integer.class, 1L);
+            if (enderecoCount != null && enderecoCount > 0) {
+                enderecoId = 1L;
+            } else {
+                // Cria novo endereço
+                jdbcTemplate.update(
+                    "INSERT INTO ENDERECO (CEP, RUA, BAIRRO, NUMERO, TIPO_LOCAL) VALUES (?, ?, ?, ?, ?)",
+                    dto.cep() != null ? dto.cep() : "00000-000",
+                    dto.rua() != null ? dto.rua() : "Nao informada",
+                    dto.bairro() != null ? dto.bairro() : "Nao informado",
+                    dto.numero() != null ? dto.numero() : "0",
+                    dto.tipoLocal() != null ? dto.tipoLocal() : "RESIDENCIAL"
+                );
+                // Busca o ID do endereço criado
+                enderecoId = jdbcTemplate.queryForObject("SELECT MAX(ID) FROM ENDERECO", Long.class);
+                if (enderecoId == null) enderecoId = 1L;
+            }
+        } catch (Exception e) {
+            // Se falhar, cria novo endereço
             jdbcTemplate.update(
                 "INSERT INTO ENDERECO (CEP, RUA, BAIRRO, NUMERO, TIPO_LOCAL) VALUES (?, ?, ?, ?, ?)",
                 dto.cep() != null ? dto.cep() : "00000-000",
@@ -52,6 +98,8 @@ public class StudentRegistrationService {
                 dto.numero() != null ? dto.numero() : "0",
                 dto.tipoLocal() != null ? dto.tipoLocal() : "RESIDENCIAL"
             );
+            enderecoId = jdbcTemplate.queryForObject("SELECT MAX(ID) FROM ENDERECO", Long.class);
+            if (enderecoId == null) enderecoId = 1L;
         }
 
         // Insere solicitação de cadastro
@@ -91,6 +139,11 @@ public class StudentRegistrationService {
             nextId, request.nome(), request.email(), senhaHash, request.cpf(), request.telefone(), "ALUNO", request.enderecoId()
         );
 
+        jdbcTemplate.update(
+            "INSERT INTO ALUNO (ID, STATUS_MATRICULA, FOTO_PERFIL, FACULDADE_ID) VALUES (?, ?, ?, ?)",
+            nextId, "ATIVA", null, null
+        );
+
         // Atualiza status da solicitação
         jdbcTemplate.update(
             "UPDATE STUDENT_REGISTRATION_REQUEST SET STATUS = 'APPROVED', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID = ?",
@@ -117,32 +170,32 @@ public class StudentRegistrationService {
         }
     }
 
-    private static class StudentRegistrationRequest {
-        Long id;
-        String nome;
-        String email;
-        String cpf;
-        String senha;
-        String telefone;
-        Long enderecoId;
-        String status;
-        String createdAt;
-    }
+    private record StudentRegistrationRequest(
+        Long id,
+        String nome,
+        String email,
+        String cpf,
+        String senha,
+        String telefone,
+        Long enderecoId,
+        String status,
+        String createdAt
+    ) {}
 
     private static class StudentRegistrationRequestRowMapper implements RowMapper<StudentRegistrationRequest> {
         @Override
         public StudentRegistrationRequest mapRow(ResultSet rs, int rowNum) throws SQLException {
-            StudentRegistrationRequest request = new StudentRegistrationRequest();
-            request.id = rs.getLong("ID");
-            request.nome = rs.getString("NOME");
-            request.email = rs.getString("EMAIL");
-            request.cpf = rs.getString("CPF");
-            request.senha = rs.getString("SENHA");
-            request.telefone = rs.getString("TELEFONE");
-            request.enderecoId = rs.getLong("ENDERECO_ID");
-            request.status = rs.getString("STATUS");
-            request.createdAt = rs.getString("CREATED_AT");
-            return request;
+            return new StudentRegistrationRequest(
+                rs.getLong("ID"),
+                rs.getString("NOME"),
+                rs.getString("EMAIL"),
+                rs.getString("CPF"),
+                rs.getString("SENHA"),
+                rs.getString("TELEFONE"),
+                rs.getLong("ENDERECO_ID"),
+                rs.getString("STATUS"),
+                rs.getString("CREATED_AT")
+            );
         }
     }
 

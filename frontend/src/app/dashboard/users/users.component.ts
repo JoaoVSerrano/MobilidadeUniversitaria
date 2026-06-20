@@ -5,6 +5,7 @@ import { DashboardService } from '../services/dashboard.service';
 import { User } from '../models/dashboard.model';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 interface StudentRequest {
   id: number;
@@ -29,7 +30,7 @@ export class UsersComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:8080/api';
+  private baseUrl = environment.apiUrl;
 
   users: User[] = [];
   filtered: User[] = [];
@@ -53,8 +54,6 @@ export class UsersComponent implements OnInit {
   showViewModal = signal(false);
   selectedUser = signal<User | null>(null);
 
-  private readonly STORAGE_KEY = 'dashboard_users_form';
-
   // Form data
   formData: { name: string; email: string; cpf: string; phone: string; type: string } = {
     name: '',
@@ -67,24 +66,6 @@ export class UsersComponent implements OnInit {
   isLoading = signal(false);
   errorMessage = signal('');
   private hasLoadedOnce = false;
-
-  private saveFormToStorage() {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.formData));
-  }
-
-  private loadFormFromStorage() {
-    const saved = localStorage.getItem(this.STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        this.formData = { ...this.formData, ...parsed };
-      } catch { /* ignore */ }
-    }
-  }
-
-  private clearStorage() {
-    localStorage.removeItem(this.STORAGE_KEY);
-  }
 
   ngOnInit() {
     console.log('UsersComponent ngOnInit called');
@@ -129,20 +110,23 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.loadStudentRequests();
         this.loadUsers();
+        const req = this.studentRequests().find(r => r.id === requestId);
+        alert(`Aluno ${req?.nome || ''} aprovado com sucesso!`);
       },
       error: (err) => {
-        console.error('Erro ao aprovar solicitação:', err);
+        alert('Erro ao aprovar: ' + (err.error?.message || err.message));
       }
     });
   }
 
   rejectStudentRequest(requestId: number) {
+    if (!confirm('Confirma a rejeição desta solicitação?')) return;
     this.http.post(`${this.baseUrl}/auth/student-requests/${requestId}/reject`, {}).subscribe({
       next: () => {
         this.loadStudentRequests();
       },
       error: (err) => {
-        console.error('Erro ao rejeitar solicitação:', err);
+        alert('Erro ao rejeitar: ' + (err.error?.message || err.message));
       }
     });
   }
@@ -217,7 +201,8 @@ export class UsersComponent implements OnInit {
 
   // Create user
   openCreateModal() {
-    this.loadFormFromStorage();
+    this.formData = { name: '', email: '', cpf: '', phone: '', type: 'aluno' };
+    this.errorMessage.set('');
     this.showCreateModal.set(true);
   }
 
@@ -225,19 +210,16 @@ export class UsersComponent implements OnInit {
     this.showCreateModal.set(false);
   }
 
-  onFormChange() {
-    this.saveFormToStorage();
-  }
-
   createUser() {
     console.log('=== createUser START ===');
     console.log('formData:', JSON.stringify(this.formData));
 
-    if (!this.formData.name || !this.formData.email || !this.formData.cpf) {
+    if (!this.formData.name || !this.formData.email || !this.formData.cpf || !this.formData.phone) {
       console.log('Validation failed - missing fields:', {
         name: !!this.formData.name,
         email: !!this.formData.email,
-        cpf: !!this.formData.cpf
+        cpf: !!this.formData.cpf,
+        phone: !!this.formData.phone
       });
       this.errorMessage.set('Por favor, preencha todos os campos obrigatórios');
       return;
@@ -260,7 +242,6 @@ export class UsersComponent implements OnInit {
       next: (response) => {
         console.log('=== createUser SUCCESS ===');
         console.log('Response:', response);
-        this.clearStorage();
         this.closeCreateModal();
         this.loadUsers();
         this.isLoading.set(false);
@@ -268,7 +249,7 @@ export class UsersComponent implements OnInit {
       error: (err) => {
         console.log('=== createUser ERROR ===');
         console.error('Error details:', err);
-        this.errorMessage.set('Erro ao criar usuário: ' + (err.message || 'Erro desconhecido'));
+        this.errorMessage.set(err.error?.message || err.message || 'Erro ao criar usuário');
         this.isLoading.set(false);
       }
     });

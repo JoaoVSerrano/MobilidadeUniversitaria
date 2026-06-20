@@ -51,26 +51,68 @@ export class AppAlunoReservaComponent implements OnInit {
     }
 
     this.isLoading.set(true);
-    this.http.post(`${this.baseUrl}/student/trips/confirm`, {
-      rotaId: Number(this.rotaSelecionada),
-      data: this.dataSelecionada
-    }).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        this.mensagem.set('Reserva confirmada com sucesso!');
-        this.mensagemTipo.set('success');
-        this.dataSelecionada = '';
-        this.rotaSelecionada = '';
-        setTimeout(() => this.mensagem.set(''), 4000);
+
+    // 1. Buscar viagens disponíveis para a rota selecionada na data
+    this.http.get<any[]>(`${this.baseUrl}/viagens`).subscribe({
+      next: (viagens) => {
+        const rotaId = Number(this.rotaSelecionada);
+        const dataAlvo = this.dataSelecionada; // YYYY-MM-DD
+
+        // Encontrar viagem da rota na data selecionada com status AGENDADA
+        const viagem = viagens.find(v => {
+          const viagemData = v.dataHoraPartida
+            ? new Date(v.dataHoraPartida).toISOString().split('T')[0]
+            : null;
+          return v.rota?.id === rotaId
+            && viagemData === dataAlvo
+            && v.status === 'AGENDADA';
+        });
+
+        if (!viagem) {
+          // Tentar o endpoint de confirmação direto como fallback
+          this.http.post(`${this.baseUrl}/student/trips/confirm`, {
+            rotaId,
+            data: this.dataSelecionada
+          }).subscribe({
+            next: () => {
+              this.isLoading.set(false);
+              this.mensagem.set('Reserva confirmada com sucesso!');
+              this.mensagemTipo.set('success');
+              this.dataSelecionada = '';
+              this.rotaSelecionada = '';
+              setTimeout(() => this.mensagem.set(''), 4000);
+            },
+            error: () => {
+              this.isLoading.set(false);
+              this.mensagem.set('Não há viagem disponível para essa rota e data. Tente outra data.');
+              this.mensagemTipo.set('error');
+            }
+          });
+          return;
+        }
+
+        // 2. Registrar presença via POST /api/presencas
+        // O aluno logado usa POST /api/student/trips/{viagemId}/reserve
+        this.http.post(`${this.baseUrl}/student/trips/${viagem.id}/reserve`, {}).subscribe({
+          next: () => {
+            this.isLoading.set(false);
+            this.mensagem.set(`Reserva confirmada para a viagem de ${viagem.rota?.nomeRota}!`);
+            this.mensagemTipo.set('success');
+            this.dataSelecionada = '';
+            this.rotaSelecionada = '';
+            setTimeout(() => this.mensagem.set(''), 4000);
+          },
+          error: (err: any) => {
+            this.isLoading.set(false);
+            this.mensagem.set(err.error?.message || 'Erro ao confirmar reserva.');
+            this.mensagemTipo.set('error');
+          }
+        });
       },
-      error: (err: any) => {
+      error: () => {
         this.isLoading.set(false);
-        // Fallback: confirmar localmente para demo
-        this.mensagem.set('Reserva registrada! (modo demonstração)');
-        this.mensagemTipo.set('success');
-        this.dataSelecionada = '';
-        this.rotaSelecionada = '';
-        setTimeout(() => this.mensagem.set(''), 4000);
+        this.mensagem.set('Erro ao buscar viagens disponíveis.');
+        this.mensagemTipo.set('error');
       }
     });
   }

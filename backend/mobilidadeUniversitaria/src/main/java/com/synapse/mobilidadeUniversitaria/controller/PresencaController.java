@@ -51,4 +51,10 @@ public class PresencaController {
         presencaService.deletar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/confirmar")
+    @PreAuthorize("hasRole('GESTOR') or @authorizationService.canAccessPresenca(#id)")
+    public ResponseEntity<PresencaDigitalResponseDTO> confirmarPresenca(@PathVariable Long id) {
+        return ResponseEntity.ok(presencaService.confirmarPresencaById(id));
+    }
 }
