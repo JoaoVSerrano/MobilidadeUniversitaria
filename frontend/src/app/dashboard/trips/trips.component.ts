@@ -70,7 +70,7 @@ export class TripsComponent implements OnInit {
         this.trips = data;
         this.scheduledToday = data.filter(t => t.status === 'agendada').length;
         this.totalPassengers = data.reduce((acc, t) => acc + t.studentsCount, 0);
-        this.completed = data.filter(t => t.status === 'concluida').length;
+        this.completed = data.filter(t => t.status === 'completed').length;
         this.cdr.detectChanges();
       },
       error: (err) => {

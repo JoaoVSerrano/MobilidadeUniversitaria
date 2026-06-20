@@ -43,30 +43,13 @@ export class VehiclesComponent implements OnInit {
   maintenanceVehicles = 0;
   totalCapacity = 0;
 
-  
-  private readonly STORAGE_KEY = 'dashboard_vehicles_form';
-
-  private saveFormToStorage() {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.formData));
-  }
-  private loadFormFromStorage() {
-    const saved = localStorage.getItem(this.STORAGE_KEY);
-    if (saved) { try { const p = JSON.parse(saved); this.formData = { ...this.formData, ...p }; } catch {} }
-  }
-  private clearStorage() { localStorage.removeItem(this.STORAGE_KEY); }
-
-  onFormChange() { this.saveFormToStorage(); }
-
   ngOnInit() {
-    console.log('VehiclesComponent ngOnInit called');
     this.loadVehicles();
 
     // Listen to route changes to reload data when tab is opened
     this.router.events.subscribe((event) => {
       if (event.constructor.name === 'NavigationEnd') {
-        // Check if the current route is the vehicles route
         if (this.router.url === '/dashboard/veiculos') {
-          console.log('Vehicles route activated, reloading data');
           this.loadVehicles();
         }
       }
@@ -74,10 +57,8 @@ export class VehiclesComponent implements OnInit {
   }
 
   loadVehicles() {
-    console.log('Loading vehicles...');
     this.svc.getVehicles().subscribe({
       next: (data) => {
-        console.log('Vehicles loaded successfully:', data);
         this.vehicles = data;
         this.filtered = data;
         this.totalVehicles = data.length;
@@ -126,7 +107,7 @@ export class VehiclesComponent implements OnInit {
 
   // Create Modal
   openCreateModal() {
-    this.loadFormFromStorage();
+    this.formData = { code: '', plate: '', model: '', year: '', status: 'ativo', capacity: 0 };
     this.showCreateModal.set(true);
   }
 
@@ -135,12 +116,9 @@ export class VehiclesComponent implements OnInit {
   }
 
   createVehicle() {
-    console.log('createVehicle called with formData:', this.formData);
-    this.clearStorage();
     const data: Partial<Vehicle> = { code: this.formData.code, plate: this.formData.plate, model: this.formData.model, year: Number(this.formData.year), status: this.formData.status as Vehicle['status'], capacity: this.formData.capacity };
     this.svc.createVehicle(data).subscribe({
-      next: (response) => {
-        console.log('Vehicle created successfully:', response);
+      next: () => {
         this.closeCreateModal();
         this.loadVehicles();
       },
@@ -168,13 +146,11 @@ export class VehiclesComponent implements OnInit {
   }
 
   updateVehicle() {
-    console.log('updateVehicle called with formData:', this.formData);
     const vehicle = this.selectedVehicle();
     if (vehicle) {
       const data: Partial<Vehicle> = { code: this.formData.code, plate: this.formData.plate, model: this.formData.model, year: Number(this.formData.year), status: this.formData.status as Vehicle['status'], capacity: this.formData.capacity };
       this.svc.updateVehicle(vehicle.id, data).subscribe({
-        next: (response) => {
-          console.log('Vehicle updated successfully:', response);
+        next: () => {
           this.closeEditModal();
           this.loadVehicles();
         },
@@ -195,12 +171,10 @@ export class VehiclesComponent implements OnInit {
   }
 
   confirmDelete() {
-    console.log('confirmDelete called');
     const vehicle = this.selectedVehicle();
     if (vehicle) {
       this.svc.deleteVehicle(vehicle.id).subscribe({
-        next: (response) => {
-          console.log('Vehicle deleted successfully:', response);
+        next: () => {
           this.closeDeleteModal();
           this.loadVehicles();
         },

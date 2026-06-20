@@ -34,27 +34,25 @@ export class UsersComponent implements OnInit {
 
   users: User[] = [];
   filtered: User[] = [];
-  search: string = '';
-  filterType: string = 'todos';
-  filterStatus: string = 'todos';
+  search = '';
+  filterType = 'todos';
+  filterStatus = 'todos';
 
   totalUsers = 0;
   totalAlunos = 0;
   totalMotoristas = 0;
   totalPendentes = 0;
 
-  // Student requests
   studentRequests = signal<StudentRequest[]>([]);
   isLoadingRequests = signal(false);
 
-  // Modal states
   showCreateModal = signal(false);
   showEditModal = signal(false);
   showDeleteModal = signal(false);
   showViewModal = signal(false);
   selectedUser = signal<User | null>(null);
+  selectedUserDetails: any = null;
 
-  // Form data
   formData: { name: string; email: string; cpf: string; phone: string; type: string } = {
     name: '',
     email: '',
@@ -65,19 +63,14 @@ export class UsersComponent implements OnInit {
 
   isLoading = signal(false);
   errorMessage = signal('');
-  private hasLoadedOnce = false;
 
   ngOnInit() {
-    console.log('UsersComponent ngOnInit called');
     this.loadUsers();
     this.loadStudentRequests();
 
-    // Listen to route changes to reload data when tab is opened
     this.router.events.subscribe((event) => {
       if (event.constructor.name === 'NavigationEnd') {
-        // Check if the current route is the users route
         if (this.router.url === '/dashboard/usuarios') {
-          console.log('Users route activated, reloading data');
           this.loadUsers();
           this.loadStudentRequests();
         }
@@ -87,19 +80,16 @@ export class UsersComponent implements OnInit {
 
   loadStudentRequests() {
     this.isLoadingRequests.set(true);
-    // TODO: substituir por endpoint backend real para listar solicitações
+    this.errorMessage.set('');
+
     this.http.get<StudentRequest[]>(`${this.baseUrl}/auth/student-requests`).subscribe({
       next: (data) => {
         this.studentRequests.set(data);
         this.isLoadingRequests.set(false);
       },
-      error: () => {
-        // Mock data se o endpoint não existir ainda
-        const mockRequests: StudentRequest[] = [
-          { id: 1, nome: 'João Silva', email: 'joao@email.com', cpf: '12345678901', telefone: '(11) 98765-4321', status: 'PENDING', createdAt: '2024-01-15' },
-          { id: 2, nome: 'Maria Santos', email: 'maria@email.com', cpf: '98765432109', telefone: '(11) 91234-5678', status: 'PENDING', createdAt: '2024-01-16' }
-        ];
-        this.studentRequests.set(mockRequests);
+      error: (err) => {
+        this.studentRequests.set([]);
+        this.errorMessage.set(err.error?.message || err.message || 'Erro ao carregar solicitações pendentes');
         this.isLoadingRequests.set(false);
       }
     });
@@ -132,12 +122,10 @@ export class UsersComponent implements OnInit {
   }
 
   loadUsers() {
-    console.log('Loading users...');
     this.isLoading.set(true);
     this.errorMessage.set('');
     this.svc.getUsers().subscribe({
       next: (data) => {
-        console.log('Users loaded successfully:', data);
         this.users = data;
         this.filtered = data;
         this.totalUsers = data.length;
@@ -148,7 +136,6 @@ export class UsersComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error loading users:', err);
         this.errorMessage.set('Erro ao carregar usuários: ' + (err.message || 'Erro desconhecido'));
         this.isLoading.set(false);
         this.cdr.detectChanges();
@@ -161,7 +148,6 @@ export class UsersComponent implements OnInit {
     return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase();
   }
 
-  // View user
   openViewModal(user: User) {
     this.selectedUser.set(user);
     this.showViewModal.set(true);
@@ -199,7 +185,6 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  // Create user
   openCreateModal() {
     this.formData = { name: '', email: '', cpf: '', phone: '', type: 'aluno' };
     this.errorMessage.set('');
@@ -211,21 +196,11 @@ export class UsersComponent implements OnInit {
   }
 
   createUser() {
-    console.log('=== createUser START ===');
-    console.log('formData:', JSON.stringify(this.formData));
-
     if (!this.formData.name || !this.formData.email || !this.formData.cpf || !this.formData.phone) {
-      console.log('Validation failed - missing fields:', {
-        name: !!this.formData.name,
-        email: !!this.formData.email,
-        cpf: !!this.formData.cpf,
-        phone: !!this.formData.phone
-      });
       this.errorMessage.set('Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
-    console.log('Validation passed, calling API...');
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -236,74 +211,95 @@ export class UsersComponent implements OnInit {
       phone: this.formData.phone,
       type: this.formData.type as any
     };
-    console.log('API payload:', JSON.stringify(payload));
 
     this.svc.createUser(payload).subscribe({
-      next: (response) => {
-        console.log('=== createUser SUCCESS ===');
-        console.log('Response:', response);
+      next: () => {
         this.closeCreateModal();
         this.loadUsers();
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.log('=== createUser ERROR ===');
-        console.error('Error details:', err);
         this.errorMessage.set(err.error?.message || err.message || 'Erro ao criar usuário');
         this.isLoading.set(false);
       }
     });
   }
 
-  // Edit user
   openEditModal(user: User) {
     this.selectedUser.set(user);
-    this.formData = {
-      name: user.name,
-      email: user.email,
-      cpf: user.cpf,
-      phone: user.phone,
-      type: user.type
-    };
-    this.showEditModal.set(true);
+    this.errorMessage.set('');
+
+    const endpoint = this.getUserEndpoint(user.type);
+    this.http.get<any>(`${this.baseUrl}/${endpoint}/${user.id}`).subscribe({
+      next: (details) => {
+        this.selectedUserDetails = details;
+        this.formData = {
+          name: details.nome ?? user.name,
+          email: details.email ?? user.email,
+          cpf: details.cpf ?? user.cpf,
+          phone: details.telefone ?? user.phone,
+          type: user.type
+        };
+        this.showEditModal.set(true);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.error?.message || err.message || 'Erro ao carregar detalhes do usuário');
+      }
+    });
   }
 
   closeEditModal() {
     this.showEditModal.set(false);
     this.selectedUser.set(null);
+    this.selectedUserDetails = null;
   }
 
   updateUser() {
-    console.log('updateUser called with formData:', this.formData);
     const user = this.selectedUser();
     if (!user) {
-      console.log('No user selected for update');
+      return;
+    }
+
+    if (!this.selectedUserDetails && user.type !== 'admin') {
+      this.errorMessage.set('Não foi possível carregar os dados completos para atualização');
       return;
     }
 
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    this.svc.updateUser(user.id, {
-      name: this.formData.name,
+    const endpoint = this.getUserEndpoint(user.type);
+    const body: any = {
+      nome: this.formData.name,
       email: this.formData.email,
-      phone: this.formData.phone
-    }).subscribe({
-      next: (response) => {
-        console.log('User updated successfully:', response);
+      cpf: this.formData.cpf,
+      telefone: this.formData.phone,
+      enderecoId: this.selectedUserDetails?.endereco?.id ?? this.selectedUserDetails?.enderecoId
+    };
+
+    if (user.type === 'aluno') {
+      body.faculdadeId = this.selectedUserDetails?.faculdade?.id;
+      body.statusMatricula = this.selectedUserDetails?.statusMatricula;
+    }
+
+    if (user.type === 'motorista') {
+      body.cnhNumero = this.selectedUserDetails?.cnhNumero;
+      body.vencimentoCnh = this.formatDateForBackend(this.selectedUserDetails?.vencimentoCnh);
+    }
+
+    this.http.put(`${this.baseUrl}/${endpoint}/${user.id}`, body).subscribe({
+      next: () => {
         this.closeEditModal();
         this.loadUsers();
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Error updating user:', err);
-        this.errorMessage.set('Erro ao atualizar usuário: ' + (err.message || 'Erro desconhecido'));
+        this.errorMessage.set(err.error?.message || err.message || 'Erro ao atualizar usuário');
         this.isLoading.set(false);
       }
     });
   }
 
-  // Delete user
   openDeleteModal(user: User) {
     this.selectedUser.set(user);
     this.showDeleteModal.set(true);
@@ -315,10 +311,8 @@ export class UsersComponent implements OnInit {
   }
 
   confirmDelete() {
-    console.log('confirmDelete called');
     const user = this.selectedUser();
     if (!user) {
-      console.log('No user selected for delete');
       return;
     }
 
@@ -326,17 +320,46 @@ export class UsersComponent implements OnInit {
     this.errorMessage.set('');
 
     this.svc.deleteUser(user.id).subscribe({
-      next: (response) => {
-        console.log('User deleted successfully:', response);
+      next: () => {
         this.closeDeleteModal();
         this.loadUsers();
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Error deleting user:', err);
-        this.errorMessage.set('Erro ao excluir usuário: ' + (err.message || 'Erro desconhecido'));
+        this.errorMessage.set(err.message || 'Erro ao excluir usuário');
         this.isLoading.set(false);
       }
     });
+  }
+
+  private getUserEndpoint(type: string): string {
+    switch (type) {
+      case 'admin':
+        return 'gestores';
+      case 'motorista':
+        return 'motoristas';
+      default:
+        return 'alunos';
+    }
+  }
+
+  private formatDateForBackend(value: string | null | undefined): string | null {
+    if (!value) {
+      return null;
+    }
+
+    if (value.includes('/')) {
+      return value;
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 }

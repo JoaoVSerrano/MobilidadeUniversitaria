@@ -29,7 +29,6 @@ export class AppAlunoReservaComponent implements OnInit {
   mensagem = signal('');
   mensagemTipo = signal<'success' | 'error' | ''>('');
 
-  // Data mínima = hoje
   hoje = new Date().toISOString().split('T')[0];
 
   ngOnInit() {
@@ -51,14 +50,14 @@ export class AppAlunoReservaComponent implements OnInit {
     }
 
     this.isLoading.set(true);
+    this.mensagem.set('');
+    this.mensagemTipo.set('');
 
-    // 1. Buscar viagens disponíveis para a rota selecionada na data
     this.http.get<any[]>(`${this.baseUrl}/viagens`).subscribe({
       next: (viagens) => {
         const rotaId = Number(this.rotaSelecionada);
-        const dataAlvo = this.dataSelecionada; // YYYY-MM-DD
+        const dataAlvo = this.dataSelecionada;
 
-        // Encontrar viagem da rota na data selecionada com status AGENDADA
         const viagem = viagens.find(v => {
           const viagemData = v.dataHoraPartida
             ? new Date(v.dataHoraPartida).toISOString().split('T')[0]
@@ -69,30 +68,12 @@ export class AppAlunoReservaComponent implements OnInit {
         });
 
         if (!viagem) {
-          // Tentar o endpoint de confirmação direto como fallback
-          this.http.post(`${this.baseUrl}/student/trips/confirm`, {
-            rotaId,
-            data: this.dataSelecionada
-          }).subscribe({
-            next: () => {
-              this.isLoading.set(false);
-              this.mensagem.set('Reserva confirmada com sucesso!');
-              this.mensagemTipo.set('success');
-              this.dataSelecionada = '';
-              this.rotaSelecionada = '';
-              setTimeout(() => this.mensagem.set(''), 4000);
-            },
-            error: () => {
-              this.isLoading.set(false);
-              this.mensagem.set('Não há viagem disponível para essa rota e data. Tente outra data.');
-              this.mensagemTipo.set('error');
-            }
-          });
+          this.isLoading.set(false);
+          this.mensagem.set('Não há viagem disponível para essa rota e data. Tente outra data.');
+          this.mensagemTipo.set('error');
           return;
         }
 
-        // 2. Registrar presença via POST /api/presencas
-        // O aluno logado usa POST /api/student/trips/{viagemId}/reserve
         this.http.post(`${this.baseUrl}/student/trips/${viagem.id}/reserve`, {}).subscribe({
           next: () => {
             this.isLoading.set(false);
@@ -117,13 +98,11 @@ export class AppAlunoReservaComponent implements OnInit {
     });
   }
 
-  // Simula ocupação baseada no id da rota para demonstração visual
   getOcupacao(rota: RotaDisponivel): number {
     const seed = rota.id * 37 % 100;
     return Math.min(seed + 40, 100);
   }
 
-  // Simula horário baseado no índice da rota
   getHorario(rota: RotaDisponivel): string {
     const horas = ['07:30', '08:00', '08:30', '09:00', '09:30', '10:00'];
     return horas[rota.id % horas.length];

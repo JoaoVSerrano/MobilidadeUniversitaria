@@ -23,7 +23,30 @@
   <nav class="bottom-nav">
     @for (item of navItems; track item.id) {
       <button class="nav-item" [class.active]="currentScreen === item.id" (click)="setScreen(item.id)">
-        <span class="nav-icon" [innerHTML]="getIconSvg(item.icon)"></span>
+        <span class="nav-icon">
+          @switch (item.icon) {
+            @case ('home') {
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              </svg>
+            }
+            @case ('route') {
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+              </svg>
+            }
+            @case ('qr') {
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v2h2v2h-2v2h2v-2h2v2h2v-2h-2v-2h2v-2h-2v-2h-2v2zm0 4v2h-2v-2h2zm4 4v2h-2v-2h2z"/>
+              </svg>
+            }
+            @case ('profile') {
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            }
+          }
+        </span>
         <span class="nav-label">{{ item.label }}</span>
       </button>
     }

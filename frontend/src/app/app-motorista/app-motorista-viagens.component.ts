@@ -25,8 +25,7 @@ export class AppMotoristaViagensComponent implements OnInit {
   viagens = signal<any[]>([]);
   isLoading = signal(true);
   erro = signal('');
-  
-  // Para mostrar lista de alunos de uma viagem
+
   selectedViagem = signal<any | null>(null);
   presencas = signal<Presenca[]>([]);
   showStudentsList = signal(false);
@@ -62,10 +61,11 @@ export class AppMotoristaViagensComponent implements OnInit {
   }
 
   verAlunos(viagem: any) {
+    this.erro.set('');
     this.selectedViagem.set(viagem);
     this.showStudentsList.set(true);
     this.isLoadingPresencas.set(true);
-    
+
     this.http.get<Presenca[]>(`${this.baseUrl}/driver/trips/${viagem.id}/students`).subscribe({
       next: (data) => {
         this.presencas.set(data);
@@ -85,8 +85,9 @@ export class AppMotoristaViagensComponent implements OnInit {
   }
 
   confirmarPresenca(presencaId: number) {
+    this.erro.set('');
     this.http.post<any>(`${this.baseUrl}/presencas/${presencaId}/confirmar`, {}).subscribe({
-      next: (updatedPresenca) => {
+      next: () => {
         this.presencas.update(ps => ps.map(p =>
           p.id === presencaId
             ? { ...p, confirmada: true, status: 'CONFIRMADA' }
@@ -94,12 +95,7 @@ export class AppMotoristaViagensComponent implements OnInit {
         ));
       },
       error: (err: any) => {
-        // Fallback: marcar localmente se o endpoint ainda não existir
-        this.presencas.update(ps => ps.map(p =>
-          p.id === presencaId
-            ? { ...p, confirmada: true, status: 'CONFIRMADA' }
-            : p
-        ));
+        this.erro.set(err.error?.message || 'Erro ao confirmar presença.');
       }
     });
   }

@@ -1,15 +1,27 @@
 package com.synapse.mobilidadeUniversitaria.service;
 
+import com.synapse.mobilidadeUniversitaria.Entities.Aluno;
+import com.synapse.mobilidadeUniversitaria.Entities.Endereco;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.LocalType;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.StatusMatricula;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import com.synapse.mobilidadeUniversitaria.dtos.request.StudentRegistrationRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioResponseDTO;
+import com.synapse.mobilidadeUniversitaria.exceptions.ResourceAlreadyExistsException;
+import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
+import com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.EnderecoRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -18,198 +30,160 @@ public class StudentRegistrationService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PasswordEncoder passwordEncoder;
+    private final UsuarioRepository usuarioRepository;
+    private final EnderecoRepository enderecoRepository;
+    private final AlunoRepository alunoRepository;
 
+    @Transactional
     public void createStudentRequest(StudentRegistrationRequestDTO dto) {
-        // Verifica se a tabela STUDENT_REGISTRATION_REQUEST existe
-        try {
-            jdbcTemplate.queryForObject("SELECT COUNT(*) FROM STUDENT_REGISTRATION_REQUEST", Integer.class);
-        } catch (Exception e) {
-            // Tenta criar a tabela se não existir
-            try {
-                jdbcTemplate.update(
-                    "CREATE TABLE STUDENT_REGISTRATION_REQUEST (" +
-                    "ID BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                    "NOME VARCHAR(255) NOT NULL, " +
-                    "EMAIL VARCHAR(255) NOT NULL UNIQUE, " +
-                    "CPF VARCHAR(11) NOT NULL UNIQUE, " +
-                    "SENHA VARCHAR(255) NOT NULL, " +
-                    "TELEFONE VARCHAR(20) NOT NULL, " +
-                    "ENDERECO_ID BIGINT NOT NULL, " +
-                    "STATUS VARCHAR(20) NOT NULL DEFAULT 'PENDING', " +
-                    "CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                    "UPDATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, " +
-                    "FOREIGN KEY (ENDERECO_ID) REFERENCES ENDERECO(ID))"
-                );
-            } catch (Exception ex) {
-                throw new RuntimeException("Erro ao criar tabela STUDENT_REGISTRATION_REQUEST: " + ex.getMessage());
-            }
+        if (usuarioRepository.existsByEmail(dto.email())) {
+            throw new ResourceAlreadyExistsException("Email ja cadastrado: " + dto.email());
+        }
+        if (usuarioRepository.existsByCpf(dto.cpf())) {
+            throw new ResourceAlreadyExistsException("CPF ja cadastrado: " + dto.cpf());
+        }
+        if (existsPendingRequest(dto.email(), dto.cpf())) {
+            throw new ResourceAlreadyExistsException("Ja existe uma solicitacao pendente para este email ou CPF");
         }
 
-        // Verifica se email ou CPF já existem
-        Integer countEmail = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM USUARIO WHERE EMAIL = ?", Integer.class, dto.email());
-        if (countEmail != null && countEmail > 0) {
-            throw new RuntimeException("Email ja cadastrado");
-        }
+        Endereco endereco = new Endereco();
+        endereco.setCep(defaultString(dto.cep(), "00000-000"));
+        endereco.setRua(defaultString(dto.rua(), "Nao informada"));
+        endereco.setBairro(defaultString(dto.bairro(), "Nao informado"));
+        endereco.setNumero(defaultString(dto.numero(), "0"));
+        endereco.setComplemento(dto.complemento());
+        endereco.setTipoLocal(parseLocalType(dto.tipoLocal()));
 
-        Integer countCpf = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM USUARIO WHERE CPF = ?", Integer.class, dto.cpf());
-        if (countCpf != null && countCpf > 0) {
-            throw new RuntimeException("CPF ja cadastrado");
-        }
+        Endereco savedEndereco = enderecoRepository.save(endereco);
 
-        // Verifica se já existe solicitação pendente
-        Integer countRequest = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM STUDENT_REGISTRATION_REQUEST WHERE EMAIL = ? AND STATUS = 'PENDING'",
-            Integer.class, dto.email());
-        if (countRequest != null && countRequest > 0) {
-            throw new RuntimeException("Ja existe uma solicitacao pendente para este email");
-        }
-
-        // Busca ou cria endereço
-        Long enderecoId;
-        try {
-            // Tenta usar endereço existente com ID 1
-            Integer enderecoCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM ENDERECO WHERE ID = ?", Integer.class, 1L);
-            if (enderecoCount != null && enderecoCount > 0) {
-                enderecoId = 1L;
-            } else {
-                // Cria novo endereço
-                jdbcTemplate.update(
-                    "INSERT INTO ENDERECO (CEP, RUA, BAIRRO, NUMERO, TIPO_LOCAL) VALUES (?, ?, ?, ?, ?)",
-                    dto.cep() != null ? dto.cep() : "00000-000",
-                    dto.rua() != null ? dto.rua() : "Nao informada",
-                    dto.bairro() != null ? dto.bairro() : "Nao informado",
-                    dto.numero() != null ? dto.numero() : "0",
-                    dto.tipoLocal() != null ? dto.tipoLocal() : "RESIDENCIAL"
-                );
-                // Busca o ID do endereço criado
-                enderecoId = jdbcTemplate.queryForObject("SELECT MAX(ID) FROM ENDERECO", Long.class);
-                if (enderecoId == null) enderecoId = 1L;
-            }
-        } catch (Exception e) {
-            // Se falhar, cria novo endereço
-            jdbcTemplate.update(
-                "INSERT INTO ENDERECO (CEP, RUA, BAIRRO, NUMERO, TIPO_LOCAL) VALUES (?, ?, ?, ?, ?)",
-                dto.cep() != null ? dto.cep() : "00000-000",
-                dto.rua() != null ? dto.rua() : "Nao informada",
-                dto.bairro() != null ? dto.bairro() : "Nao informado",
-                dto.numero() != null ? dto.numero() : "0",
-                dto.tipoLocal() != null ? dto.tipoLocal() : "RESIDENCIAL"
-            );
-            enderecoId = jdbcTemplate.queryForObject("SELECT MAX(ID) FROM ENDERECO", Long.class);
-            if (enderecoId == null) enderecoId = 1L;
-        }
-
-        // Insere solicitação de cadastro
         jdbcTemplate.update(
-            "INSERT INTO STUDENT_REGISTRATION_REQUEST (NOME, EMAIL, CPF, SENHA, TELEFONE, ENDERECO_ID, STATUS, CREATED_AT) VALUES (?, ?, ?, ?, ?, ?, 'PENDING', CURRENT_TIMESTAMP)",
-            dto.nome(), dto.email(), dto.cpf(), dto.senha(), dto.telefone(), enderecoId
+                "INSERT INTO STUDENT_REGISTRATION_REQUEST " +
+                        "(NOME, EMAIL, CPF, SENHA, TELEFONE, ENDERECO_ID, STATUS, CREATED_AT, UPDATED_AT) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, 'PENDING', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                dto.nome(),
+                dto.email(),
+                dto.cpf(),
+                dto.senha(),
+                dto.telefone(),
+                savedEndereco.getId()
         );
     }
 
     public List<StudentRegistrationRequest> listPendingRequests() {
         return jdbcTemplate.query(
-            "SELECT * FROM STUDENT_REGISTRATION_REQUEST WHERE STATUS = 'PENDING' ORDER BY CREATED_AT DESC",
-            new StudentRegistrationRequestRowMapper()
+                "SELECT * FROM STUDENT_REGISTRATION_REQUEST WHERE STATUS = 'PENDING' ORDER BY CREATED_AT DESC",
+                new StudentRegistrationRequestRowMapper()
         );
     }
 
+    @Transactional
     public UsuarioResponseDTO approveStudentRequest(Long requestId) {
-        // Busca a solicitação
-        StudentRegistrationRequest request = jdbcTemplate.queryForObject(
-            "SELECT * FROM STUDENT_REGISTRATION_REQUEST WHERE ID = ? AND STATUS = 'PENDING'",
-            new StudentRegistrationRequestRowMapper(), requestId);
+        StudentRegistrationRequest request = jdbcTemplate.query(
+                        "SELECT * FROM STUDENT_REGISTRATION_REQUEST WHERE ID = ? AND STATUS = 'PENDING'",
+                        new StudentRegistrationRequestRowMapper(),
+                        requestId
+                )
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Solicitacao nao encontrada ou ja processada: " + requestId
+                ));
 
-        if (request == null) {
-            throw new RuntimeException("Solicitacao nao encontrada ou ja processada");
-        }
+        Endereco endereco = enderecoRepository.findById(request.enderecoId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Endereco nao encontrado com id: " + request.enderecoId()
+                ));
 
-        // Cria o usuário
-        String senhaHash = passwordEncoder.encode(request.senha());
-        
-        // Busca próximo ID disponível
-        Long nextId = jdbcTemplate.queryForObject("SELECT MAX(ID) FROM USUARIO", Long.class);
-        if (nextId == null) nextId = 0L;
-        nextId = nextId + 1;
+        Aluno aluno = new Aluno();
+        aluno.setNome(request.nome());
+        aluno.setEmail(request.email());
+        aluno.setCpf(request.cpf());
+        aluno.setSenha(passwordEncoder.encode(request.senha()));
+        aluno.setTelefone(request.telefone());
+        aluno.setUserType(UserType.ALUNO);
+        aluno.setEndereco(endereco);
+        aluno.setStatusMatricula(StatusMatricula.ATIVA);
+
+        Aluno salvo = alunoRepository.save(aluno);
 
         jdbcTemplate.update(
-            "INSERT INTO USUARIO (ID, NOME, EMAIL, SENHA, CPF, TELEFONE, USER_TYPE, ENDERECO_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            nextId, request.nome(), request.email(), senhaHash, request.cpf(), request.telefone(), "ALUNO", request.enderecoId()
+                "UPDATE STUDENT_REGISTRATION_REQUEST SET STATUS = 'APPROVED', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID = ?",
+                requestId
         );
 
-        jdbcTemplate.update(
-            "INSERT INTO ALUNO (ID, STATUS_MATRICULA, FOTO_PERFIL, FACULDADE_ID) VALUES (?, ?, ?, ?)",
-            nextId, "ATIVA", null, null
-        );
-
-        // Atualiza status da solicitação
-        jdbcTemplate.update(
-            "UPDATE STUDENT_REGISTRATION_REQUEST SET STATUS = 'APPROVED', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID = ?",
-            requestId
-        );
-
-        // Busca o usuário criado
-        UsuarioResponseDTO usuario = jdbcTemplate.queryForObject(
-            "SELECT ID, NOME, EMAIL, CPF, TELEFONE, USER_TYPE FROM USUARIO WHERE EMAIL = ?",
-            new UsuarioRowMapper(),
-            request.email()
-        );
-
-        return usuario;
+        return toUsuarioResponse(salvo);
     }
 
+    @Transactional
     public void rejectStudentRequest(Long requestId) {
         Integer updated = jdbcTemplate.update(
-            "UPDATE STUDENT_REGISTRATION_REQUEST SET STATUS = 'REJECTED', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID = ? AND STATUS = 'PENDING'",
-            requestId
+                "UPDATE STUDENT_REGISTRATION_REQUEST SET STATUS = 'REJECTED', UPDATED_AT = CURRENT_TIMESTAMP WHERE ID = ? AND STATUS = 'PENDING'",
+                requestId
         );
         if (updated == 0) {
-            throw new RuntimeException("Solicitacao nao encontrada ou ja processada");
+            throw new ResourceNotFoundException("Solicitacao nao encontrada ou ja processada: " + requestId);
         }
+    }
+
+    private boolean existsPendingRequest(String email, String cpf) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM STUDENT_REGISTRATION_REQUEST WHERE STATUS = 'PENDING' AND (EMAIL = ? OR CPF = ?)",
+                Integer.class,
+                email,
+                cpf
+        );
+        return count != null && count > 0;
+    }
+
+    private String defaultString(String value, String defaultValue) {
+        return value == null || value.isBlank() ? defaultValue : value.trim();
+    }
+
+    private LocalType parseLocalType(String value) {
+        if (value == null || value.isBlank()) {
+            return LocalType.RESIDENCIAL;
+        }
+        return LocalType.valueOf(value.trim().toUpperCase());
+    }
+
+    private UsuarioResponseDTO toUsuarioResponse(Aluno aluno) {
+        UsuarioResponseDTO dto = new UsuarioResponseDTO();
+        dto.setId(aluno.getId());
+        dto.setNome(aluno.getNome());
+        dto.setEmail(aluno.getEmail());
+        dto.setCpf(aluno.getCpf());
+        dto.setTelefone(aluno.getTelefone());
+        dto.setTipoUsuario(UserType.ALUNO);
+        return dto;
     }
 
     private record StudentRegistrationRequest(
-        Long id,
-        String nome,
-        String email,
-        String cpf,
-        String senha,
-        String telefone,
-        Long enderecoId,
-        String status,
-        String createdAt
-    ) {}
+            Long id,
+            String nome,
+            String email,
+            String cpf,
+            String senha,
+            String telefone,
+            Long enderecoId,
+            String status,
+            LocalDateTime createdAt
+    ) {
+    }
 
     private static class StudentRegistrationRequestRowMapper implements RowMapper<StudentRegistrationRequest> {
         @Override
         public StudentRegistrationRequest mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new StudentRegistrationRequest(
-                rs.getLong("ID"),
-                rs.getString("NOME"),
-                rs.getString("EMAIL"),
-                rs.getString("CPF"),
-                rs.getString("SENHA"),
-                rs.getString("TELEFONE"),
-                rs.getLong("ENDERECO_ID"),
-                rs.getString("STATUS"),
-                rs.getString("CREATED_AT")
+                    rs.getLong("ID"),
+                    rs.getString("NOME"),
+                    rs.getString("EMAIL"),
+                    rs.getString("CPF"),
+                    rs.getString("SENHA"),
+                    rs.getString("TELEFONE"),
+                    rs.getLong("ENDERECO_ID"),
+                    rs.getString("STATUS"),
+                    rs.getTimestamp("CREATED_AT") != null ? rs.getTimestamp("CREATED_AT").toLocalDateTime() : null
             );
-        }
-    }
-
-    private static class UsuarioRowMapper implements RowMapper<UsuarioResponseDTO> {
-        @Override
-        public UsuarioResponseDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-            UsuarioResponseDTO dto = new UsuarioResponseDTO();
-            dto.setId(rs.getLong("ID"));
-            dto.setNome(rs.getString("NOME"));
-            dto.setEmail(rs.getString("EMAIL"));
-            dto.setCpf(rs.getString("CPF"));
-            dto.setTelefone(rs.getString("TELEFONE"));
-            dto.setTipoUsuario(com.synapse.mobilidadeUniversitaria.Entities.enums.UserType.valueOf(rs.getString("USER_TYPE")));
-            return dto;
         }
     }
 }
