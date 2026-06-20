@@ -25,30 +25,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Header com gradiente */
-.header-gradient {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  padding: 2rem 1.5rem;
-  border-radius: 20px;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.welcome-text {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #f8fafc;
-  margin: 0 0 0.5rem 0;
-}
-
-.subtitle {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-}
-
 /* Botão Principal */
 .btn-main {
   width: 100%;

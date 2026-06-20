@@ -36,14 +36,17 @@ public class DashboardController {
 
     @GetMapping("/kpis")
     public ResponseEntity<com.synapse.mobilidadeUniversitaria.DTOs.DashboardKpiResponseDTO> kpis() {
+        DashboardGestorResponseDTO base = dashboardService.dashboardGestor();
+        long viagensFinalizadas = dashboardService.contarViagensFinalizadasHoje();
+
         return ResponseEntity.ok(com.synapse.mobilidadeUniversitaria.DTOs.DashboardKpiResponseDTO.builder()
-                .totalAlunos(1284L)
-                .variacaoAlunos(12.0)
-                .taxaOcupacao(82)
-                .variacaoOcupacao(5.0)
-                .viagensHoje(48L)
-                .viagensFinalizadas(8L)
-                .economiaEstimada(84000.0)
+                .totalAlunos(base.totalAlunos())
+                .variacaoAlunos(0.0)
+                .taxaOcupacao((int) Math.round(base.taxaOcupacao()))
+                .variacaoOcupacao(0.0)
+                .viagensHoje(base.viagensHoje())
+                .viagensFinalizadas(viagensFinalizadas)
+                .economiaEstimada(0.0)
                 .build());
     }
 }

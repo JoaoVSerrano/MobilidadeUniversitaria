@@ -30,14 +30,20 @@ export class DashboardService {
     );
   }
 
-  public createUser(user: Partial<User>): Observable<User> {
+  public createUser(user: Partial<User> & { type?: string }): Observable<any> {
+    const tipoMap: Record<string, string> = {
+      'aluno': 'ALUNO',
+      'motorista': 'MOTORISTA',
+      'admin': 'GESTOR'
+    };
     return this.api.post('/usuarios', {
       nome: user.name,
       email: user.email,
       cpf: user.cpf,
       telefone: user.phone,
-      senha: 'password123'
-    }) as Observable<User>;
+      senha: 'password123',
+      tipoUsuario: tipoMap[user.type || 'aluno'] || 'ALUNO'
+    });
   }
 
   public updateUser(id: number, user: Partial<User>): Observable<User> {
@@ -149,11 +155,15 @@ export class DashboardService {
       map((data) => (data as any[]).map(t => ({
         id: t.id,
         route: t.rota?.nomeRota || 'Rota não definida',
-        date: t.dataHora,
-        time: t.horaSaida,
+        date: t.dataHoraPartida
+          ? new Date(t.dataHoraPartida).toLocaleDateString('pt-BR')
+          : '—',
+        time: t.dataHoraPartida
+          ? new Date(t.dataHoraPartida).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+          : '—',
         driver: t.motorista?.nome || 'A definir',
-        vehicle: t.veiculo?.placa || 'A definir',
-        studentsCount: t.qtdPresentes || 0,
+        vehicle: t.veiculo?.modelo || t.veiculo?.placa || 'A definir',
+        studentsCount: 0,
         status: this.mapTripStatus(t.status)
       })))
     );
@@ -177,7 +187,13 @@ export class DashboardService {
   }
 
   public getDrivers(): Observable<any[]> {
-    return this.api.get('/motoristas');
+    return this.api.get('/motoristas').pipe(
+      map((data) => (data as any[]).map(d => ({
+        id: d.id,
+        nome: d.nome,
+        email: d.email
+      })))
+    );
   }
 
   public getVehiclesList(): Observable<any[]> {

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -33,7 +34,7 @@ export class RegisterComponent {
   isLoading = signal<boolean>(false);
 
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:8080/api';
+  private baseUrl = environment.apiUrl;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -105,8 +106,18 @@ export class RegisterComponent {
 
     // Enviar solicitação de cadastro de aluno (não cria usuário diretamente)
     this.http.post(`${this.baseUrl}/auth/register/student-request`, {
-      ...this.formData,
-      tipoUsuario: 'ALUNO'
+      nome: this.formData.nome,
+      email: this.formData.email,
+      cpf: this.formData.cpf,
+      senha: this.formData.senha,
+      telefone: this.formData.telefone,
+      tipoUsuario: 'ALUNO',
+      cep: this.formData.endereco.cep,
+      rua: this.formData.endereco.rua,
+      bairro: this.formData.endereco.bairro,
+      numero: this.formData.endereco.numero,
+      complemento: this.formData.endereco.complemento,
+      tipoLocal: this.formData.endereco.tipoLocal
     }).subscribe({
       next: () => {
         this.successMessage.set('Solicitação enviada com sucesso! Aguarde aprovação do gestor.');

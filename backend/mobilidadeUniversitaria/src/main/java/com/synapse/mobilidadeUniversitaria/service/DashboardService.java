@@ -2,6 +2,7 @@ package com.synapse.mobilidadeUniversitaria.service;
 
 import com.synapse.mobilidadeUniversitaria.Entities.PresencaDigital;
 import com.synapse.mobilidadeUniversitaria.Entities.Viagem;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.ViagemStatus;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DashboardGestorResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DemandaPorDiaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.OcupacaoPorRotaResponseDTO;
@@ -105,5 +106,11 @@ public class DashboardService {
                 .map(Viagem::getId)
                 .mapToLong(viagemId -> presencaRepository.findByViagemId(viagemId).size())
                 .sum();
+    }
+
+    public long contarViagensFinalizadasHoje() {
+        return viagensHoje().stream()
+                .filter(v -> ViagemStatus.FINALIZADA.equals(v.getStatus()))
+                .count();
     }
 }
