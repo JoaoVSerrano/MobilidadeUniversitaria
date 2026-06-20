@@ -23,7 +23,7 @@ export class DashboardService {
         cpf: u.cpf,
         email: u.email,
         phone: u.telefone,
-        type: u.tipoUsuario?.toLowerCase() || 'aluno',
+        type: u.tipoUsuario === 'GESTOR' ? 'admin' : (u.tipoUsuario?.toLowerCase() || 'aluno'),
         status: 'Ativo' as const,
         createdAt: new Date().toLocaleDateString('pt-BR')
       })))

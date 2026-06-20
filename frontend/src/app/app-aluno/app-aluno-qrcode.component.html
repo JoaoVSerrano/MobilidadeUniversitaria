@@ -25,7 +25,7 @@
       <!-- QR Code -->
       <div class="qr-section">
         <div class="qr-container">
-          <div class="qr-code" [innerHTML]="qrSvg()"></div>
+          <img class="qr-code" [src]="qrDataUrl()" alt="QR Code da carteirinha" />
         </div>
         <div class="qr-status">
           <span class="status-indicator active"></span>

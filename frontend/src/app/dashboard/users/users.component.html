@@ -13,6 +13,10 @@
   </button>
 </div>
 
+@if (errorMessage()) {
+  <div class="error-message page-error">{{ errorMessage() }}</div>
+}
+
 <!-- Student Requests Section -->
 @if (studentRequests().length > 0) {
   <div class="student-requests-section">
