@@ -1,7 +1,10 @@
 package com.synapse.mobilidadeUniversitaria.service;
 
+import com.synapse.mobilidadeUniversitaria.Entities.Endereco;
 import com.synapse.mobilidadeUniversitaria.Entities.Usuario;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.LocalType;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
+import com.synapse.mobilidadeUniversitaria.dtos.request.CriarUsuarioRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioUpdateRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioStatsResponseDTO;
@@ -10,8 +13,11 @@ import com.synapse.mobilidadeUniversitaria.mapper.EnderecoMapper;
 import com.synapse.mobilidadeUniversitaria.repositories.EnderecoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.UsuarioRepository;
 import com.synapse.mobilidadeUniversitaria.security.AuthorizationService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +31,9 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final AuthorizationService authorizationService;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public UsuarioService(UsuarioRepository usuarioRepository,
                           EnderecoMapper enderecoMapper,
                           EnderecoRepository enderecoRepository,
@@ -37,6 +46,46 @@ public class UsuarioService {
         this.usuarioValidationService = usuarioValidationService;
         this.passwordEncoder = passwordEncoder;
         this.authorizationService = authorizationService;
+    }
+
+    @Transactional
+    public UsuarioResponseDTO criar(CriarUsuarioRequestDTO dto) {
+        // Busca ou cria endereço padrão
+        Endereco endereco = enderecoRepository.findById(1L)
+                .orElseGet(() -> {
+                    Endereco novo = new Endereco();
+                    novo.setCep("00000-000");
+                    novo.setRua("Não informada");
+                    novo.setBairro("Não informado");
+                    novo.setNumero("0");
+                    novo.setTipoLocal(LocalType.RESIDENCIAL);
+                    return enderecoRepository.save(novo);
+                });
+
+        // Parse user type
+        UserType userType;
+        try {
+            userType = UserType.valueOf(dto.getTipoUsuario().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            userType = UserType.ALUNO;
+        }
+
+        // Cria usuário
+        Usuario usuario = new Usuario();
+        // Não setar ID - deixar JPA gerar automaticamente
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        usuario.setCpf(dto.getCpf());
+        usuario.setTelefone(dto.getTelefone());
+        usuario.setUserType(userType);
+        usuario.setSenha(passwordEncoder.encode(dto.getSenha() != null ? dto.getSenha() : "password123"));
+        usuario.setEndereco(endereco);
+
+        // Usa persist para inserção direta
+        entityManager.persist(usuario);
+        entityManager.flush();
+
+        return toResponse(usuario);
     }
 
     public List<UsuarioResponseDTO> listarTodos() {

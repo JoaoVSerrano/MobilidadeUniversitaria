@@ -1,8 +1,8 @@
 <div class="register-page">
   <div class="register-card">
     <div class="header">
-      <h1>Criar Conta de Gestor</h1>
-      <p>Configure o primeiro usuário administrador do sistema</p>
+      <h1>Cadastro de Aluno</h1>
+      <p>Solicite sua conta para usar o sistema de transporte universitário</p>
     </div>
 
     <form (submit)="register($event)" class="register-form">
@@ -86,12 +86,16 @@
         </div>
       </div>
 
+      <div class="info-box">
+        <p>⚠️ Após o cadastro, sua solicitação será enviada ao gestor para aprovação. Você receberá um email quando sua conta for ativada.</p>
+      </div>
+
       <button type="submit" class="btn-primary" [disabled]="isLoading()">
         @if (isLoading()) {
           <span class="spinner"></span>
-          Criando conta...
+          Enviando solicitação...
         } @else {
-          Criar conta de gestor
+          Solicitar conta de aluno
         }
       </button>
 

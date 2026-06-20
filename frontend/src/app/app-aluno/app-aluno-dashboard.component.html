@@ -5,53 +5,66 @@
       <p>Carregando...</p>
     </div>
   } @else {
+    <!-- Header com gradiente -->
+    <div class="header-gradient">
+      <h1 class="welcome-text">Olá, {{ user()?.nome || 'Usuário' }}</h1>
+      <p class="subtitle">Bem-vindo ao Go Campus</p>
+    </div>
+
+    <!-- Botão Principal -->
+    <button class="btn-main" (click)="irParaReservas()">
+      Reservar Presença
+    </button>
+
+    <!-- Card Status da Matrícula -->
+    <div class="card status-card">
+      <div class="status-header">
+        <span class="status-label">Status da Matrícula</span>
+        <span class="status-indicator active"></span>
+      </div>
+      <span class="status-value">Aprovado</span>
+    </div>
+
+    <!-- Card Próxima Viagem -->
     @if (proximaViagem()) {
-      <div class="card next-trip">
-        <div class="next-trip-header">
-          <span class="label">Próxima Viagem</span>
-          <span class="badge" [class]="getStatusBadgeClass(proximaViagem()!.status)">
-            {{ proximaViagem()!.status }}
-          </span>
+      <div class="card trip-card">
+        <h3 class="card-title">Próxima Viagem</h3>
+        <div class="trip-route">
+          <span class="trip-origin">{{ proximaViagem()!.origem }}</span>
+          <svg class="trip-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+          <span class="trip-dest">{{ proximaViagem()!.destino }}</span>
         </div>
-        <div class="next-trip-content">
-          <h3>{{ proximaViagem()!.rota }}</h3>
-          <p>{{ proximaViagem()!.data }}</p>
+        <div class="trip-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>{{ proximaViagem()!.horario }}</span>
         </div>
+        <button class="btn-secondary">Ver Detalhes</button>
       </div>
     }
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-value">{{ estatisticas().total }}</span>
-        <span class="stat-label">Total</span>
+    <!-- Card Notificações Recentes -->
+    <div class="card notifications-card">
+      <div class="notifications-header">
+        <h3 class="card-title">Notificações Recentes</h3>
+        <button class="link-text" (click)="irParaNotificacoes()">Ver todas</button>
       </div>
-      <div class="stat-card success">
-        <span class="stat-value">{{ estatisticas().concluidas }}</span>
-        <span class="stat-label">Concluídas</span>
-      </div>
-      <div class="stat-card warning">
-        <span class="stat-value">{{ estatisticas().canceladas }}</span>
-        <span class="stat-label">Canceladas</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title">Histórico de Viagens</h3>
-      @if (historicoViagens().length === 0) {
+      @if (notificacoesRecentes().length === 0) {
         <div class="empty-state">
-          <p>Nenhuma viagem realizada ainda.</p>
+          <p>Nenhuma notificação recente.</p>
         </div>
       } @else {
-        <div class="trip-list">
-          @for (viagem of historicoViagens(); track viagem.id) {
-            <div class="trip-item">
-              <div class="trip-info">
-                <span class="trip-rota">{{ viagem.rota }}</span>
-                <span class="trip-data">{{ viagem.data }}</span>
+        <div class="notifications-list">
+          @for (notif of notificacoesRecentes().slice(0, 3); track notif.id) {
+            <div class="notification-item">
+              <div class="notification-content">
+                <span class="notification-text">{{ notif.mensagem }}</span>
+                <span class="notification-time">{{ notif.horario }}</span>
               </div>
-              <span class="badge" [class]="getStatusBadgeClass(viagem.status)">
-                {{ viagem.status }}
-              </span>
             </div>
           }
         </div>

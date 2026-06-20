@@ -1,33 +1,79 @@
 <div class="perfil-wrap">
+  <h2 class="page-title">Meu Perfil</h2>
+
   @if (isLoading()) {
-    <div class="loading"><div class="spinner"></div><p>Carregando perfil...</p></div>
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando perfil...</p>
+    </div>
   } @else if (user()) {
-    <div class="avatar-block">
-      <div class="avatar-circle">{{ user()!.nome.charAt(0).toUpperCase() }}</div>
-      <h2 class="perfil-nome">{{ user()!.nome }}</h2>
-      <span class="perfil-role">Aluno</span>
+    <!-- Avatar Section -->
+    <div class="avatar-section">
+      <div class="avatar-large">
+        <span class="avatar-initials">{{ getIniciais() }}</span>
+      </div>
+      <button class="change-photo-btn">Alterar foto</button>
     </div>
 
-    <div class="card">
-      <h3 class="card-title">Informações Pessoais</h3>
-      <div class="info-list">
-        <div class="info-row">
-          <span class="info-label">Nome</span>
-          <span class="info-value">{{ user()!.nome }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Email</span>
-          <span class="info-value">{{ user()!.email }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">CPF</span>
-          <span class="info-value">{{ user()!.cpf }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Telefone</span>
-          <span class="info-value">{{ user()!.telefone }}</span>
-        </div>
+    <!-- Form -->
+    <div class="profile-form">
+      <div class="form-group">
+        <label for="nome">Nome Completo</label>
+        <input
+          type="text"
+          id="nome"
+          [(ngModel)]="formData().nome"
+          (ngModelChange)="updateFormData('nome', $event)"
+          name="nome"
+          placeholder="Seu nome completo">
       </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="formData().email"
+          (ngModelChange)="updateFormData('email', $event)"
+          name="email"
+          placeholder="seu@email.com">
+      </div>
+
+      <div class="form-group">
+        <label for="telefone">Telefone</label>
+        <input
+          type="tel"
+          id="telefone"
+          [(ngModel)]="formData().telefone"
+          (ngModelChange)="updateFormData('telefone', $event)"
+          name="telefone"
+          placeholder="(00) 00000-0000">
+      </div>
+
+      <div class="form-group">
+        <label for="matricula">Matrícula</label>
+        <input
+          type="text"
+          id="matricula"
+          [(ngModel)]="formData().matricula"
+          name="matricula"
+          disabled
+          class="readonly">
+      </div>
+
+      @if (mensagem()) {
+        <div class="message" [class]="mensagemTipo()">
+          {{ mensagem() }}
+        </div>
+      }
+
+      <button class="btn-save" (click)="salvarAlteracoes()" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <span>Salvando...</span>
+        } @else {
+          <span>Salvar Alterações</span>
+        }
+      </button>
     </div>
   } @else {
     <div class="message error">Não foi possível carregar o perfil.</div>

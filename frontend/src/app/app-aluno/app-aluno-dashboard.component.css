@@ -1,136 +1,246 @@
-/* Aluno Dashboard */
 .dashboard {
+  padding: 0;
+}
+
+.loading {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-/* Next Trip Card */
-.next-trip {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.next-trip-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: center;
+  padding: 3rem;
+  color: #64748b;
 }
 
-.next-trip-header .label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #60a5fa;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(37, 99, 235, 0.2);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
 }
 
-.next-trip-content h3 {
-  font-size: 20px;
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Header com gradiente */
+.header-gradient {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.welcome-text {
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #fff;
-  margin: 0 0 4px 0;
+  color: #f8fafc;
+  margin: 0 0 0.5rem 0;
 }
 
-.next-trip-content p {
-  font-size: 14px;
-  color: #9ca3af;
+.subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
 
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.stat-card {
-  background: #111118;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 20px;
-  text-align: center;
-}
-
-.stat-card.success {
-  border-color: rgba(16, 185, 129, 0.3);
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
-}
-
-.stat-card.warning {
-  border-color: rgba(245, 158, 11, 0.3);
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%);
-}
-
-.stat-value {
-  display: block;
-  font-size: 32px;
-  font-weight: 700;
+/* Botão Principal */
+.btn-main {
+  width: 100%;
+  padding: 1.25rem;
+  background: #2563eb;
   color: #fff;
-  line-height: 1;
-  margin-bottom: 8px;
+  border: none;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+  margin-bottom: 1.5rem;
+  box-sizing: border-box;
 }
 
-.stat-card.success .stat-value {
-  color: #34d399;
+.btn-main:hover {
+  background: #1d4ed8;
 }
 
-.stat-card.warning .stat-value {
-  color: #fbbf24;
+/* Card Status */
+.status-card {
+  background: #111111;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.stat-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Trip List */
-.trip-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.trip-item {
+.status-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 16px;
-  background: #0a0a0f;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 0.75rem;
+}
+
+.status-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #64748b;
+}
+
+.status-indicator.active {
+  background: #34d399;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.5);
+}
+
+.status-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+/* Card Próxima Viagem */
+.trip-card {
+  background: #111111;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.trip-route {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.trip-origin,
+.trip-dest {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.trip-arrow {
+  width: 24px;
+  height: 24px;
+  color: #64748b;
+}
+
+.trip-time {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.trip-time svg {
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+}
+
+.trip-time span {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 0.875rem;
+  background: transparent;
+  color: #2563eb;
+  border: 1px solid #2563eb;
   border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-.trip-item:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+.btn-secondary:hover {
+  background: rgba(37, 99, 235, 0.1);
 }
 
-.trip-info {
+/* Card Notificações */
+.notifications-card {
+  background: #111111;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.link-text {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notifications-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.75rem;
 }
 
-.trip-rota {
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
+.notification-item {
+  padding: 1rem;
+  background: #050505;
+  border-radius: 12px;
+  border: 1px solid #27272a;
 }
 
-.trip-data {
-  font-size: 12px;
-  color: #6b7280;
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+.notification-text {
+  font-size: 0.875rem;
+  color: #f8fafc;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  margin: 0;
 }

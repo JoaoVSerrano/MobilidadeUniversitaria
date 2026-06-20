@@ -27,4 +27,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Page<Usuario> findByNomeContainingIgnoreCaseOrEmailContainingIgnoreCase(
             String nome, String email, Pageable pageable
     );
+
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(MAX(u.id), 0) FROM Usuario u")
+    Long findMaxId();
 }

@@ -13,6 +13,45 @@
   </button>
 </div>
 
+<!-- Student Requests Section -->
+@if (studentRequests().length > 0) {
+  <div class="student-requests-section">
+    <h2 class="section-title">Solicitações de Cadastro Pendentes</h2>
+    <div class="requests-list">
+      @for (request of studentRequests(); track request.id) {
+        <div class="request-card">
+          <div class="request-info">
+            <div class="request-avatar">
+              <span>{{ request.nome.substring(0, 2).toUpperCase() }}</span>
+            </div>
+            <div class="request-details">
+              <h3 class="request-name">{{ request.nome }}</h3>
+              <p class="request-email">{{ request.email }}</p>
+              <p class="request-cpf">CPF: {{ request.cpf }}</p>
+              <p class="request-phone">{{ request.telefone }}</p>
+            </div>
+          </div>
+          <div class="request-actions">
+            <button class="btn-approve" (click)="approveStudentRequest(request.id)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Aprovar
+            </button>
+            <button class="btn-reject" (click)="rejectStudentRequest(request.id)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              Rejeitar
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
 <!-- Stats Row -->
 <div class="stats-row">
   <div class="mini-stat">
@@ -219,8 +258,17 @@
         </div>
         <div class="modal-actions">
           <button class="btn-cancel" (click)="closeCreateModal()">Cancelar</button>
-          <button class="btn-confirm" (click)="createUser()">Criar Usuário</button>
+          <button class="btn-confirm" (click)="createUser()" [disabled]="isLoading()">
+            @if (isLoading()) {
+              <span>Criando...</span>
+            } @else {
+              <span>Criar Usuário</span>
+            }
+          </button>
         </div>
+        @if (errorMessage()) {
+          <div class="error-message">{{ errorMessage() }}</div>
+        }
       </div>
     </div>
   </div>
