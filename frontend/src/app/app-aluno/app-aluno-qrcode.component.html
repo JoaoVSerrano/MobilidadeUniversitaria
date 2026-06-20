@@ -1,62 +1,47 @@
 <div class="qrcode-page">
-  <div class="page-header">
-    <h2>QR Code de Embarque</h2>
-    <p>Apresente ao motorista para validar seu embarque</p>
-  </div>
+  <h2 class="page-title">Carteirinha Digital</h2>
 
   @if (isLoading()) {
     <div class="loading">
       <div class="spinner"></div>
-      <p>Gerando QR Code...</p>
+      <p>Carregando...</p>
     </div>
-  } @else if (qrData()) {
-    <div class="qr-card">
-      <div class="qr-badge">
-        <span class="pulse-dot"></span>
-        Código ativo
-      </div>
-
-      <div class="qr-frame" [innerHTML]="qrSvg()"></div>
-
-      <div class="qr-meta">
-        <div class="meta-row">
-          <span class="meta-label">Código</span>
-          <span class="meta-value mono">{{ qrData().qrData | slice:0:20 }}...</span>
-        </div>
-        @if (getExpiresAt()) {
-          <div class="meta-row">
-            <span class="meta-label">Válido até</span>
-            <span class="meta-value">{{ getExpiresAt() | date:'HH:mm' }}</span>
-          </div>
-        }
-      </div>
-    </div>
-
-    <p class="instructions">
-      Mantenha a tela visível e apresente ao motorista no momento do embarque.
-    </p>
-
-    <button class="btn btn-primary" (click)="refresh()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-        <polyline points="23 4 23 10 17 10"></polyline>
-        <polyline points="1 20 1 14 7 14"></polyline>
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-      </svg>
-      Atualizar QR Code
-    </button>
   } @else {
-    <div class="card">
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="56" height="56">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-        <h3>Nenhum QR Code ativo</h3>
-        <p>Reserve uma viagem para gerar seu código de embarque.</p>
+    <div class="digital-card">
+      <!-- Avatar -->
+      <div class="avatar-section">
+        <div class="avatar">
+          <span class="avatar-initials">{{ getIniciais() }}</span>
+        </div>
+        <button class="change-photo-btn">Alterar foto</button>
       </div>
-      <button class="btn btn-primary" (click)="carregar()">Tentar novamente</button>
+
+      <!-- Info -->
+      <div class="card-info">
+        <h3 class="student-name">{{ user()?.nome || 'Nome do Aluno' }}</h3>
+        <p class="student-matricula">Matrícula: {{ getMatricula() }}</p>
+      </div>
+
+      <!-- QR Code -->
+      <div class="qr-section">
+        <div class="qr-container">
+          <div class="qr-code" [innerHTML]="qrSvg()"></div>
+        </div>
+        <div class="qr-status">
+          <span class="status-indicator active"></span>
+          <span class="status-text">Ativo</span>
+        </div>
+      </div>
+
+      <!-- Update Button -->
+      <button class="btn-update" (click)="atualizarQRCode()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        Atualizar QR Code
+      </button>
     </div>
   }
 </div>

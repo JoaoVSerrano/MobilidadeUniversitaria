@@ -5,6 +5,7 @@ import com.synapse.mobilidadeUniversitaria.Entities.Usuario;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import com.synapse.mobilidadeUniversitaria.dtos.request.LoginRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.request.RegisterGestorRequestDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.request.RegisterSimplificadoRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.JwtResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioResponseDTO;
@@ -77,6 +78,55 @@ public class AuthService {
         gestor.setEnderecoId(endereco.getId());
 
         return gestorService.criar(gestor);
+    }
+
+    public UsuarioResponseDTO registrarUsuarioSimplificado(RegisterSimplificadoRequestDTO dto) {
+        if (usuarioRepository.existsByEmail(dto.email())) {
+            throw new ResourceAlreadyExistsException("Email ja cadastrado");
+        }
+
+        if (usuarioRepository.existsByCpf(dto.cpf())) {
+            throw new ResourceAlreadyExistsException("CPF ja cadastrado");
+        }
+
+        // Busca ou cria endereço padrão
+        Endereco endereco = enderecoRepository.findById(1L)
+                .orElseGet(() -> {
+                    Endereco novo = new Endereco();
+                    novo.setCep("00000-000");
+                    novo.setRua("Não informada");
+                    novo.setBairro("Não informado");
+                    novo.setNumero("0");
+                    novo.setTipoLocal(com.synapse.mobilidadeUniversitaria.Entities.enums.LocalType.RESIDENCIAL);
+                    return enderecoRepository.save(novo);
+                });
+
+        // Determina o tipo de usuário
+        UserType userType = UserType.ALUNO;
+        if (dto.tipoUsuario() != null) {
+            try {
+                userType = UserType.valueOf(dto.tipoUsuario().toUpperCase());
+            } catch (IllegalArgumentException ignored) {}
+        }
+
+        Usuario usuario = new Usuario();
+        usuario.setNome(dto.nome());
+        usuario.setEmail(dto.email());
+        usuario.setCpf(dto.cpf());
+        usuario.setTelefone(dto.telefone());
+        usuario.setUserType(userType);
+        usuario.setSenha(dto.senha()); // Será encoded pelo service
+
+        // Usa o GestorService para criar o usuário (que já tem a lógica de encoding)
+        UsuarioRequestDTO request = new UsuarioRequestDTO();
+        request.setNome(dto.nome());
+        request.setEmail(dto.email());
+        request.setCpf(dto.cpf());
+        request.setSenha(dto.senha());
+        request.setTelefone(dto.telefone());
+        request.setEnderecoId(endereco.getId());
+
+        return gestorService.criar(request);
     }
 
     private JwtResponseDTO toJwtResponse(AuthenticatedUser user) {

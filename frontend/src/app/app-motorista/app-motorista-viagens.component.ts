@@ -3,6 +3,14 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
+interface Presenca {
+  id: number;
+  alunoId: number;
+  alunoNome: string;
+  status: string;
+  confirmada: boolean;
+}
+
 @Component({
   selector: 'app-motorista-viagens',
   standalone: true,
@@ -17,6 +25,12 @@ export class AppMotoristaViagensComponent implements OnInit {
   viagens = signal<any[]>([]);
   isLoading = signal(true);
   erro = signal('');
+  
+  // Para mostrar lista de alunos de uma viagem
+  selectedViagem = signal<any | null>(null);
+  presencas = signal<Presenca[]>([]);
+  showStudentsList = signal(false);
+  isLoadingPresencas = signal(false);
 
   ngOnInit() {
     this.http.get<any[]>(`${this.baseUrl}/driver/trips/today`).subscribe({
@@ -44,6 +58,43 @@ export class AppMotoristaViagensComponent implements OnInit {
     this.http.post<any>(`${this.baseUrl}/driver/trips/${id}/finish`, {}).subscribe({
       next: (updated) => this.viagens.update(vs => vs.map(v => v.id === id ? updated : v)),
       error: (err: any) => this.erro.set(err.error?.message || 'Erro ao finalizar viagem.')
+    });
+  }
+
+  verAlunos(viagem: any) {
+    this.selectedViagem.set(viagem);
+    this.showStudentsList.set(true);
+    this.isLoadingPresencas.set(true);
+    
+    this.http.get<Presenca[]>(`${this.baseUrl}/driver/trips/${viagem.id}/students`).subscribe({
+      next: (data) => {
+        this.presencas.set(data);
+        this.isLoadingPresencas.set(false);
+      },
+      error: (err: any) => {
+        this.erro.set(err.error?.message || 'Erro ao carregar lista de alunos.');
+        this.isLoadingPresencas.set(false);
+      }
+    });
+  }
+
+  fecharListaAlunos() {
+    this.showStudentsList.set(false);
+    this.selectedViagem.set(null);
+    this.presencas.set([]);
+  }
+
+  confirmarPresenca(presencaId: number) {
+    this.http.post(`${this.baseUrl}/presencas/${presencaId}/confirmar`, {}).subscribe({
+      next: () => {
+        // Atualizar lista de presenças
+        this.presencas.update(ps => ps.map(p => 
+          p.id === presencaId ? { ...p, confirmada: true, status: 'CONFIRMADA' } : p
+        ));
+      },
+      error: (err: any) => {
+        this.erro.set(err.error?.message || 'Erro ao confirmar presença.');
+      }
     });
   }
 

@@ -5,9 +5,18 @@ import { AuthService } from '../services/auth.service';
 
 interface Viagem {
   id: number;
+  origem: string;
+  destino: string;
+  horario: string;
   data: string;
-  rota: string;
   status: string;
+}
+
+interface Notificacao {
+  id: number;
+  mensagem: string;
+  horario: string;
+  lida: boolean;
 }
 
 @Component({
@@ -23,63 +32,57 @@ export class AppAlunoDashboardComponent implements OnInit {
 
   user = this.authService.user;
   isLoading = signal(true);
-  historicoViagens = signal<Viagem[]>([]);
   proximaViagem = signal<Viagem | null>(null);
-
-  estatisticas = computed(() => {
-    const viagens = this.historicoViagens();
-    return {
-      total: viagens.length,
-      concluidas: viagens.filter(v => v.status === 'FINALIZADA').length,
-      canceladas: viagens.filter(v => v.status === 'CANCELADA').length
-    };
-  });
+  notificacoesRecentes = signal<Notificacao[]>([]);
 
   ngOnInit(): void {
     const user = this.user();
     if (!user) return;
 
+    // Carregar próxima viagem
     this.alunoService.getViagensByAlunoId(user.id).subscribe({
       next: (viagens: any[]) => {
-        const mapped = viagens.slice(0, 5).map((v: any) => ({
-          id: v.id,
-          data: v.dataHoraPartida
-            ? new Date(v.dataHoraPartida).toLocaleDateString('pt-BR')
-            : '—',
-          rota: v.rota?.nomeRota || '—',
-          status: v.status || '—'
-        }));
-
-        this.historicoViagens.set(mapped);
-
         const proxima = viagens.find((v: any) =>
           v.status === 'AGENDADA' || v.status === 'EM_ANDAMENTO'
         );
         if (proxima) {
           this.proximaViagem.set({
             id: proxima.id,
+            origem: proxima.rota?.pontoParada?.split(' → ')[0] || 'Centro',
+            destino: proxima.rota?.pontoParada?.split(' → ')[1] || 'Campus',
+            horario: proxima.dataHoraPartida
+              ? new Date(proxima.dataHoraPartida).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+              : '—',
             data: proxima.dataHoraPartida
               ? new Date(proxima.dataHoraPartida).toLocaleDateString('pt-BR')
               : '—',
-            rota: proxima.rota?.nomeRota || '—',
             status: proxima.status || '—'
           });
         }
-
         this.isLoading.set(false);
       },
       error: () => {
         this.isLoading.set(false);
       }
     });
+
+    // Carregar notificações recentes (mock data for demo)
+    this.notificacoesRecentes.set([
+      { id: 1, mensagem: 'Sua reserva para amanhã foi confirmada', horario: '10:30', lida: false },
+      { id: 2, mensagem: 'Ônibus próximo do horário de saída', horario: '09:15', lida: true },
+      { id: 3, mensagem: 'Ônibus com 5 minutos de atraso', horario: '08:45', lida: true }
+    ]);
   }
 
-  getStatusBadgeClass(status: string): string {
-    switch (status) {
-      case 'FINALIZADA': return 'badge-success';
-      case 'EM_ANDAMENTO': return 'badge-info';
-      case 'CANCELADA': return 'badge-warning';
-      default: return 'badge-info';
-    }
+  irParaReservas(): void {
+    // Emitir evento ou usar router para navegar para reservas
+    const event = new CustomEvent('navigate-to-reservas');
+    window.dispatchEvent(event);
+  }
+
+  irParaNotificacoes(): void {
+    // Emitir evento ou usar router para navegar para notificações
+    const event = new CustomEvent('navigate-to-notificacoes');
+    window.dispatchEvent(event);
   }
 }

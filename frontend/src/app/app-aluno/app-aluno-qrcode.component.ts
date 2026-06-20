@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
 import { environment } from '../../environments/environment';
@@ -7,7 +7,7 @@ import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-aluno-qrcode',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule],
   templateUrl: './app-aluno-qrcode.component.html',
   styleUrl: './app-aluno-qrcode.component.css'
 })
@@ -16,27 +16,36 @@ export class AppAlunoQrcodeComponent implements OnInit {
   private authService = inject(AuthService);
   private baseUrl = environment.apiUrl;
 
+  user = this.authService.user;
   qrData = signal<any>(null);
   isLoading = signal(true);
   erro = signal('');
 
   // SVG QR Code gerado localmente a partir do payload
   qrSvg = computed(() => {
-    const d = this.qrData();
-    if (!d) return '';
-    return this.generateQrSvg(d.qrData || d.codigo || 'GOCAMPUS-QR');
+    const user = this.user();
+    if (!user) return '';
+    const matricula = (user as any).matricula || user.id || '000000';
+    const payload = `GOCAMPUS-${user.id}-${matricula}-${Date.now()}`;
+    return this.generateQrSvg(payload);
   });
 
-  ngOnInit() { this.carregar(); }
+  ngOnInit() {
+    this.carregar();
+  }
 
   carregar() {
     this.isLoading.set(true);
     this.erro.set('');
+    // TODO: substituir por endpoint backend real
     this.http.get<any>(`${this.baseUrl}/student/qrcode`).subscribe({
-      next: (data) => { this.qrData.set(data); this.isLoading.set(false); },
+      next: (data) => {
+        this.qrData.set(data);
+        this.isLoading.set(false);
+      },
       error: () => {
         // Fallback local — gera QR com dados do usuário
-        const user = this.authService.user();
+        const user = this.user();
         const expiry = new Date(Date.now() + 10 * 60 * 1000);
         this.qrData.set({
           qrData: `GOCAMPUS-${user?.id ?? 0}-${Date.now()}`,
@@ -48,12 +57,16 @@ export class AppAlunoQrcodeComponent implements OnInit {
     });
   }
 
-  refresh() {
+  atualizarQRCode() {
     this.isLoading.set(true);
+    // TODO: substituir por endpoint backend real
     this.http.post<any>(`${this.baseUrl}/student/qrcode/refresh`, {}).subscribe({
-      next: (data) => { this.qrData.set(data); this.isLoading.set(false); },
+      next: (data) => {
+        this.qrData.set(data);
+        this.isLoading.set(false);
+      },
       error: () => {
-        const user = this.authService.user();
+        const user = this.user();
         const expiry = new Date(Date.now() + 10 * 60 * 1000);
         this.qrData.set({
           qrData: `GOCAMPUS-${user?.id ?? 0}-${Date.now()}`,
@@ -63,6 +76,22 @@ export class AppAlunoQrcodeComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  // Gera as iniciais do nome do aluno
+  getIniciais(): string {
+    const user = this.user();
+    if (!user?.nome) return 'AL';
+    const nomes = user.nome.split(' ');
+    if (nomes.length >= 2) {
+      return (nomes[0][0] + nomes[nomes.length - 1][0]).toUpperCase();
+    }
+    return user.nome.substring(0, 2).toUpperCase();
+  }
+
+  getMatricula(): string {
+    const user = this.user();
+    return (user as any).matricula || String(user?.id) || '000000';
   }
 
   // Gera um SVG de QR Code visual baseado no hash do payload

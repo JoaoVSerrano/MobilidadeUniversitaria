@@ -1,55 +1,75 @@
-<div class="reserva">
-  <h2 class="page-title">Reservar Viagem</h2>
-  <p class="page-subtitle">Escolha a data e a rota para sua próxima viagem</p>
+<div class="reserva-page">
+
+  <div class="page-header">
+    <h2>Reservar Presença</h2>
+    <p>Mostrando apenas rotas disponíveis</p>
+  </div>
 
   @if (mensagem()) {
-    <div class="message" [class]="mensagemTipo()">
-      {{ mensagem() }}
+    <div class="message" [class]="mensagemTipo()">{{ mensagem() }}</div>
+  }
+
+  <div class="section-label">Selecione a Data</div>
+  <div class="input-group">
+    <input
+      type="date"
+      [(ngModel)]="dataSelecionada"
+      name="data"
+      [min]="hoje"
+      class="date-input">
+  </div>
+
+  <div class="section-label">Selecione a Rota</div>
+
+  @if (rotas().length === 0) {
+    <div class="empty-state">
+      <p>Nenhuma rota disponível.</p>
+    </div>
+  } @else {
+    <div class="rotas-list">
+      @for (rota of rotas(); track rota.id) {
+        <div
+          class="rota-card"
+          [class.selected]="rotaSelecionada === rota.id.toString()"
+          [class.lotado]="getOcupacao(rota) >= 100"
+          (click)="getOcupacao(rota) < 100 && selecionarRota(rota.id.toString())">
+
+          <div class="rota-top">
+            <div class="rota-info">
+              <span class="rota-icone">🚌</span>
+              <div>
+                <span class="rota-nome">{{ rota.nomeRota }}</span>
+                <span class="rota-horario">{{ getHorario(rota) }}</span>
+              </div>
+            </div>
+            @if (getOcupacao(rota) >= 100) {
+              <span class="badge-lotado">Lotado</span>
+            } @else {
+              <span class="rota-percent" [style.color]="getOcupacaoColor(getOcupacao(rota))">
+                {{ getOcupacao(rota) }}% ocupado
+              </span>
+            }
+          </div>
+
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [style.width.%]="getOcupacao(rota)"
+              [style.background]="getOcupacaoColor(getOcupacao(rota))">
+            </div>
+          </div>
+
+        </div>
+      }
     </div>
   }
 
-  <form (ngSubmit)="reservar()" class="reserva-form">
-    <div class="input-group">
-      <label for="data">Data da Viagem</label>
-      <input
-        type="date"
-        id="data"
-        [(ngModel)]="dataSelecionada"
-        name="data"
-        required>
+  @if (rotaSelecionada && dataSelecionada) {
+    <div class="confirm-footer">
+      <button class="btn btn-primary" (click)="reservar()" [disabled]="isLoading()">
+        @if (isLoading()) { Confirmando... } @else { Confirmar Reserva }
+      </button>
     </div>
+  }
 
-    <div class="input-group">
-      <label for="rota">Selecione a Rota</label>
-      <select id="rota" [(ngModel)]="rotaSelecionada" name="rota" required>
-        <option value="">Escolha uma rota</option>
-        @for (rota of rotas(); track rota.id) {
-          <option [value]="rota.id">{{ rota.nomeRota }}</option>
-        }
-      </select>
-    </div>
-
-    @if (rotaSelecionada) {
-      <div class="selected-route">
-        <div class="route-card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
-          <span>Rota selecionada</span>
-        </div>
-      </div>
-    }
-
-    <button
-      type="submit"
-      class="btn btn-primary"
-      [disabled]="isLoading() || !dataSelecionada || !rotaSelecionada">
-      @if (isLoading()) {
-        Confirmando...
-      } @else {
-        Confirmar Reserva
-      }
-    </button>
-  </form>
 </div>

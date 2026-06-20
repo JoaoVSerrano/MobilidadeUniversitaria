@@ -4,6 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../services/dashboard.service';
 import { User } from '../models/dashboard.model';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+
+interface StudentRequest {
+  id: number;
+  nome: string;
+  email: string;
+  cpf: string;
+  telefone: string;
+  status: string;
+  createdAt: string;
+}
 
 @Component({
   selector: 'app-users',
@@ -17,6 +28,8 @@ export class UsersComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private http = inject(HttpClient);
+  private baseUrl = 'http://localhost:8080/api';
 
   users: User[] = [];
   filtered: User[] = [];
@@ -28,6 +41,10 @@ export class UsersComponent implements OnInit {
   totalAlunos = 0;
   totalMotoristas = 0;
   totalPendentes = 0;
+
+  // Student requests
+  studentRequests = signal<StudentRequest[]>([]);
+  isLoadingRequests = signal(false);
 
   // Modal states
   showCreateModal = signal(false);
@@ -72,6 +89,7 @@ export class UsersComponent implements OnInit {
   ngOnInit() {
     console.log('UsersComponent ngOnInit called');
     this.loadUsers();
+    this.loadStudentRequests();
 
     // Listen to route changes to reload data when tab is opened
     this.router.events.subscribe((event) => {
@@ -80,7 +98,51 @@ export class UsersComponent implements OnInit {
         if (this.router.url === '/dashboard/usuarios') {
           console.log('Users route activated, reloading data');
           this.loadUsers();
+          this.loadStudentRequests();
         }
+      }
+    });
+  }
+
+  loadStudentRequests() {
+    this.isLoadingRequests.set(true);
+    // TODO: substituir por endpoint backend real para listar solicitações
+    this.http.get<StudentRequest[]>(`${this.baseUrl}/auth/student-requests`).subscribe({
+      next: (data) => {
+        this.studentRequests.set(data);
+        this.isLoadingRequests.set(false);
+      },
+      error: () => {
+        // Mock data se o endpoint não existir ainda
+        const mockRequests: StudentRequest[] = [
+          { id: 1, nome: 'João Silva', email: 'joao@email.com', cpf: '12345678901', telefone: '(11) 98765-4321', status: 'PENDING', createdAt: '2024-01-15' },
+          { id: 2, nome: 'Maria Santos', email: 'maria@email.com', cpf: '98765432109', telefone: '(11) 91234-5678', status: 'PENDING', createdAt: '2024-01-16' }
+        ];
+        this.studentRequests.set(mockRequests);
+        this.isLoadingRequests.set(false);
+      }
+    });
+  }
+
+  approveStudentRequest(requestId: number) {
+    this.http.post(`${this.baseUrl}/auth/student-requests/${requestId}/approve`, {}).subscribe({
+      next: () => {
+        this.loadStudentRequests();
+        this.loadUsers();
+      },
+      error: (err) => {
+        console.error('Erro ao aprovar solicitação:', err);
+      }
+    });
+  }
+
+  rejectStudentRequest(requestId: number) {
+    this.http.post(`${this.baseUrl}/auth/student-requests/${requestId}/reject`, {}).subscribe({
+      next: () => {
+        this.loadStudentRequests();
+      },
+      error: (err) => {
+        console.error('Erro ao rejeitar solicitação:', err);
       }
     });
   }
@@ -168,33 +230,44 @@ export class UsersComponent implements OnInit {
   }
 
   createUser() {
-    console.log('createUser called with formData:', this.formData);
-    
+    console.log('=== createUser START ===');
+    console.log('formData:', JSON.stringify(this.formData));
+
     if (!this.formData.name || !this.formData.email || !this.formData.cpf) {
-      console.log('Validation failed: missing required fields');
+      console.log('Validation failed - missing fields:', {
+        name: !!this.formData.name,
+        email: !!this.formData.email,
+        cpf: !!this.formData.cpf
+      });
       this.errorMessage.set('Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
+    console.log('Validation passed, calling API...');
     this.isLoading.set(true);
     this.errorMessage.set('');
-    
-    this.svc.createUser({
+
+    const payload = {
       name: this.formData.name,
       email: this.formData.email,
       cpf: this.formData.cpf,
       phone: this.formData.phone,
       type: this.formData.type as any
-    }).subscribe({
+    };
+    console.log('API payload:', JSON.stringify(payload));
+
+    this.svc.createUser(payload).subscribe({
       next: (response) => {
-        console.log('User created successfully:', response);
+        console.log('=== createUser SUCCESS ===');
+        console.log('Response:', response);
         this.clearStorage();
         this.closeCreateModal();
         this.loadUsers();
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Error creating user:', err);
+        console.log('=== createUser ERROR ===');
+        console.error('Error details:', err);
         this.errorMessage.set('Erro ao criar usuário: ' + (err.message || 'Erro desconhecido'));
         this.isLoading.set(false);
       }

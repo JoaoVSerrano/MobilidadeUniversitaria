@@ -48,6 +48,108 @@
 .viagem-card.status-finalizada   { border-left: 3px solid #10b981; }
 .viagem-card.status-cancelada    { border-left: 3px solid #ef4444; }
 
+/* Modal Styles */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+}
+
+.modal-content {
+  background: #111118; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 24px;
+  width: 100%; max-width: 500px;
+  max-height: 80vh; overflow-y: auto;
+}
+
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.modal-header h3 {
+  font-size: 18px; font-weight: 600; color: #fff; margin: 0;
+}
+
+.btn-close {
+  background: transparent; border: none; color: #6b7280;
+  cursor: pointer; padding: 4px; border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.btn-close:hover { background: rgba(255,255,255,0.05); color: #fff; }
+
+.modal-body { min-height: 200px; }
+
+.students-list {
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.student-card {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #0a0a0a; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 14px;
+  transition: all 0.2s;
+}
+
+.student-card.confirmed {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.student-info {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.student-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; color: #fff;
+}
+
+.student-name {
+  font-size: 14px; font-weight: 600; color: #fff; margin: 0 0 4px;
+}
+
+.student-status {
+  font-size: 12px; color: #6b7280;
+}
+
+.student-status.status-reservada { color: #f59e0b; }
+.student-status.status-confirmada { color: #10b981; }
+
+.btn-confirm {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; background: rgba(16, 185, 129, 0.1);
+  color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+
+.btn-confirm:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.confirmed-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; background: rgba(16, 185, 129, 0.1);
+  color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px; font-size: 13px; font-weight: 500;
+}
+
+.btn-students {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.btn-students:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
 .viagem-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 
 .viagem-rota { display: flex; align-items: center; gap: 12px; }

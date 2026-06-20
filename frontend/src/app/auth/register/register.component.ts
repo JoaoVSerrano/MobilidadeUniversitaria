@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -30,6 +31,9 @@ export class RegisterComponent {
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
   isLoading = signal<boolean>(false);
+
+  private http = inject(HttpClient);
+  private baseUrl = 'http://localhost:8080/api';
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -99,27 +103,28 @@ export class RegisterComponent {
 
     this.isLoading.set(true);
 
-    this.authService.register(this.formData).subscribe({
+    // Enviar solicitação de cadastro de aluno (não cria usuário diretamente)
+    this.http.post(`${this.baseUrl}/auth/register/student-request`, {
+      ...this.formData,
+      tipoUsuario: 'ALUNO'
+    }).subscribe({
       next: () => {
-        this.successMessage.set('Conta criada com sucesso! Redirecionando para login...');
+        this.successMessage.set('Solicitação enviada com sucesso! Aguarde aprovação do gestor.');
         this.isLoading.set(false);
         setTimeout(() => {
           this.router.navigate(['/login']);
-        }, 2000);
+        }, 3000);
       },
-      error: (err: Error) => {
+      error: (err: any) => {
         this.isLoading.set(false);
-        if (err.message.includes(' primeiro gestor')) {
-          this.errorMessage.set('Sistema já configurado. Redirecionando para login...');
-          setTimeout(() => {
-            this.router.navigate(['/login']);
-          }, 2000);
+        if (err.error?.message) {
+          this.errorMessage.set(err.error.message);
         } else if (err.message.includes('Email ja cadastrado')) {
           this.errorMessage.set('Este email já está cadastrado');
         } else if (err.message.includes('CPF ja cadastrado')) {
           this.errorMessage.set('Este CPF já está cadastrado');
         } else {
-          this.errorMessage.set(err.message);
+          this.errorMessage.set('Erro ao enviar solicitação. Tente novamente.');
         }
       }
     });
