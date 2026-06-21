@@ -527,6 +527,25 @@
   color: #f8fafc;
 }
 
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #0a0a0a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+}
+
+.detail-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f8fafc;
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #27272a;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

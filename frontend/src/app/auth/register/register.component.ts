@@ -19,6 +19,7 @@ export class RegisterComponent {
     cpf: '',
     senha: '',
     telefone: '',
+    nomeFaculdade: '',
     endereco: {
       cep: '',
       rua: '',
@@ -32,11 +33,13 @@ export class RegisterComponent {
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
   isLoading = signal<boolean>(false);
+  faculdadeSuggestions = signal<any[]>([]);
+  showFaculdadeSuggestions = signal<boolean>(false);
 
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
-
-  constructor(private authService: AuthService, private router: Router) {}
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   formatCPF(event: any): void {
     let value = event.target.value.replace(/\D/g, '');
@@ -81,7 +84,7 @@ export class RegisterComponent {
 
     // Validation
     if (!this.formData.nome || !this.formData.email || !this.formData.cpf ||
-        !this.formData.senha || !this.formData.telefone) {
+        !this.formData.senha || !this.formData.telefone || !this.formData.nomeFaculdade) {
       this.errorMessage.set('Preencha todos os campos obrigatórios');
       return;
     }
@@ -112,6 +115,7 @@ export class RegisterComponent {
       senha: this.formData.senha,
       telefone: this.formData.telefone,
       tipoUsuario: 'ALUNO',
+      nomeFaculdade: this.formData.nomeFaculdade,
       cep: this.formData.endereco.cep,
       rua: this.formData.endereco.rua,
       bairro: this.formData.endereco.bairro,
@@ -128,16 +132,61 @@ export class RegisterComponent {
       },
       error: (err: any) => {
         this.isLoading.set(false);
-        if (err.error?.message) {
-          this.errorMessage.set(err.error.message);
-        } else if (err.message.includes('Email ja cadastrado')) {
+        const errorMessage = err.error?.message || err.message || '';
+        if (errorMessage.includes('Email ja cadastrado')) {
           this.errorMessage.set('Este email já está cadastrado');
-        } else if (err.message.includes('CPF ja cadastrado')) {
+        } else if (errorMessage.includes('CPF ja cadastrado')) {
           this.errorMessage.set('Este CPF já está cadastrado');
+        } else if (errorMessage.includes('Ja existe uma solicitacao pendente')) {
+          this.errorMessage.set('Já existe uma solicitação pendente para este email ou CPF');
+        } else if (errorMessage.includes('Nome da faculdade e obrigatorio')) {
+          this.errorMessage.set('Nome da faculdade é obrigatório');
+        } else if (err.error?.message) {
+          this.errorMessage.set(err.error.message);
         } else {
           this.errorMessage.set('Erro ao enviar solicitação. Tente novamente.');
         }
       }
     });
+  }
+
+  clearError() {
+    this.errorMessage.set('');
+  }
+
+  searchFaculdades(nome: string) {
+    if (nome.length < 2) {
+      this.faculdadeSuggestions.set([]);
+      this.showFaculdadeSuggestions.set(false);
+      return;
+    }
+
+    this.authService.searchFaculdades(nome).subscribe({
+      next: (faculdades) => {
+        this.faculdadeSuggestions.set(faculdades);
+        this.showFaculdadeSuggestions.set(faculdades.length > 0);
+      },
+      error: () => {
+        this.faculdadeSuggestions.set([]);
+        this.showFaculdadeSuggestions.set(false);
+      }
+    });
+  }
+
+  selectFaculdade(nome: string) {
+    this.formData.nomeFaculdade = nome;
+    this.showFaculdadeSuggestions.set(false);
+    this.faculdadeSuggestions.set([]);
+  }
+
+  onFaculdadeInput(event: any) {
+    const value = event.target.value;
+    this.formData.nomeFaculdade = value;
+    this.searchFaculdades(value);
+    this.clearError();
+  }
+
+  closeFaculdadeSuggestions() {
+    this.showFaculdadeSuggestions.set(false);
   }
 }

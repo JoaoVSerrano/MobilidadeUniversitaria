@@ -36,6 +36,12 @@ public class FaculdadeController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<List<FaculdadeResponseDTO>> buscarPorNome(@RequestParam String nome) {
+        List<FaculdadeResponseDTO> response = faculdadeService.buscarPorNome(nome);
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<FaculdadeResponseDTO> atualizar(@PathVariable Long id,
                                                           @Valid @RequestBody FaculdadeRequestDTO dto) {

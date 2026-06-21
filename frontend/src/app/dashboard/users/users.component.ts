@@ -13,6 +13,13 @@ interface StudentRequest {
   email: string;
   cpf: string;
   telefone: string;
+  nomeFaculdade: string;
+  cep: string;
+  rua: string;
+  bairro: string;
+  numero: string;
+  complemento: string;
+  tipoLocal: string;
   status: string;
   createdAt: string;
 }
@@ -50,15 +57,18 @@ export class UsersComponent implements OnInit {
   showEditModal = signal(false);
   showDeleteModal = signal(false);
   showViewModal = signal(false);
+  showRequestViewModal = signal(false);
   selectedUser = signal<User | null>(null);
   selectedUserDetails: any = null;
+  selectedRequest = signal<StudentRequest | null>(null);
 
-  formData: { name: string; email: string; cpf: string; phone: string; type: string } = {
+  formData: { name: string; email: string; cpf: string; phone: string; type: string; password: string } = {
     name: '',
     email: '',
     cpf: '',
     phone: '',
-    type: 'aluno'
+    type: 'aluno',
+    password: ''
   };
 
   isLoading = signal(false);
@@ -119,6 +129,16 @@ export class UsersComponent implements OnInit {
         alert('Erro ao rejeitar: ' + (err.error?.message || err.message));
       }
     });
+  }
+
+  openRequestViewModal(request: StudentRequest) {
+    this.selectedRequest.set(request);
+    this.showRequestViewModal.set(true);
+  }
+
+  closeRequestViewModal() {
+    this.showRequestViewModal.set(false);
+    this.selectedRequest.set(null);
   }
 
   loadUsers() {
@@ -186,7 +206,7 @@ export class UsersComponent implements OnInit {
   }
 
   openCreateModal() {
-    this.formData = { name: '', email: '', cpf: '', phone: '', type: 'aluno' };
+    this.formData = { name: '', email: '', cpf: '', phone: '', type: 'aluno', password: '' };
     this.errorMessage.set('');
     this.showCreateModal.set(true);
   }
@@ -209,7 +229,8 @@ export class UsersComponent implements OnInit {
       email: this.formData.email,
       cpf: this.formData.cpf,
       phone: this.formData.phone,
-      type: this.formData.type as any
+      type: this.formData.type as any,
+      password: this.formData.password || 'password123'
     };
 
     this.svc.createUser(payload).subscribe({
@@ -238,7 +259,8 @@ export class UsersComponent implements OnInit {
           email: details.email ?? user.email,
           cpf: details.cpf ?? user.cpf,
           phone: details.telefone ?? user.phone,
-          type: user.type
+          type: user.type,
+          password: ''
         };
         this.showEditModal.set(true);
       },

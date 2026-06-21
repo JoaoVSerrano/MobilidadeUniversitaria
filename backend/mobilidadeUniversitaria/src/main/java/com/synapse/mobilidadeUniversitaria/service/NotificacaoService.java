@@ -6,7 +6,7 @@ import com.synapse.mobilidadeUniversitaria.dtos.response.NotificacaoResponseDTO;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.repositories.NotificacaoRepository;
 import com.synapse.mobilidadeUniversitaria.security.AuthenticatedUser;
-import com.synapse.mobilidadeUniversitaria.security.AuthorizationService;
+import com.synapse.mobilidadeUniversitaria.service.AuthService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,16 +16,16 @@ import java.util.List;
 public class NotificacaoService {
 
     private final NotificacaoRepository notificacaoRepository;
-    private final AuthorizationService authorizationService;
+    private final AuthService authService;
 
     public NotificacaoService(NotificacaoRepository notificacaoRepository,
-                              AuthorizationService authorizationService) {
+                              AuthService authService) {
         this.notificacaoRepository = notificacaoRepository;
-        this.authorizationService = authorizationService;
+        this.authService = authService;
     }
 
     public List<NotificacaoResponseDTO> listarDoUsuarioLogado() {
-        AuthenticatedUser user = authorizationService.currentUser();
+        AuthenticatedUser user = authService.currentUser();
         List<Notificacao> notificacoes;
 
         if (UserType.GESTOR.equals(user.getUserType())) {
@@ -53,7 +53,7 @@ public class NotificacaoService {
     }
 
     public void marcarTodasComoLidas() {
-        AuthenticatedUser user = authorizationService.currentUser();
+        AuthenticatedUser user = authService.currentUser();
         List<Notificacao> notificacoes = UserType.GESTOR.equals(user.getUserType())
                 ? notificacaoRepository.findAll()
                 : notificacaoRepository.findByAlunoId(user.getId());
@@ -62,7 +62,7 @@ public class NotificacaoService {
     }
 
     public long contarNaoLidas() {
-        AuthenticatedUser user = authorizationService.currentUser();
+        AuthenticatedUser user = authService.currentUser();
         List<Notificacao> notificacoes = UserType.GESTOR.equals(user.getUserType())
                 ? notificacaoRepository.findAll()
                 : notificacaoRepository.findByAlunoId(user.getId());

@@ -36,17 +36,68 @@ export class AppAlunoNotificacoesComponent implements OnInit {
 
   carregarNotificacoes() {
     this.isLoading.set(true);
-    // TODO: substituir por endpoint backend real
-    // Mock data for demo
-    setTimeout(() => {
-      this.notificacoes.set([
-        { id: 1, tipo: 'confirmacao', titulo: 'Reserva Confirmada', mensagem: 'Sua reserva para amanhã foi confirmada', lida: false, horario: '10:30' },
-        { id: 2, tipo: 'info', titulo: 'Embarque Próximo', mensagem: 'Ônibus próximo do horário de saída', lida: false, horario: '09:15' },
-        { id: 3, tipo: 'atraso', titulo: 'Atraso', mensagem: 'Ônibus com 5 minutos de atraso', lida: true, horario: '08:45' },
-        { id: 4, tipo: 'info', titulo: 'Nova Rota', mensagem: 'Nova rota disponível: Bairro D-Campus', lida: true, horario: 'Ontem' }
-      ]);
-      this.isLoading.set(false);
-    }, 500);
+    this.alunoService.getNotificacoes().subscribe({
+      next: (data) => {
+        const notificacoesMapeadas = data.map(n => ({
+          id: n.id,
+          tipo: this.mapearTipo(n.tipoNotificacao),
+          titulo: this.mapearTitulo(n.tipoNotificacao),
+          mensagem: n.mensagem,
+          lida: n.lida,
+          horario: this.formatarHorario(n.dataHoraEnvio)
+        }));
+        this.notificacoes.set(notificacoesMapeadas);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar notificações:', err);
+        this.notificacoes.set([]);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  mapearTipo(tipoBackend: string): 'info' | 'alerta' | 'atraso' | 'confirmacao' {
+    const tipoMap: Record<string, 'info' | 'alerta' | 'atraso' | 'confirmacao'> = {
+      'NOVA_VIAGEM': 'info',
+      'RESERVA_CONFIRMADA': 'confirmacao',
+      'EMBARQUE_PROXIMO': 'info',
+      'ATRASO': 'atraso',
+      'CANCELAMENTO': 'alerta',
+      'INFO': 'info',
+      'ALERTA': 'alerta'
+    };
+    return tipoMap[tipoBackend] || 'info';
+  }
+
+  mapearTitulo(tipoBackend: string): string {
+    const tituloMap: Record<string, string> = {
+      'NOVA_VIAGEM': 'Nova Viagem',
+      'RESERVA_CONFIRMADA': 'Reserva Confirmada',
+      'EMBARQUE_PROXIMO': 'Embarque Próximo',
+      'ATRASO': 'Atraso',
+      'CANCELAMENTO': 'Cancelamento',
+      'INFO': 'Informação',
+      'ALERTA': 'Alerta'
+    };
+    return tituloMap[tipoBackend] || 'Notificação';
+  }
+
+  formatarHorario(dataHora: string): string {
+    if (!dataHora) return '';
+    const data = new Date(dataHora);
+    const agora = new Date();
+    const diffMs = agora.getTime() - data.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHoras = Math.floor(diffMs / 3600000);
+    const diffDias = Math.floor(diffMs / 86400000);
+
+    if (diffMin < 1) return 'Agora';
+    if (diffMin < 60) return `${diffMin} min atrás`;
+    if (diffHoras < 24) return `${diffHoras}h atrás`;
+    if (diffDias === 1) return 'Ontem';
+    if (diffDias < 7) return `${diffDias} dias atrás`;
+    return data.toLocaleDateString('pt-BR');
   }
 
   getNotificationIcon(tipo: string): string {
@@ -76,8 +127,15 @@ export class AppAlunoNotificacoesComponent implements OnInit {
   }
 
   marcarComoLida(id: number): void {
-    this.notificacoes.update(notifs =>
-      notifs.map(n => n.id === id ? { ...n, lida: true } : n)
-    );
+    this.alunoService.marcarNotificacaoLida(id).subscribe({
+      next: () => {
+        this.notificacoes.update(notifs =>
+          notifs.map(n => n.id === id ? { ...n, lida: true } : n)
+        );
+      },
+      error: (err) => {
+        console.error('Erro ao marcar notificação como lida:', err);
+      }
+    });
   }
 }

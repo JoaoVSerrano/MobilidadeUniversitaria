@@ -35,12 +35,28 @@ export class RoutesComponent implements OnInit {
   selectedRoute = signal<Route | null>(null);
 
   // Form data
-  formData: { name: string; description: string; originDest: string; status: string } = {
+  formData: { name: string; description: string; originDest: string; status: string; paradas: string[] } = {
     name: '',
     description: '',
     originDest: '',
-    status: 'Ativa'
+    status: 'Ativa',
+    paradas: []
   };
+
+  // Para adicionar nova parada
+  novaParada = '';
+
+  // Métodos para gerenciar paradas
+  adicionarParada() {
+    if (this.novaParada.trim()) {
+      this.formData.paradas.push(this.novaParada.trim());
+      this.novaParada = '';
+    }
+  }
+
+  removerParada(index: number) {
+    this.formData.paradas.splice(index, 1);
+  }
 
   ngOnInit() {
     this.loadRoutes();
@@ -104,7 +120,8 @@ export class RoutesComponent implements OnInit {
 
   // Create
   openCreateModal() {
-    this.formData = { name: '', description: '', originDest: '', status: 'Ativa' };
+    this.formData = { name: '', description: '', originDest: '', status: 'Ativa', paradas: [] };
+    this.novaParada = '';
     this.showCreateModal.set(true);
   }
 
@@ -120,7 +137,8 @@ export class RoutesComponent implements OnInit {
       name: this.formData.name,
       description: this.formData.description,
       originDest: this.formData.originDest,
-      status: this.formData.status as any
+      status: this.formData.status as any,
+      paradas: this.formData.paradas
     }).subscribe({
       next: () => {
         this.closeCreateModal();
@@ -137,8 +155,10 @@ export class RoutesComponent implements OnInit {
       name: route.name,
       description: route.description,
       originDest: route.originDest,
-      status: route.status
+      status: route.status,
+      paradas: route.stops?.map(s => s.name) || []
     };
+    this.novaParada = '';
     this.showEditModal.set(true);
   }
 
@@ -156,7 +176,8 @@ export class RoutesComponent implements OnInit {
       name: this.formData.name,
       description: this.formData.description,
       originDest: this.formData.originDest,
-      status: this.formData.status as any
+      status: this.formData.status as any,
+      paradas: this.formData.paradas
     }).subscribe({
       next: () => {
         this.closeEditModal();

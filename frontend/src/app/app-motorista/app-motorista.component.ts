@@ -6,8 +6,9 @@ import { AppMotoristaDashboardComponent } from './app-motorista-dashboard.compon
 import { AppMotoristaViagensComponent } from './app-motorista-viagens.component';
 import { AppMotoristaQrComponent } from './app-motorista-qr.component';
 import { AppMotoristaPerfilComponent } from './app-motorista-perfil.component';
+import { AppMotoristaNotificacoesComponent } from './app-motorista-notificacoes.component';
 
-type Screen = 'dashboard' | 'viagens' | 'qr' | 'perfil';
+type Screen = 'dashboard' | 'viagens' | 'qr' | 'perfil' | 'notificacoes';
 
 interface NavItem { id: Screen; label: string; icon: string; }
 
@@ -19,7 +20,8 @@ interface NavItem { id: Screen; label: string; icon: string; }
     AppMotoristaDashboardComponent,
     AppMotoristaViagensComponent,
     AppMotoristaQrComponent,
-    AppMotoristaPerfilComponent
+    AppMotoristaPerfilComponent,
+    AppMotoristaNotificacoesComponent
   ],
   templateUrl: './app-motorista.component.html',
   styleUrl: './app-motorista.component.css'
@@ -35,6 +37,7 @@ export class AppMotoristaComponent {
     { id: 'dashboard', label: 'Início',   icon: 'home'    },
     { id: 'viagens',  label: 'Viagens',  icon: 'route'   },
     { id: 'qr',       label: 'Scanner',  icon: 'qr'      },
+    { id: 'notificacoes', label: 'Notificações', icon: 'bell' },
     { id: 'perfil',   label: 'Perfil',   icon: 'profile' }
   ];
 
@@ -52,6 +55,10 @@ export class AppMotoristaComponent {
       </svg>`,
       qr: `<svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v2h2v2h-2v2h2v-2h2v2h2v-2h-2v-2h2v-2h-2v-2h-2v2zm0 4v2h-2v-2h2zm4 4v2h-2v-2h2z"/>
+      </svg>`,
+      bell: `<svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
       </svg>`,
       profile: `<svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>

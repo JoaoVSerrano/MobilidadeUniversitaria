@@ -129,6 +129,60 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon input {
+  padding-right: 2.5rem;
+}
+
+.search-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #111111;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.suggestion-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  color: #e2e8f0;
+  font-size: 0.9375rem;
+  transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+  background: #1e293b;
+}
+
+.suggestion-item:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.suggestion-item:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
 .input-group select {
   cursor: pointer;
 }

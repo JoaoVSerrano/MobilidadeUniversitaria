@@ -19,6 +19,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -138,5 +139,18 @@ public class AuthService {
                 user.getEmail(),
                 user.getUserType()
         );
+    }
+
+    public AuthenticatedUser currentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof AuthenticatedUser) {
+            return (AuthenticatedUser) authentication.getPrincipal();
+        }
+        return null;
+    }
+
+    public boolean canAccessNotificacao(Long id) {
+        // Implementação simplificada - permite acesso se o usuário estiver autenticado
+        return currentUser() != null;
     }
 }

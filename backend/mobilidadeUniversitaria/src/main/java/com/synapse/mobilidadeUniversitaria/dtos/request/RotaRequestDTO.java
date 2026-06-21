@@ -11,6 +11,8 @@ public record RotaRequestDTO(
         String descricao,
 
         @NotBlank(message = "ponto de parada é obrigatório")
-        String pontoParada
+        String pontoParada,
+
+        String paradas  // JSON string: "[\"Av. Principal\",\"Shopping\"]"
 ) {
 }

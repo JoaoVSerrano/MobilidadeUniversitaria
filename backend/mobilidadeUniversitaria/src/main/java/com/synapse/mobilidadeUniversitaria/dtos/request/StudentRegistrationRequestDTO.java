@@ -24,6 +24,9 @@ public record StudentRegistrationRequestDTO(
 
         String tipoUsuario,
 
+        @NotBlank(message = "Nome da faculdade e obrigatorio")
+        String nomeFaculdade,
+
         String cep,
         String rua,
         String bairro,

@@ -33,6 +33,7 @@ export interface Route {
   capacity: number;
   status: 'Ativa' | 'Inativa';
   stops: RouteStop[];
+  paradas?: string[]; // Array de strings para envio ao backend
 }
 
 export interface Vehicle {
@@ -50,10 +51,13 @@ export interface Vehicle {
 export interface Trip {
   id: number;
   route: string;
+  routeId?: number;
   date: string;
   time: string;
   driver: string;
+  driverId?: number;
   vehicle: string;
+  vehicleId?: number;
   studentsCount: number;
   status: 'pending' | 'in-progress' | 'completed' | 'agendada' | 'concluida';
 }
