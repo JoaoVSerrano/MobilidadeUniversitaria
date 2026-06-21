@@ -36,6 +36,7 @@ public class ViagemService {
     private final com.synapse.mobilidadeUniversitaria.repositories.NotificacaoRepository notificacaoRepository;
     private final com.synapse.mobilidadeUniversitaria.repositories.NotificacaoMotoristaRepository notificacaoMotoristaRepository;
     private final com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository alunoRepository;
+    private final com.synapse.mobilidadeUniversitaria.repositories.PresencaDigitalRepository presencaDigitalRepository;
 
     public ViagemService(ViagemRepository viagemRepository,
                          MotoristaRepository motoristaRepository,
@@ -45,7 +46,8 @@ public class ViagemService {
                          QRCodeService qrCodeService,
                          com.synapse.mobilidadeUniversitaria.repositories.NotificacaoRepository notificacaoRepository,
                          com.synapse.mobilidadeUniversitaria.repositories.NotificacaoMotoristaRepository notificacaoMotoristaRepository,
-                         com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository alunoRepository) {
+                         com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository alunoRepository,
+                         com.synapse.mobilidadeUniversitaria.repositories.PresencaDigitalRepository presencaDigitalRepository) {
         this.viagemRepository = viagemRepository;
         this.motoristaRepository = motoristaRepository;
         this.veiculoRepository = veiculoRepository;
@@ -55,6 +57,7 @@ public class ViagemService {
         this.notificacaoRepository = notificacaoRepository;
         this.notificacaoMotoristaRepository = notificacaoMotoristaRepository;
         this.alunoRepository = alunoRepository;
+        this.presencaDigitalRepository = presencaDigitalRepository;
     }
 
     public ViagemResponseDTO criar(ViagemRequestDTO dto) {
@@ -95,6 +98,9 @@ public class ViagemService {
                     ". Faça sua reserva!"
                 );
                 notif.setLida(false);
+                // Adicionando a ação para facilitar a reserva
+                notif.setAcao("Reservar Agora");
+                notif.setAcaoUrl("/aluno/reservas/" + salva.getId());
                 notificacaoRepository.save(notif);
             }
         } catch (Exception e) {
@@ -262,7 +268,41 @@ public class ViagemService {
         }
         viagem.setStatus(ViagemStatus.EM_ANDAMENTO);
         viagem.setDataHoraInicio(LocalDateTime.now());
-        return viagemMapper.toResponse(viagemRepository.save(viagem));
+        Viagem salva = viagemRepository.save(viagem);
+
+        // Notificar motorista que a viagem iniciou
+        try {
+            com.synapse.mobilidadeUniversitaria.Entities.NotificacaoMotorista notifMot =
+                    new com.synapse.mobilidadeUniversitaria.Entities.NotificacaoMotorista();
+            notifMot.setMotorista(salva.getMotorista());
+            notifMot.setViagem(salva);
+            notifMot.setTipoNotificacao("VIAGEM_INICIADA");
+            notifMot.setMensagem("Você iniciou a viagem " + salva.getRota().getNomeRota() + ". Boa viagem!");
+            notifMot.setLida(false);
+            notificacaoMotoristaRepository.save(notifMot);
+        } catch (Exception e) {
+            // Log error
+        }
+
+        // Notificar alunos que reservaram a viagem
+        try {
+            List<com.synapse.mobilidadeUniversitaria.Entities.PresencaDigital> presencas = presencaDigitalRepository.findByViagemId(id);
+            for (com.synapse.mobilidadeUniversitaria.Entities.PresencaDigital presenca : presencas) {
+                if (presenca.getStatus() != com.synapse.mobilidadeUniversitaria.Entities.enums.PresencaStatus.CANCELADA) {
+                    com.synapse.mobilidadeUniversitaria.Entities.Notificacao notif = new com.synapse.mobilidadeUniversitaria.Entities.Notificacao();
+                    notif.setAluno(presenca.getAluno());
+                    notif.setViagem(salva);
+                    notif.setTipoNotificacao("VIAGEM_INICIADA");
+                    notif.setMensagem("A viagem " + salva.getRota().getNomeRota() + " acabou de iniciar! Localize o onibus.");
+                    notif.setLida(false);
+                    notificacaoRepository.save(notif);
+                }
+            }
+        } catch (Exception e) {
+            // Log error but don't fail the operation
+        }
+
+        return viagemMapper.toResponse(salva);
     }
 
     public ViagemResponseDTO finalizar(Long id) {

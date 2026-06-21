@@ -41,5 +41,7 @@ public class Notificacao {
     @Column(nullable = false)
     private Boolean lida = false;
 
+    private String acao;
+    private String acaoUrl;
 
 }

@@ -15,6 +15,9 @@ public class VeiculoMapper {
         v.setPlaca(request.placa());
         v.setModelo(request.modelo());
         v.setCapacidadeTotal(request.capacidadeTotal());
+        v.setAno(request.ano());
+        v.setStatus(request.status() != null ? request.status().toUpperCase() : "ATIVO");
+        v.setKmRodados(request.kmRodados() != null ? request.kmRodados() : 0);
 
         return v;
     }
@@ -25,6 +28,15 @@ public class VeiculoMapper {
         v.setPlaca(request.placa());
         v.setModelo(request.modelo());
         v.setCapacidadeTotal(request.capacidadeTotal());
+        if (request.ano() != null) {
+            v.setAno(request.ano());
+        }
+        if (request.status() != null) {
+            v.setStatus(request.status().toUpperCase());
+        }
+        if (request.kmRodados() != null) {
+            v.setKmRodados(request.kmRodados());
+        }
     }
 
     public VeiculoResponseDTO toResponse(Veiculo veiculo) {
@@ -35,7 +47,11 @@ public class VeiculoMapper {
                 veiculo.getId(),
                 veiculo.getPlaca(),
                 veiculo.getModelo(),
-                veiculo.getCapacidadeTotal()
+                veiculo.getCapacidadeTotal(),
+                veiculo.getAno(),
+                veiculo.getStatus(),
+                veiculo.getKmRodados(),
+                veiculo.getProximaRevisao() != null ? veiculo.getProximaRevisao().toString() : null
         );
     }
 }

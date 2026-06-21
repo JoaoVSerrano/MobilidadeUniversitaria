@@ -24,6 +24,15 @@ export class DashboardHomeComponent implements OnInit {
   maxDemand: number = 300;
 
   ngOnInit() {
+    this.loadDashboardData();
+
+    // Atualização automática a cada 30 segundos para refletir presenças em tempo real
+    setInterval(() => {
+      this.loadDashboardData();
+    }, 30000);
+  }
+
+  loadDashboardData() {
     // KPIs
     this.dashboardService.getStats().subscribe((kpi: any) => {
       this.stats = [

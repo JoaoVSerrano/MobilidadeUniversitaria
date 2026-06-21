@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../services/dashboard.service';
 import { Vehicle } from '../models/dashboard.model';
@@ -7,7 +8,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-vehicles',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './vehicles.component.html',
   styleUrl: './vehicles.component.css'
 })
@@ -24,13 +25,13 @@ export class VehiclesComponent implements OnInit {
   selectedVehicle = signal<Vehicle | null>(null);
 
   // Form data
-  formData: { code: string; plate: string; model: string; year: number | string; status: 'ativo' | 'manutencao' | 'inativo'; capacity: number } = {
-    code: '',
+  formData: { plate: string; model: string; year: number | string; status: string; capacity: number; kmRodados: number | string } = {
     plate: '',
     model: '',
     year: '',
-    status: 'ativo',
-    capacity: 0
+    status: 'ATIVO',
+    capacity: 0,
+    kmRodados: 0
   };
 
   vehicles: Vehicle[] = [];
@@ -62,8 +63,8 @@ export class VehiclesComponent implements OnInit {
         this.vehicles = data;
         this.filtered = data;
         this.totalVehicles = data.length;
-        this.activeVehicles = data.filter(v => v.status === 'ativo').length;
-        this.maintenanceVehicles = data.filter(v => v.status === 'manutencao').length;
+        this.activeVehicles = data.filter(v => v.status === 'ATIVO' || v.status === 'ativo').length;
+        this.maintenanceVehicles = data.filter(v => v.status === 'MANUTENCAO' || v.status === 'manutencao').length;
         this.totalCapacity = data.reduce((acc, v) => acc + v.capacity, 0);
         this.cdr.detectChanges();
       },
@@ -84,14 +85,45 @@ export class VehiclesComponent implements OnInit {
   }
 
   applyFilters() {
+    const statusMap: Record<string, string[]> = {
+      'Todos': [],
+      'ativo': ['ATIVO', 'ativo'],
+      'manutencao': ['MANUTENCAO', 'manutencao'],
+      'inativo': ['INATIVO', 'inativo']
+    };
+    const allowedStatuses = statusMap[this.filterStatus] || [];
+
     this.filtered = this.vehicles.filter(v => {
       const matchSearch =
-        v.code.toLowerCase().includes(this.search.toLowerCase()) ||
         v.plate.toLowerCase().includes(this.search.toLowerCase()) ||
         v.model.toLowerCase().includes(this.search.toLowerCase());
-      const matchStatus = this.filterStatus === 'Todos' || v.status === this.filterStatus;
+      const matchStatus = this.filterStatus === 'Todos' || allowedStatuses.includes(v.status);
       return matchSearch && matchStatus;
     });
+  }
+
+  getStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      'ATIVO': 'Ativo',
+      'ativo': 'Ativo',
+      'MANUTENCAO': 'Manutenção',
+      'manutencao': 'Manutenção',
+      'INATIVO': 'Inativo',
+      'inativo': 'Inativo'
+    };
+    return labels[status] ?? status;
+  }
+
+  getStatusClass(status: string): string {
+    const classes: Record<string, string> = {
+      'ATIVO': 'ativo',
+      'ativo': 'ativo',
+      'MANUTENCAO': 'manutencao',
+      'manutencao': 'manutencao',
+      'INATIVO': 'inativo',
+      'inativo': 'inativo'
+    };
+    return classes[status] ?? 'ativo';
   }
 
   // View Modal
@@ -107,7 +139,7 @@ export class VehiclesComponent implements OnInit {
 
   // Create Modal
   openCreateModal() {
-    this.formData = { code: '', plate: '', model: '', year: '', status: 'ativo', capacity: 0 };
+    this.formData = { plate: '', model: '', year: '', status: 'ATIVO', capacity: 0, kmRodados: 0 };
     this.showCreateModal.set(true);
   }
 
@@ -116,13 +148,20 @@ export class VehiclesComponent implements OnInit {
   }
 
   createVehicle() {
-    const data: Partial<Vehicle> = { code: this.formData.code, plate: this.formData.plate, model: this.formData.model, year: Number(this.formData.year), status: this.formData.status as Vehicle['status'], capacity: this.formData.capacity };
+    const data: Partial<Vehicle> = {
+      plate: this.formData.plate,
+      model: this.formData.model,
+      year: this.formData.year ? Number(this.formData.year) : null,
+      status: this.formData.status,
+      capacity: this.formData.capacity,
+      kmRodados: this.formData.kmRodados ? Number(this.formData.kmRodados) : 0
+    };
     this.svc.createVehicle(data).subscribe({
       next: () => {
         this.closeCreateModal();
         this.loadVehicles();
       },
-      error: (err) => console.error('Erro ao criar veículo:', err)
+      error: (err) => alert('Erro ao criar veículo: ' + (err.error?.message || err.message || 'Verifique os campos e tente novamente'))
     });
   }
 
@@ -130,12 +169,12 @@ export class VehiclesComponent implements OnInit {
   openEditModal(vehicle: Vehicle) {
     this.selectedVehicle.set(vehicle);
     this.formData = {
-      code: vehicle.code,
       plate: vehicle.plate,
       model: vehicle.model,
-      year: vehicle.year,
+      year: vehicle.year ?? '',
       status: vehicle.status,
-      capacity: vehicle.capacity
+      capacity: vehicle.capacity,
+      kmRodados: vehicle.kmRodados ?? 0
     };
     this.showEditModal.set(true);
   }
@@ -148,13 +187,20 @@ export class VehiclesComponent implements OnInit {
   updateVehicle() {
     const vehicle = this.selectedVehicle();
     if (vehicle) {
-      const data: Partial<Vehicle> = { code: this.formData.code, plate: this.formData.plate, model: this.formData.model, year: Number(this.formData.year), status: this.formData.status as Vehicle['status'], capacity: this.formData.capacity };
+      const data: Partial<Vehicle> = {
+        plate: this.formData.plate,
+        model: this.formData.model,
+        year: this.formData.year ? Number(this.formData.year) : null,
+        status: this.formData.status,
+        capacity: this.formData.capacity,
+        kmRodados: this.formData.kmRodados ? Number(this.formData.kmRodados) : 0
+      };
       this.svc.updateVehicle(vehicle.id, data).subscribe({
         next: () => {
           this.closeEditModal();
           this.loadVehicles();
         },
-        error: (err) => console.error('Erro ao atualizar veículo:', err)
+        error: (err) => alert('Erro ao atualizar veículo: ' + (err.error?.message || err.message || 'Verifique os campos e tente novamente'))
       });
     }
   }
@@ -178,7 +224,7 @@ export class VehiclesComponent implements OnInit {
           this.closeDeleteModal();
           this.loadVehicles();
         },
-        error: (err) => console.error('Erro ao excluir veículo:', err)
+        error: (err) => alert('Erro ao excluir veículo: ' + (err.error?.message || err.message || 'Tente novamente'))
       });
     }
   }

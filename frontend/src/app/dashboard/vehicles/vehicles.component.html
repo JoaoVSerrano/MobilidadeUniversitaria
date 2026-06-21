@@ -38,7 +38,7 @@
     <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
-    <input type="text" class="search-input" placeholder="Buscar por código, placa ou modelo..." (input)="onSearch($event)">
+    <input type="text" class="search-input" placeholder="Buscar por placa ou modelo..." (input)="onSearch($event)">
   </div>
   <select class="filter-select" (change)="onStatusChange($event)">
     <option value="Todos">Todos</option>
@@ -61,15 +61,14 @@
           </svg>
         </div>
         <div class="vehicle-id-block">
-          <span class="vehicle-code">{{ vehicle.code }}</span>
           <span class="vehicle-plate">{{ vehicle.plate }}</span>
         </div>
-        <span [class]="'vehicle-badge ' + vehicle.status">{{ vehicle.status }}</span>
+        <span [class]="'vehicle-badge ' + getStatusClass(vehicle.status)">{{ getStatusLabel(vehicle.status) }}</span>
       </div>
 
       <!-- Model & Year -->
       <div class="vehicle-model">{{ vehicle.model }}</div>
-      <div class="vehicle-year">Ano: {{ vehicle.year }}</div>
+      <div class="vehicle-year">Ano: {{ vehicle.year ?? '—' }}</div>
 
       <!-- Capacity & KM -->
       <div class="vehicle-chips">
@@ -79,7 +78,7 @@
         </div>
         <div class="vchip">
           <span class="vchip-label">KM Rodados</span>
-          <span class="vchip-value">{{ vehicle.mileage }}</span>
+          <span class="vchip-value">{{ vehicle.kmRodados ?? 0 }} km</span>
         </div>
       </div>
 
@@ -91,7 +90,7 @@
           <line x1="8" y1="2" x2="8" y2="6"></line>
           <line x1="3" y1="10" x2="21" y2="10"></line>
         </svg>
-        Próxima revisão: {{ vehicle.nextRevision }}
+        Próxima revisão: {{ vehicle.proximaRevisao ?? 'A definir' }}
       </div>
 
       <!-- CTA -->
@@ -126,14 +125,13 @@
       </div>
       @if (selectedVehicle()) {
         <div class="modal-body">
-          <div class="detail-row"><label>Código</label><span>{{ selectedVehicle()!.code }}</span></div>
           <div class="detail-row"><label>Placa</label><span>{{ selectedVehicle()!.plate }}</span></div>
           <div class="detail-row"><label>Modelo</label><span>{{ selectedVehicle()!.model }}</span></div>
-          <div class="detail-row"><label>Ano</label><span>{{ selectedVehicle()!.year }}</span></div>
+          <div class="detail-row"><label>Ano</label><span>{{ selectedVehicle()!.year ?? '—' }}</span></div>
           <div class="detail-row"><label>Capacidade</label><span>{{ selectedVehicle()!.capacity }}</span></div>
-          <div class="detail-row"><label>KM Rodados</label><span>{{ selectedVehicle()!.mileage }}</span></div>
-          <div class="detail-row"><label>Status</label><span>{{ selectedVehicle()!.status }}</span></div>
-          <div class="detail-row"><label>Próxima Revisão</label><span>{{ selectedVehicle()!.nextRevision }}</span></div>
+          <div class="detail-row"><label>KM Rodados</label><span>{{ selectedVehicle()!.kmRodados ?? 0 }} km</span></div>
+          <div class="detail-row"><label>Status</label><span>{{ getStatusLabel(selectedVehicle()!.status) }}</span></div>
+          <div class="detail-row"><label>Próxima Revisão</label><span>{{ selectedVehicle()!.proximaRevisao ?? 'A definir' }}</span></div>
         </div>
       }
     </div>
@@ -149,10 +147,6 @@
         <button class="modal-close" (click)="closeCreateModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Código</label>
-          <input type="text" [(ngModel)]="formData.code" placeholder="Ex: BUS-001">
-        </div>
         <div class="form-group">
           <label>Placa</label>
           <input type="text" [(ngModel)]="formData.plate" placeholder="Ex: ABC-1234">
@@ -170,11 +164,15 @@
           <input type="number" [(ngModel)]="formData.capacity" placeholder="45">
         </div>
         <div class="form-group">
+          <label>KM Rodados</label>
+          <input type="number" [(ngModel)]="formData.kmRodados" placeholder="0">
+        </div>
+        <div class="form-group">
           <label>Status</label>
           <select [(ngModel)]="formData.status">
-            <option value="ativo">Ativo</option>
-            <option value="manutencao">Manutenção</option>
-            <option value="inativo">Inativo</option>
+            <option value="ATIVO">Ativo</option>
+            <option value="MANUTENCAO">Manutenção</option>
+            <option value="INATIVO">Inativo</option>
           </select>
         </div>
         <div class="modal-actions">
@@ -196,10 +194,6 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label>Código</label>
-          <input type="text" [(ngModel)]="formData.code">
-        </div>
-        <div class="form-group">
           <label>Placa</label>
           <input type="text" [(ngModel)]="formData.plate">
         </div>
@@ -216,11 +210,15 @@
           <input type="number" [(ngModel)]="formData.capacity">
         </div>
         <div class="form-group">
+          <label>KM Rodados</label>
+          <input type="number" [(ngModel)]="formData.kmRodados">
+        </div>
+        <div class="form-group">
           <label>Status</label>
           <select [(ngModel)]="formData.status">
-            <option value="ativo">Ativo</option>
-            <option value="manutencao">Manutenção</option>
-            <option value="inativo">Inativo</option>
+            <option value="ATIVO">Ativo</option>
+            <option value="MANUTENCAO">Manutenção</option>
+            <option value="INATIVO">Inativo</option>
           </select>
         </div>
         <div class="modal-actions">
@@ -241,7 +239,7 @@
         <button class="modal-close" (click)="closeDeleteModal()">✕</button>
       </div>
       <div class="modal-body">
-        <p class="confirm-text">Tem certeza que deseja excluir o veículo <strong>{{ selectedVehicle()?.code }}</strong>?</p>
+        <p class="confirm-text">Tem certeza que deseja excluir o veículo <strong>{{ selectedVehicle()?.plate }}</strong>?</p>
         <div class="modal-actions">
           <button class="btn-cancel" (click)="closeDeleteModal()">Cancelar</button>
           <button class="btn-danger" (click)="confirmDelete()">Excluir</button>

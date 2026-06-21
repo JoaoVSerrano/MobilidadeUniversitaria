@@ -18,4 +18,6 @@ public interface PresencaDigitalRepository extends JpaRepository<PresencaDigital
     Optional<PresencaDigital> findByAlunoIdAndViagemId(Long alunoId, Long viagemId);
 
     long countByViagemIdAndStatusNot(Long viagemId, PresencaStatus status);
+
+    void deleteByAlunoId(Long alunoId);
 }

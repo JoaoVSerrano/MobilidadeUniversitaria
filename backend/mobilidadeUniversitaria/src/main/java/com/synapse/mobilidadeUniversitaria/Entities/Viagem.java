@@ -49,6 +49,8 @@ public class Viagem {
     @ManyToOne
     @JoinColumn(name = "rota_id")
     private Rota rota;
+
+    private Integer paradaAtualIndex = 0;
 }
 
 

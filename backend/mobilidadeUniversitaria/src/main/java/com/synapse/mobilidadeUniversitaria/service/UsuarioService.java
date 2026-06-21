@@ -1,17 +1,29 @@
 package com.synapse.mobilidadeUniversitaria.service;
 
+import com.synapse.mobilidadeUniversitaria.Entities.Aluno;
 import com.synapse.mobilidadeUniversitaria.Entities.Endereco;
+import com.synapse.mobilidadeUniversitaria.Entities.Motorista;
 import com.synapse.mobilidadeUniversitaria.Entities.Usuario;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.LocalType;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import com.synapse.mobilidadeUniversitaria.dtos.request.CriarUsuarioRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.request.UsuarioUpdateRequestDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.MotoristaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.UsuarioStatsResponseDTO;
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
+import com.synapse.mobilidadeUniversitaria.mapper.AlunoMapper;
 import com.synapse.mobilidadeUniversitaria.mapper.EnderecoMapper;
+import com.synapse.mobilidadeUniversitaria.mapper.MotoristaMapper;
+import com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.EnderecoRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.FaculdadeRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.NotificacaoMotoristaRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.NotificacaoRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.PresencaDigitalRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.UsuarioRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.ViagemRepository;
 import com.synapse.mobilidadeUniversitaria.security.AuthorizationService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -30,6 +42,14 @@ public class UsuarioService {
     private final UsuarioValidationService usuarioValidationService;
     private final PasswordEncoder passwordEncoder;
     private final AuthorizationService authorizationService;
+    private final AlunoMapper alunoMapper;
+    private final MotoristaMapper motoristaMapper;
+    private final FaculdadeRepository faculdadeRepository;
+    private final AlunoRepository alunoRepository;
+    private final NotificacaoRepository notificacaoRepository;
+    private final NotificacaoMotoristaRepository notificacaoMotoristaRepository;
+    private final ViagemRepository viagemRepository;
+    private final PresencaDigitalRepository presencaDigitalRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -39,13 +59,29 @@ public class UsuarioService {
                           EnderecoRepository enderecoRepository,
                           UsuarioValidationService usuarioValidationService,
                           PasswordEncoder passwordEncoder,
-                          AuthorizationService authorizationService) {
+                          AuthorizationService authorizationService,
+                          AlunoMapper alunoMapper,
+                          MotoristaMapper motoristaMapper,
+                          FaculdadeRepository faculdadeRepository,
+                          AlunoRepository alunoRepository,
+                          NotificacaoRepository notificacaoRepository,
+                          NotificacaoMotoristaRepository notificacaoMotoristaRepository,
+                          ViagemRepository viagemRepository,
+                          PresencaDigitalRepository presencaDigitalRepository) {
         this.usuarioRepository = usuarioRepository;
         this.enderecoMapper = enderecoMapper;
         this.enderecoRepository = enderecoRepository;
         this.usuarioValidationService = usuarioValidationService;
         this.passwordEncoder = passwordEncoder;
         this.authorizationService = authorizationService;
+        this.alunoMapper = alunoMapper;
+        this.motoristaMapper = motoristaMapper;
+        this.faculdadeRepository = faculdadeRepository;
+        this.alunoRepository = alunoRepository;
+        this.notificacaoRepository = notificacaoRepository;
+        this.notificacaoMotoristaRepository = notificacaoMotoristaRepository;
+        this.viagemRepository = viagemRepository;
+        this.presencaDigitalRepository = presencaDigitalRepository;
     }
 
     @Transactional
@@ -155,8 +191,20 @@ public class UsuarioService {
         );
     }
 
+    @Transactional
     public void deletar(Long id) {
         Usuario usuario = buscarUsuarioPorId(id);
+
+        // Deletar notificações associadas ao usuário
+        notificacaoRepository.deleteByAlunoId(id);
+        notificacaoMotoristaRepository.deleteByMotoristaId(id);
+
+        // Deletar viagens associadas ao usuário (se for motorista)
+        viagemRepository.deleteByMotoristaId(id);
+
+        // Deletar presenças digitais associadas ao usuário (se for aluno)
+        presencaDigitalRepository.deleteByAlunoId(id);
+
         usuarioRepository.delete(usuario);
     }
 

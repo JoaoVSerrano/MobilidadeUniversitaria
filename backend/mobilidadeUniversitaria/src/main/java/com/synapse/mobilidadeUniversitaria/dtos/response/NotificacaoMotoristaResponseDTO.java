@@ -2,9 +2,9 @@ package com.synapse.mobilidadeUniversitaria.dtos.response;
 
 import java.time.LocalDateTime;
 
-public record NotificacaoResponseDTO(
+public record NotificacaoMotoristaResponseDTO(
         Long id,
-        Long alunoId,
+        Long motoristaId,
         Long viagemId,
         String tipoNotificacao,
         String mensagem,
@@ -12,5 +12,4 @@ public record NotificacaoResponseDTO(
         Boolean lida,
         String acao,
         String acaoUrl
-) {
-}
+) {}

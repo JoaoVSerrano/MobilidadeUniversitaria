@@ -16,6 +16,18 @@ export interface User {
   type: 'aluno' | 'motorista' | 'admin';
   status: 'Ativo' | 'Pendente' | 'Inativo';
   createdAt: string;
+  address?: {
+    cep: string;
+    rua: string;
+    bairro: string;
+    numero: string;
+    complemento?: string;
+    tipoLocal?: string;
+  };
+  faculdade?: {
+    id: number;
+    nome: string;
+  };
 }
 
 export interface RouteStop {
@@ -28,24 +40,20 @@ export interface Route {
   name: string;
   description: string;
   originDest: string;
-  distance: string;
-  time: string;
-  capacity: number;
   status: 'Ativa' | 'Inativa';
   stops: RouteStop[];
-  paradas?: string[]; // Array de strings para envio ao backend
+  paradas?: string[];
 }
 
 export interface Vehicle {
   id: number;
-  code: string;
   plate: string;
   model: string;
-  year: number;
-  status: 'ativo' | 'manutencao' | 'inativo';
+  year: number | null;
+  status: string;
   capacity: number;
-  mileage: string;
-  nextRevision: string;
+  kmRodados: number | null;
+  proximaRevisao: string | null;
 }
 
 export interface Trip {

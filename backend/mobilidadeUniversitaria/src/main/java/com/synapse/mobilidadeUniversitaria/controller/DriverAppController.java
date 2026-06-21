@@ -28,6 +28,7 @@ public class DriverAppController {
     private final AuthorizationService authorizationService;
 
     @GetMapping("/trips/today")
+    @PreAuthorize("hasRole('MOTORISTA')")
     public ResponseEntity<List<ViagemResponseDTO>> listarViagensDeHoje() {
         return ResponseEntity.ok(viagemService.listarHojePorMotorista(authorizationService.currentUser().getId()));
     }

@@ -10,6 +10,8 @@ export interface Notificacao {
   mensagem: string;
   lida: boolean;
   horario: string;
+  acao?: string;
+  acaoUrl?: string;
 }
 
 @Component({
@@ -44,7 +46,9 @@ export class AppAlunoNotificacoesComponent implements OnInit {
           titulo: this.mapearTitulo(n.tipoNotificacao),
           mensagem: n.mensagem,
           lida: n.lida,
-          horario: this.formatarHorario(n.dataHoraEnvio)
+          horario: this.formatarHorario(n.dataHoraEnvio),
+          acao: n.acao,
+          acaoUrl: n.acaoUrl
         }));
         this.notificacoes.set(notificacoesMapeadas);
         this.isLoading.set(false);

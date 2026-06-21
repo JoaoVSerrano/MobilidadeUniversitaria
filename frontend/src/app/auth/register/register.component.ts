@@ -108,7 +108,7 @@ export class RegisterComponent {
     this.isLoading.set(true);
 
     // Enviar solicitação de cadastro de aluno (não cria usuário diretamente)
-    this.http.post(`${this.baseUrl}/auth/register/student-request`, {
+    this.http.post<any>(`${this.baseUrl}/auth/register/student-request`, {
       nome: this.formData.nome,
       email: this.formData.email,
       cpf: this.formData.cpf,
@@ -123,8 +123,8 @@ export class RegisterComponent {
       complemento: this.formData.endereco.complemento,
       tipoLocal: this.formData.endereco.tipoLocal
     }).subscribe({
-      next: () => {
-        this.successMessage.set('Solicitação enviada com sucesso! Aguarde aprovação do gestor.');
+      next: (res) => {
+        this.successMessage.set(res.mensagem || 'Solicitação enviada com sucesso! Aguarde aprovação do gestor.');
         this.isLoading.set(false);
         setTimeout(() => {
           this.router.navigate(['/login']);
@@ -132,20 +132,8 @@ export class RegisterComponent {
       },
       error: (err: any) => {
         this.isLoading.set(false);
-        const errorMessage = err.error?.message || err.message || '';
-        if (errorMessage.includes('Email ja cadastrado')) {
-          this.errorMessage.set('Este email já está cadastrado');
-        } else if (errorMessage.includes('CPF ja cadastrado')) {
-          this.errorMessage.set('Este CPF já está cadastrado');
-        } else if (errorMessage.includes('Ja existe uma solicitacao pendente')) {
-          this.errorMessage.set('Já existe uma solicitação pendente para este email ou CPF');
-        } else if (errorMessage.includes('Nome da faculdade e obrigatorio')) {
-          this.errorMessage.set('Nome da faculdade é obrigatório');
-        } else if (err.error?.message) {
-          this.errorMessage.set(err.error.message);
-        } else {
-          this.errorMessage.set('Erro ao enviar solicitação. Tente novamente.');
-        }
+        this.errorMessage.set(err.error?.message || 'Erro ao enviar solicitacao. Tente novamente.');
+        console.error('Erro ao enviar solicitação:', err);
       }
     });
   }

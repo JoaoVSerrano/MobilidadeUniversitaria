@@ -74,6 +74,7 @@ public class StudentRegistrationService {
         return result;
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public UsuarioResponseDTO approveStudentRequest(Long id) {
         StudentRegistrationRequestDTO dto = pendingRequests.get(id);
         if (dto == null) {

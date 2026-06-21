@@ -82,6 +82,26 @@ public class NotificacaoService {
         Long alunoId = notificacao.getAluno() == null ? null : notificacao.getAluno().getId();
         Long viagemId = notificacao.getViagem() == null ? null : notificacao.getViagem().getId();
 
+        String acao = null;
+        String acaoUrl = null;
+
+        if (viagemId != null) {
+            switch (notificacao.getTipoNotificacao()) {
+                case "NOVA_VIAGEM" -> {
+                    acao = "Reservar Presença";
+                    acaoUrl = "/aluno/reserva?viagemId=" + viagemId;
+                }
+                case "VIAGEM_INICIADA" -> {
+                    acao = "Ver Viagem";
+                    acaoUrl = "/aluno/minhas-viagens";
+                }
+                default -> {
+                    acao = "Ver Detalhes";
+                    acaoUrl = "/aluno/viagem/" + viagemId;
+                }
+            }
+        }
+
         return new NotificacaoResponseDTO(
                 notificacao.getId(),
                 alunoId,
@@ -89,7 +109,9 @@ public class NotificacaoService {
                 notificacao.getTipoNotificacao(),
                 notificacao.getMensagem(),
                 notificacao.getDataHoraEnvio(),
-                notificacao.getLida()
+                notificacao.getLida(),
+                acao,
+                acaoUrl
         );
     }
 }

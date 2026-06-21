@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/faculdades")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('GESTOR')")
 public class FaculdadeController {
 
     private final FaculdadeService faculdadeService;
