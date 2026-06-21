@@ -19,29 +19,49 @@
 
         <div class="input-group">
           <label for="nome">Nome Completo</label>
-          <input type="text" id="nome" [(ngModel)]="formData.nome" name="nome" placeholder="Seu nome completo" required>
+          <input type="text" id="nome" [(ngModel)]="formData.nome" name="nome" placeholder="Seu nome completo" required (input)="clearError()">
         </div>
 
         <div class="input-group">
           <label for="email">Email</label>
-          <input type="email" id="email" [(ngModel)]="formData.email" name="email" placeholder="seu@email.com" required>
+          <input type="email" id="email" [(ngModel)]="formData.email" name="email" placeholder="seu@email.com" required (input)="clearError()">
         </div>
 
         <div class="input-row">
           <div class="input-group">
             <label for="cpf">CPF</label>
-            <input type="text" id="cpf" (input)="formatCPF($event)" name="cpf" placeholder="000.000.000-00" required>
+            <input type="text" id="cpf" (input)="formatCPF($event); clearError()" name="cpf" placeholder="000.000.000-00" required>
           </div>
 
           <div class="input-group">
             <label for="telefone">Telefone</label>
-            <input type="tel" id="telefone" (input)="formatTelefone($event)" name="telefone" placeholder="(00) 00000-0000" required>
+            <input type="tel" id="telefone" (input)="formatTelefone($event); clearError()" name="telefone" placeholder="(00) 00000-0000" required>
           </div>
         </div>
 
         <div class="input-group">
           <label for="senha">Senha</label>
-          <input type="password" id="senha" [(ngModel)]="formData.senha" name="senha" placeholder="Mínimo 6 caracteres" required>
+          <input type="password" id="senha" [(ngModel)]="formData.senha" name="senha" placeholder="Mínimo 6 caracteres" required (input)="clearError()">
+        </div>
+
+        <div class="input-group">
+          <label for="nomeFaculdade">Nome da Faculdade *</label>
+          <div class="input-with-icon">
+            <input type="text" id="nomeFaculdade" [(ngModel)]="formData.nomeFaculdade" name="nomeFaculdade" placeholder="Nome da instituição de ensino" required (input)="onFaculdadeInput($event)">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          @if (showFaculdadeSuggestions()) {
+            <div class="suggestions-dropdown">
+              @for (faculdade of faculdadeSuggestions(); track faculdade.id) {
+                <div class="suggestion-item" (click)="selectFaculdade(faculdade.nome)">
+                  {{ faculdade.nome }}
+                </div>
+              }
+            </div>
+          }
         </div>
       </div>
 

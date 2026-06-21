@@ -20,4 +20,6 @@ public interface NotificacaoRepository extends JpaRepository<Notificacao, Long> 
     Page<Notificacao> findByAlunoId(Long alunoId, Pageable pageable);
 
     List<Notificacao> findByTipoNotificacao(String tipoNotificacao);
+
+    void deleteByViagemId(Long viagemId);
 }

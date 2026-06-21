@@ -24,6 +24,9 @@ public class Rota {
     @Column(nullable = false)
     private String pontoParada;
 
+    @Column(columnDefinition = "TEXT")
+    private String paradas; // JSON array de strings: ["Parada 1", "Parada 2"]
+
     @Column(nullable = false)
     private Boolean ativa = true;
 

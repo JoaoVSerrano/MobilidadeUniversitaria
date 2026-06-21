@@ -30,7 +30,7 @@ export class DashboardService {
     );
   }
 
-  public createUser(user: Partial<User> & { type?: string }): Observable<any> {
+  public createUser(user: Partial<User> & { type?: string; password?: string }): Observable<any> {
     const tipoMap: Record<string, string> = {
       'aluno': 'ALUNO',
       'motorista': 'MOTORISTA',
@@ -41,7 +41,7 @@ export class DashboardService {
       email: user.email,
       cpf: user.cpf,
       telefone: user.phone,
-      senha: 'password123',
+      senha: user.password || 'password123',
       tipoUsuario: tipoMap[user.type || 'aluno'] || 'ALUNO'
     });
   }
@@ -79,20 +79,24 @@ export class DashboardService {
     );
   }
 
-  public createRoute(route: Partial<Route>): Observable<Route> {
+  public createRoute(route: Partial<Route> & { paradas?: string[] }): Observable<Route> {
+    const paradasJson = route.paradas ? JSON.stringify(route.paradas) : null;
     return this.api.post('/rotas', {
       nomeRota: route.name,
       descricao: route.description,
       pontoParada: route.originDest,
+      paradas: paradasJson,
       ativa: true
     }) as Observable<Route>;
   }
 
-  public updateRoute(id: number, route: Partial<Route>): Observable<Route> {
+  public updateRoute(id: number, route: Partial<Route> & { paradas?: string[] }): Observable<Route> {
+    const paradasJson = route.paradas ? JSON.stringify(route.paradas) : null;
     return this.api.put(`/rotas/${id}`, {
       nomeRota: route.name,
       descricao: route.description,
       pontoParada: route.originDest,
+      paradas: paradasJson,
       ativa: route.status === 'Ativa'
     }) as Observable<Route>;
   }
@@ -186,6 +190,23 @@ export class DashboardService {
     }) as Observable<Trip>;
   }
 
+  public updateTrip(id: number, trip: any): Observable<Trip> {
+    const formatDate = (dt: string) => {
+      if (!dt) return '';
+      const [date, time] = dt.split('T');
+      const [y, m, d] = date.split('-');
+      return `${d}/${m}/${y} ${time || '00:00'}`;
+    };
+
+    return this.api.put(`/viagens/${id}`, {
+      rotaId: Number(trip.rotaId),
+      motoristaId: Number(trip.motoristaId),
+      veiculoId: Number(trip.veiculoId),
+      dataHoraPartida: formatDate(trip.dataHoraPartida),
+      dataHoraChegadaPrevista: formatDate(trip.dataHoraChegadaPrevista)
+    }) as Observable<Trip>;
+  }
+
   public getDrivers(): Observable<any[]> {
     return this.api.get('/motoristas').pipe(
       map((data) => (data as any[]).map(d => ({
@@ -209,7 +230,7 @@ export class DashboardService {
       'AGENDADA': 'agendada',
       'EM_ANDAMENTO': 'in-progress',
       'FINALIZADA': 'completed',
-      'CANCELADA': 'pending'
+      'CANCELADA': 'concluida'
     };
     return statusMap[status] || 'pending';
   }

@@ -49,6 +49,13 @@ public class FaculdadeService {
                 .collect(Collectors.toList());
     }
 
+    public List<FaculdadeResponseDTO> buscarPorNome(String nome) {
+        return faculdadeRepository.findByNomeContainingIgnoreCase(nome)
+                .stream()
+                .map(faculdadeMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
     public FaculdadeResponseDTO atualizar(Long id, FaculdadeRequestDTO dto) {
         Faculdade faculdade = buscarFaculdadePorId(id);
 

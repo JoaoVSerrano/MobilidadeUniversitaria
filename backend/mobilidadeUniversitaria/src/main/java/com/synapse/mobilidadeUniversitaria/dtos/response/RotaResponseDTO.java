@@ -4,6 +4,7 @@ public record RotaResponseDTO(
         Long id,
         String nomeRota,
         String descricao,
-        String pontoParada
+        String pontoParada,
+        String paradas
 ) {
 }

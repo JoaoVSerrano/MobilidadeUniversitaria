@@ -140,4 +140,8 @@ export class AuthService {
 
     return throwError(() => new Error(errorMessage));
   }
+
+  searchFaculdades(nome: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/faculdades/buscar?nome=${nome}`);
+  }
 }

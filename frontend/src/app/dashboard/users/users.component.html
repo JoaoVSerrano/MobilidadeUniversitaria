@@ -23,7 +23,7 @@
     <h2 class="section-title">Solicitações de Cadastro Pendentes</h2>
     <div class="requests-list">
       @for (request of studentRequests(); track request.id) {
-        <div class="request-card">
+        <div class="request-card" (click)="openRequestViewModal(request)">
           <div class="request-info">
             <div class="request-avatar">
               <span>{{ request.nome.substring(0, 2).toUpperCase() }}</span>
@@ -35,7 +35,7 @@
               <p class="request-phone">{{ request.telefone }}</p>
             </div>
           </div>
-          <div class="request-actions">
+          <div class="request-actions" (click)="$event.stopPropagation()">
             <button class="btn-approve" (click)="approveStudentRequest(request.id)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                 <polyline points="20 6 9 17 4 12"></polyline>
@@ -253,6 +253,13 @@
           <input type="text" name="createPhone" [(ngModel)]="formData.phone" placeholder="(00) 00000-0000">
         </div>
         <div class="form-group">
+          <label>Senha de Acesso</label>
+          <input type="password" name="createPassword" [(ngModel)]="formData.password" placeholder="Mínimo 6 caracteres">
+          <small style="color:#6b7280;font-size:12px">
+            Se não informada, será usada "password123"
+          </small>
+        </div>
+        <div class="form-group">
           <label>Tipo de Usuário</label>
           <select name="createType" [(ngModel)]="formData.type">
             <option value="aluno">Aluno</option>
@@ -323,6 +330,48 @@
           <button class="btn-danger" (click)="confirmDelete()">Excluir</button>
         </div>
       </div>
+    </div>
+  </div>
+}
+
+<!-- Request View Modal -->
+@if (showRequestViewModal()) {
+  <div class="modal-overlay" (click)="closeRequestViewModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Detalhes da Solicitação de Cadastro</h2>
+        <button class="modal-close" (click)="closeRequestViewModal()">✕</button>
+      </div>
+      @if (selectedRequest()) {
+        <div class="modal-body">
+          <div class="detail-section">
+            <h3>Dados Pessoais</h3>
+            <div class="detail-row"><label>Nome</label><span>{{ selectedRequest()!.nome }}</span></div>
+            <div class="detail-row"><label>Email</label><span>{{ selectedRequest()!.email }}</span></div>
+            <div class="detail-row"><label>CPF</label><span>{{ selectedRequest()!.cpf }}</span></div>
+            <div class="detail-row"><label>Telefone</label><span>{{ selectedRequest()!.telefone }}</span></div>
+            <div class="detail-row"><label>Faculdade</label><span>{{ selectedRequest()!.nomeFaculdade }}</span></div>
+          </div>
+          <div class="detail-section">
+            <h3>Endereço</h3>
+            <div class="detail-row"><label>CEP</label><span>{{ selectedRequest()!.cep }}</span></div>
+            <div class="detail-row"><label>Rua</label><span>{{ selectedRequest()!.rua }}</span></div>
+            <div class="detail-row"><label>Bairro</label><span>{{ selectedRequest()!.bairro }}</span></div>
+            <div class="detail-row"><label>Número</label><span>{{ selectedRequest()!.numero }}</span></div>
+            <div class="detail-row"><label>Complemento</label><span>{{ selectedRequest()!.complemento }}</span></div>
+            <div class="detail-row"><label>Tipo de Local</label><span>{{ selectedRequest()!.tipoLocal }}</span></div>
+          </div>
+          <div class="detail-section">
+            <h3>Informações da Solicitação</h3>
+            <div class="detail-row"><label>Status</label><span>{{ selectedRequest()!.status }}</span></div>
+            <div class="detail-row"><label>Data de Criação</label><span>{{ selectedRequest()!.createdAt }}</span></div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" (click)="closeRequestViewModal()">Fechar</button>
+            <button class="btn-confirm" (click)="approveStudentRequest(selectedRequest()!.id)">Aprovar</button>
+          </div>
+        </div>
+      }
     </div>
   </div>
 }

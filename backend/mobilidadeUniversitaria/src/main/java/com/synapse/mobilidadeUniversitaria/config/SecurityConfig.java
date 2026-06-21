@@ -98,6 +98,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/viagens/**", "/api/trips/**").hasRole("GESTOR")
                         .requestMatchers("/api/presencas/**").hasAnyRole("GESTOR", "ALUNO", "MOTORISTA")
                         .requestMatchers("/api/notificacoes/**").hasAnyRole("GESTOR", "ALUNO", "MOTORISTA")
+                        .requestMatchers("/api/notificacoes/motorista/**").hasRole("MOTORISTA")
                         .requestMatchers("/api/student/**").hasRole("ALUNO")
                         .requestMatchers("/api/driver/**").hasRole("MOTORISTA")
                         .requestMatchers("/api/drivers/**").hasRole("GESTOR")

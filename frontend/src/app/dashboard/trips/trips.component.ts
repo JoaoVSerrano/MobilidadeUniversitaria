@@ -33,9 +33,9 @@ export class TripsComponent implements OnInit {
   selectedTrip = signal<Trip | null>(null);
 
   formData = {
-    rotaId: '',
-    motoristaId: '',
-    veiculoId: '',
+    rotaId: '' as string | number,
+    motoristaId: '' as string | number,
+    veiculoId: '' as string | number,
     dataHoraPartida: '',
     dataHoraChegadaPrevista: ''
   };
@@ -131,6 +131,13 @@ export class TripsComponent implements OnInit {
 
   openEditModal(trip: Trip) {
     this.selectedTrip.set(trip);
+    this.formData = {
+      rotaId: String(trip.routeId || ''),
+      motoristaId: String(trip.driverId || ''),
+      veiculoId: String(trip.vehicleId || ''),
+      dataHoraPartida: trip.date || '',
+      dataHoraChegadaPrevista: trip.time || ''
+    };
     this.showEditModal.set(true);
   }
 
@@ -140,9 +147,26 @@ export class TripsComponent implements OnInit {
   }
 
   updateTrip() {
-    console.log('updateTrip called');
-    this.closeEditModal();
-    this.loadTrips();
+    console.log('updateTrip called with formData:', this.formData);
+    const trip = this.selectedTrip();
+    if (!trip) return;
+
+    if (!this.formData.rotaId || !this.formData.motoristaId || !this.formData.veiculoId
+        || !this.formData.dataHoraPartida || !this.formData.dataHoraChegadaPrevista) {
+      alert('Por favor, preencha todos os campos da viagem.');
+      return;
+    }
+
+    this.svc.updateTrip(trip.id, this.formData).subscribe({
+      next: (response: any) => {
+        console.log('Trip updated successfully:', response);
+        this.closeEditModal();
+        this.loadTrips();
+      },
+      error: (err: any) => {
+        alert('Erro ao atualizar viagem: ' + (err.error?.message || err.message || 'Verifique os campos e tente novamente'));
+      }
+    });
   }
 
   openDeleteModal(trip: Trip) {
@@ -165,7 +189,10 @@ export class TripsComponent implements OnInit {
           this.closeDeleteModal();
           this.loadTrips();
         },
-        error: (err) => console.error('Erro ao excluir viagem:', err)
+        error: (err) => {
+          console.error('Erro ao excluir viagem:', err);
+          alert('Erro ao excluir viagem: ' + (err.error?.message || err.message || 'Tente novamente'));
+        }
       });
     }
   }

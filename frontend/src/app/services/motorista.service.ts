@@ -20,4 +20,12 @@ export class MotoristaService {
   getViagensByMotoristaId(id: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/motoristas/${id}/viagens`);
   }
+
+  getNotificacoesMotorista(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/notificacoes/motorista`);
+  }
+
+  marcarNotificacaoMotoristaLida(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/notificacoes/motorista/${id}/lida`, {});
+  }
 }

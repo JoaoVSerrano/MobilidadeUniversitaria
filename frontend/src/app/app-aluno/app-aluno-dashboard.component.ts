@@ -66,12 +66,39 @@ export class AppAlunoDashboardComponent implements OnInit {
       }
     });
 
-    // Carregar notificações recentes (mock data for demo)
-    this.notificacoesRecentes.set([
-      { id: 1, mensagem: 'Sua reserva para amanhã foi confirmada', horario: '10:30', lida: false },
-      { id: 2, mensagem: 'Ônibus próximo do horário de saída', horario: '09:15', lida: true },
-      { id: 3, mensagem: 'Ônibus com 5 minutos de atraso', horario: '08:45', lida: true }
-    ]);
+    // Carregar notificações recentes da API
+    this.alunoService.getNotificacoes().subscribe({
+      next: (notificacoes: any[]) => {
+        const notificacoesMapeadas = notificacoes.slice(0, 3).map(n => ({
+          id: n.id,
+          mensagem: n.mensagem,
+          horario: this.formatarHorario(n.dataHoraEnvio),
+          lida: n.lida
+        }));
+        this.notificacoesRecentes.set(notificacoesMapeadas);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar notificações:', err);
+        this.notificacoesRecentes.set([]);
+      }
+    });
+  }
+
+  formatarHorario(dataHora: string): string {
+    if (!dataHora) return '';
+    const data = new Date(dataHora);
+    const agora = new Date();
+    const diffMs = agora.getTime() - data.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHoras = Math.floor(diffMs / 3600000);
+    const diffDias = Math.floor(diffMs / 86400000);
+
+    if (diffMin < 1) return 'Agora';
+    if (diffMin < 60) return `${diffMin} min atrás`;
+    if (diffHoras < 24) return `${diffHoras}h atrás`;
+    if (diffDias === 1) return 'Ontem';
+    if (diffDias < 7) return `${diffDias} dias atrás`;
+    return data.toLocaleDateString('pt-BR');
   }
 
   irParaReservas(): void {

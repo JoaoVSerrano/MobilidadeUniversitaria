@@ -15,6 +15,7 @@ public class RotaMapper {
         rota.setNomeRota(request.nomeRota());
         rota.setDescricao(request.descricao());
         rota.setPontoParada(request.pontoParada());
+        rota.setParadas(request.paradas());
 
         return rota;
     }
@@ -25,6 +26,7 @@ public class RotaMapper {
         rota.setNomeRota(request.nomeRota());
         rota.setDescricao(request.descricao());
         rota.setPontoParada(request.pontoParada());
+        rota.setParadas(request.paradas());
     }
 
     public RotaResponseDTO toResponse(Rota rota) {
@@ -34,7 +36,8 @@ public class RotaMapper {
                 rota.getId(),
                 rota.getNomeRota(),
                 rota.getDescricao(),
-                rota.getPontoParada()
+                rota.getPontoParada(),
+                rota.getParadas()
         );
     }
 }

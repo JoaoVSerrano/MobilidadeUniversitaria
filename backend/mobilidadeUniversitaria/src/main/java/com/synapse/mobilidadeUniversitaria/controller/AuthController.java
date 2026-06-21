@@ -20,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -44,13 +45,8 @@ public class AuthController {
 
     @PostMapping("/register/student-request")
     public ResponseEntity<String> registerStudentRequest(@Valid @RequestBody StudentRegistrationRequestDTO dto) {
-        try {
-            studentRegistrationService.createStudentRequest(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Solicitação de cadastro enviada com sucesso");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Erro ao processar solicitação: " + e.getMessage());
-        }
+        studentRegistrationService.createStudentRequest(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Solicitação de cadastro enviada com sucesso");
     }
 
     @GetMapping("/student-requests")

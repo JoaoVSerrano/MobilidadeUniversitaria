@@ -33,19 +33,28 @@ public class ViagemService {
     private final RotaRepository rotaRepository;
     private final ViagemMapper viagemMapper;
     private final QRCodeService qrCodeService;
+    private final com.synapse.mobilidadeUniversitaria.repositories.NotificacaoRepository notificacaoRepository;
+    private final com.synapse.mobilidadeUniversitaria.repositories.NotificacaoMotoristaRepository notificacaoMotoristaRepository;
+    private final com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository alunoRepository;
 
     public ViagemService(ViagemRepository viagemRepository,
                          MotoristaRepository motoristaRepository,
                          VeiculoRepository veiculoRepository,
                          RotaRepository rotaRepository,
                          ViagemMapper viagemMapper,
-                         QRCodeService qrCodeService) {
+                         QRCodeService qrCodeService,
+                         com.synapse.mobilidadeUniversitaria.repositories.NotificacaoRepository notificacaoRepository,
+                         com.synapse.mobilidadeUniversitaria.repositories.NotificacaoMotoristaRepository notificacaoMotoristaRepository,
+                         com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository alunoRepository) {
         this.viagemRepository = viagemRepository;
         this.motoristaRepository = motoristaRepository;
         this.veiculoRepository = veiculoRepository;
         this.rotaRepository = rotaRepository;
         this.viagemMapper = viagemMapper;
         this.qrCodeService = qrCodeService;
+        this.notificacaoRepository = notificacaoRepository;
+        this.notificacaoMotoristaRepository = notificacaoMotoristaRepository;
+        this.alunoRepository = alunoRepository;
     }
 
     public ViagemResponseDTO criar(ViagemRequestDTO dto) {
@@ -69,6 +78,47 @@ public class ViagemService {
         viagem.setRota(rota);
 
         Viagem salva = viagemRepository.save(viagem);
+
+        // Notificar todos os alunos ativos sobre a nova viagem
+        try {
+            List<com.synapse.mobilidadeUniversitaria.Entities.Aluno> alunos = alunoRepository.findAll();
+            for (com.synapse.mobilidadeUniversitaria.Entities.Aluno aluno : alunos) {
+                com.synapse.mobilidadeUniversitaria.Entities.Notificacao notif =
+                        new com.synapse.mobilidadeUniversitaria.Entities.Notificacao();
+                notif.setAluno(aluno);
+                notif.setViagem(salva);
+                notif.setTipoNotificacao("NOVA_VIAGEM");
+                notif.setMensagem(
+                    "Nova viagem disponível: " + salva.getRota().getNomeRota() +
+                    " em " + salva.getDataHoraPartida().toLocalDate() +
+                    " às " + salva.getDataHoraPartida().toLocalTime().toString().substring(0, 5) +
+                    ". Faça sua reserva!"
+                );
+                notif.setLida(false);
+                notificacaoRepository.save(notif);
+            }
+        } catch (Exception e) {
+            // Não impede a criação da viagem se as notificações falharem
+        }
+
+        // Notificar o motorista designado
+        try {
+            com.synapse.mobilidadeUniversitaria.Entities.NotificacaoMotorista notifMot =
+                    new com.synapse.mobilidadeUniversitaria.Entities.NotificacaoMotorista();
+            notifMot.setMotorista(motorista);
+            notifMot.setViagem(salva);
+            notifMot.setTipoNotificacao("VIAGEM_DESIGNADA");
+            notifMot.setMensagem(
+                "Você foi designado para a viagem: " + salva.getRota().getNomeRota() +
+                " em " + salva.getDataHoraPartida().toLocalDate() +
+                " às " + salva.getDataHoraPartida().toLocalTime().toString().substring(0, 5)
+            );
+            notifMot.setLida(false);
+            notificacaoMotoristaRepository.save(notifMot);
+        } catch (Exception e) {
+            // Não impede a criação da viagem
+        }
+
         return viagemMapper.toResponse(salva);
     }
 
@@ -158,6 +208,25 @@ public class ViagemService {
         viagem.setRota(rota);
 
         Viagem atualizada = viagemRepository.save(viagem);
+
+        // Notificar o motorista sobre a atualização da viagem
+        try {
+            com.synapse.mobilidadeUniversitaria.Entities.NotificacaoMotorista notifMot =
+                    new com.synapse.mobilidadeUniversitaria.Entities.NotificacaoMotorista();
+            notifMot.setMotorista(motorista);
+            notifMot.setViagem(atualizada);
+            notifMot.setTipoNotificacao("VIAGEM_ATUALIZADA");
+            notifMot.setMensagem(
+                "Sua viagem foi atualizada: " + atualizada.getRota().getNomeRota() +
+                " em " + atualizada.getDataHoraPartida().toLocalDate() +
+                " às " + atualizada.getDataHoraPartida().toLocalTime().toString().substring(0, 5)
+            );
+            notifMot.setLida(false);
+            notificacaoMotoristaRepository.save(notifMot);
+        } catch (Exception e) {
+            // Não impede a atualização da viagem
+        }
+
         return viagemMapper.toResponse(atualizada);
     }
 
@@ -167,8 +236,22 @@ public class ViagemService {
         if (ViagemStatus.FINALIZADA.equals(viagem.getStatus())) {
             throw new BadRequestException("Viagem finalizada nao pode ser cancelada");
         }
-        viagem.setStatus(ViagemStatus.CANCELADA);
-        viagemRepository.save(viagem);
+
+        // Deletar notificações associadas à viagem
+        try {
+            notificacaoRepository.deleteByViagemId(id);
+        } catch (Exception e) {
+            // Não impede a exclusão da viagem se falhar ao deletar notificações
+        }
+
+        // Deletar notificações de motorista associadas à viagem
+        try {
+            notificacaoMotoristaRepository.deleteByViagemId(id);
+        } catch (Exception e) {
+            // Não impede a exclusão da viagem se falhar ao deletar notificações
+        }
+
+        viagemRepository.delete(viagem);
     }
 
     public ViagemResponseDTO iniciar(Long id) {
