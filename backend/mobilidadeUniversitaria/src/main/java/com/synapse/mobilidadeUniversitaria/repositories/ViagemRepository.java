@@ -44,4 +44,8 @@ public interface ViagemRepository extends JpaRepository<Viagem, Long> {
               and :chegada > v.dataHoraPartida
             """)
     long countConflitosVeiculo(Long veiculoId, LocalDateTime partida, LocalDateTime chegada, Long ignorarId);
+
+    void deleteByRotaId(Long rotaId);
+
+    void deleteByMotoristaId(Long motoristaId);
 }

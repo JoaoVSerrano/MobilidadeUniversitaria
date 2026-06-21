@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/veiculos")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('GESTOR')")
 public class VeiculoController {
 
     private final VeiculoService veiculoService;

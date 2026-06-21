@@ -44,9 +44,14 @@ public class AuthController {
     }
 
     @PostMapping("/register/student-request")
-    public ResponseEntity<String> registerStudentRequest(@Valid @RequestBody StudentRegistrationRequestDTO dto) {
+    public ResponseEntity<com.synapse.mobilidadeUniversitaria.dtos.response.StudentRequestResponseDTO> registerStudentRequest(@Valid @RequestBody StudentRegistrationRequestDTO dto) {
         studentRegistrationService.createStudentRequest(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Solicitação de cadastro enviada com sucesso");
+        return ResponseEntity.status(HttpStatus.CREATED).body(new com.synapse.mobilidadeUniversitaria.dtos.response.StudentRequestResponseDTO(
+                true,
+                "Solicitação de cadastro enviada com sucesso",
+                java.time.LocalDateTime.now(),
+                "Seu pedido foi encaminhado ao gestor. Você será notificado via email assim que sua conta for aprovada."
+        ));
     }
 
     @GetMapping("/student-requests")

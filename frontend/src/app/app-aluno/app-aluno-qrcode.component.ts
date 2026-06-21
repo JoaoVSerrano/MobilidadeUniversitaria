@@ -22,11 +22,9 @@ export class AppAlunoQrcodeComponent implements OnInit {
   erro = signal('');
 
   qrDataUrl = computed(() => {
-    const user = this.user();
-    if (!user) return '';
-    const matricula = (user as any).matricula || user.id || '000000';
-    const payload = `GOCAMPUS-${user.id}-${matricula}-${Date.now()}`;
-    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(this.generateQrSvg(payload))}`;
+    const data = this.qrData();
+    if (!data?.qrData) return '';
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(this.generateQrSvg(data.qrData))}`;
   });
 
   ngOnInit() {

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { QrCodeService } from '../services/qrcode.service';
 
 @Component({
   selector: 'app-motorista-qr',
@@ -14,8 +15,11 @@ import { environment } from '../../environments/environment';
 export class AppMotoristaQrComponent {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
+  private qrCodeService = inject(QrCodeService);
 
   qrInput = '';
+  qrCodeImage = signal<string>('');
+  expiresAt = signal<string>('');
   resultado = signal<any>(null);
   isLoading = signal(false);
   erro = signal('');
@@ -82,21 +86,26 @@ export class AppMotoristaQrComponent {
     this.sucesso.set('');
   }
 
-  simularScan() {
-    // Simula um QR code aleatório
-    const ids = ['5', '12', '8', '3', '15'];
-    const nomes = ['João Silva', 'Maria Santos', 'Pedro Costa', 'Ana Oliveira', 'Carlos Souza'];
-    const idx = Math.floor(Math.random() * ids.length);
-    const codigo = `GOCAMPUS-${ids[idx]}-${Date.now()}`;
-    this.qrInput = codigo;
-    // Simula o sucesso
-    this.sucesso.set(`✅ Simulação — ${nomes[idx]}`);
-    this.historico.update(h => [{
-      nome: nomes[idx],
-      hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      status: 'OK'
-    }, ...h.slice(0, 9)]);
-    this.qrInput = '';
-    setTimeout(() => this.sucesso.set(''), 3000);
+  async gerarQRCode(tripId: number) {
+    this.isLoading.set(true);
+    this.erro.set('');
+
+    this.http.get<{qrData: string, expiresAt: string}>(`${this.baseUrl}/driver/trips/${tripId}/qrcode`).subscribe({
+      next: async (res) => {
+        try {
+          const imageData = await this.qrCodeService.generateQrCode(res.qrData);
+          this.qrCodeImage.set(imageData);
+          this.expiresAt.set(res.expiresAt);
+        } catch (err) {
+          this.erro.set('Erro ao gerar imagem do QR Code');
+        } finally {
+          this.isLoading.set(false);
+        }
+      },
+      error: (err) => {
+        this.erro.set(err.error?.message || 'Erro ao obter dados do QR Code');
+        this.isLoading.set(false);
+      }
+    });
   }
 }

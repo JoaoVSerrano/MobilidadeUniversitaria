@@ -4,6 +4,10 @@ public record VeiculoResponseDTO(
         Long id,
         String placa,
         String modelo,
-        int capacidadeTotal
+        int capacidadeTotal,
+        Integer ano,
+        String status,
+        Integer kmRodados,
+        String proximaRevisao
 ) {
 }

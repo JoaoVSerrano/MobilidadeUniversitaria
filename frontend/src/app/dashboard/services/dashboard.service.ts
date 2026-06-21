@@ -25,7 +25,19 @@ export class DashboardService {
         phone: u.telefone,
         type: u.tipoUsuario === 'GESTOR' ? 'admin' : (u.tipoUsuario?.toLowerCase() || 'aluno'),
         status: 'Ativo' as const,
-        createdAt: new Date().toLocaleDateString('pt-BR')
+        createdAt: new Date().toLocaleDateString('pt-BR'),
+        address: u.endereco ? {
+          cep: u.endereco.cep,
+          rua: u.endereco.rua,
+          bairro: u.endereco.bairro,
+          numero: u.endereco.numero,
+          complemento: u.endereco.complemento,
+          tipoLocal: u.endereco.tipoLocal
+        } : undefined,
+        faculdade: u.faculdade ? {
+          id: u.faculdade.id,
+          nome: u.faculdade.nome
+        } : undefined
       })))
     );
   }
@@ -65,17 +77,26 @@ export class DashboardService {
   // Routes API - map backend response
   public getRoutes(): Observable<Route[]> {
     return this.api.get('/rotas').pipe(
-      map((data) => (data as any[]).map(r => ({
-        id: r.id,
-        name: r.nomeRota,
-        description: r.descricao,
-        originDest: r.pontoParada,
-        distance: '15 km', // Mock
-        time: '30 min', // Mock
-        capacity: 45, // Mock
-        status: r.ativa ? 'Ativa' as const : 'Inativa' as const,
-        stops: []
-      })))
+      map((data) => (data as any[]).map(r => {
+        let stops: RouteStop[] = [];
+        if (r.paradas) {
+          try {
+            const parsed = typeof r.paradas === 'string' ? JSON.parse(r.paradas) : r.paradas;
+            if (Array.isArray(parsed)) {
+              stops = parsed.map((s: string, i: number) => ({ name: s, time: '' }));
+            }
+          } catch { /* ignore parse errors */ }
+        }
+        return {
+          id: r.id,
+          name: r.nomeRota,
+          description: r.descricao,
+          originDest: r.pontoParada,
+          status: r.ativa ? 'Ativa' as const : 'Inativa' as const,
+          stops,
+          paradas: typeof r.paradas === 'string' ? JSON.parse(r.paradas || '[]') : (r.paradas || [])
+        };
+      }))
     );
   }
 
@@ -114,14 +135,13 @@ export class DashboardService {
     return this.api.get('/veiculos').pipe(
       map((data) => (data as any[]).map(v => ({
         id: v.id,
-        code: v.placa,
         plate: v.placa,
         model: v.modelo,
         year: v.ano,
         status: v.status?.toLowerCase() || 'ativo',
         capacity: v.capacidadeTotal,
-        mileage: v.kmRodados + ' km',
-        nextRevision: 'A definir'
+        kmRodados: v.kmRodados ?? 0,
+        proximaRevisao: v.proximaRevisao ?? null
       })))
     );
   }
@@ -130,9 +150,10 @@ export class DashboardService {
     return this.api.post('/veiculos', {
       placa: vehicle.plate,
       modelo: vehicle.model,
-      ano: vehicle.year,
       capacidadeTotal: vehicle.capacity,
-      kmRodados: 0
+      ano: vehicle.year || null,
+      status: vehicle.status?.toUpperCase() || 'ATIVO',
+      kmRodados: vehicle.kmRodados ?? 0
     }) as Observable<Vehicle>;
   }
 
@@ -140,8 +161,10 @@ export class DashboardService {
     return this.api.put(`/veiculos/${id}`, {
       placa: vehicle.plate,
       modelo: vehicle.model,
-      ano: vehicle.year,
-      capacidadeTotal: vehicle.capacity
+      capacidadeTotal: vehicle.capacity,
+      ano: vehicle.year || null,
+      status: vehicle.status?.toUpperCase(),
+      kmRodados: vehicle.kmRodados
     }) as Observable<Vehicle>;
   }
 
@@ -150,7 +173,7 @@ export class DashboardService {
   }
 
   public updateVehicleStatus(id: number, status: string): Observable<any> {
-    return this.api.put(`/veiculos/${id}/status`, { status });
+    return this.api.put(`/veiculos/${id}`, { status: status.toUpperCase() });
   }
 
   // Trips API

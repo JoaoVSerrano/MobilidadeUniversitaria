@@ -11,6 +11,8 @@ export interface Notificacao {
   lida: boolean;
   horario: string;
   detalhes?: string;
+  acao?: string;
+  acaoUrl?: string;
 }
 
 @Component({
@@ -46,7 +48,9 @@ export class AppMotoristaNotificacoesComponent implements OnInit {
           mensagem: n.mensagem,
           lida: n.lida,
           horario: this.formatarHorario(n.dataHoraEnvio),
-          detalhes: n.viagemId ? `Viagem ID: ${n.viagemId}` : undefined
+          detalhes: n.viagemId ? `Viagem ID: ${n.viagemId}` : undefined,
+          acao: n.acao,
+          acaoUrl: n.acaoUrl
         }));
         this.notificacoes.set(notificacoesMapeadas);
         this.isLoading.set(false);
@@ -63,6 +67,7 @@ export class AppMotoristaNotificacoesComponent implements OnInit {
     const tipoMap: Record<string, 'info' | 'alerta' | 'atraso' | 'confirmacao'> = {
       'VIAGEM_DESIGNADA': 'confirmacao',
       'VIAGEM_ATUALIZADA': 'info',
+      'VIAGEM_INICIADA': 'info',
       'VIAGEM_CANCELADA': 'alerta',
       'VIAGEM_ATRASADA': 'atraso',
       'INFO': 'info',
@@ -75,6 +80,7 @@ export class AppMotoristaNotificacoesComponent implements OnInit {
     const tituloMap: Record<string, string> = {
       'VIAGEM_DESIGNADA': 'Viagem Designada',
       'VIAGEM_ATUALIZADA': 'Viagem Atualizada',
+      'VIAGEM_INICIADA': 'Viagem em Curso',
       'VIAGEM_CANCELADA': 'Viagem Cancelada',
       'VIAGEM_ATRASADA': 'Viagem Atrasada',
       'INFO': 'Informação',

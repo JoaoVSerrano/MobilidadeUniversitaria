@@ -102,23 +102,27 @@
               </button>
             }
             @if (viagem.status === 'EM_ANDAMENTO') {
+              <div class="paradas-emulator">
+                <p class="parada-label">Parada Atual:</p>
+                <div class="paradas-controls">
+                  <button class="btn-parada" (click)="atualizarParada(viagem.id, Math.max(0, viagem.paradaAtualIndex - 1))" [disabled]="viagem.paradaAtualIndex === 0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </button>
+                  <span class="parada-index">Parada {{ viagem.paradaAtualIndex + 1 }}</span>
+                  <button class="btn-parada" (click)="atualizarParada(viagem.id, viagem.paradaAtualIndex + 1)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                </div>
+              </div>
               <button class="btn-action btn-finish" (click)="finalizar(viagem.id)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                  <polyline points="20 6 9 17 4 12"/>
+                  <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
                 Finalizar Rota
-              </button>
-              <button class="btn-action btn-scan">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                  <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-                </svg>
-                Scanner
-              </button>
-              <button class="btn-action btn-students" (click)="verAlunos(viagem)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                Ver Alunos
               </button>
             }
             @if (viagem.status === 'FINALIZADA') {

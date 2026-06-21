@@ -51,6 +51,11 @@
             <span class="notification-time">{{ notif.horario }}</span>
           </div>
           <div class="notification-actions">
+            @if (notif.acao) {
+              <a [routerLink]="notif.acaoUrl" class="btn-action btn-notification-action">
+                {{ notif.acao }}
+              </a>
+            }
             @if (!notif.lida) {
               <button class="btn-action btn-mark-read" (click)="marcarComoLida(notif.id)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">

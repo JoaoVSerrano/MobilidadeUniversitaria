@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/enderecos")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('GESTOR')")
 public class EnderecoController {
 
     private final EnderecoService enderecoService;

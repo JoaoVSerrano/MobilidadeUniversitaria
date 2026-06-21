@@ -183,17 +183,19 @@ export class TripsComponent implements OnInit {
     console.log('confirmDelete called');
     const trip = this.selectedTrip();
     if (trip) {
-      this.svc.deleteTrip(trip.id).subscribe({
-        next: (response) => {
-          console.log('Trip deleted successfully:', response);
-          this.closeDeleteModal();
-          this.loadTrips();
-        },
-        error: (err) => {
-          console.error('Erro ao excluir viagem:', err);
-          alert('Erro ao excluir viagem: ' + (err.error?.message || err.message || 'Tente novamente'));
-        }
-      });
+      if (confirm(`Tem certeza que deseja excluir a viagem "${trip.route}"?`)) {
+        this.svc.deleteTrip(trip.id).subscribe({
+          next: (response) => {
+            console.log('Trip deleted successfully:', response);
+            this.closeDeleteModal();
+            this.loadTrips();
+          },
+          error: (err) => {
+            console.error('Erro ao excluir viagem:', err);
+            alert('Erro ao excluir viagem: ' + (err.error?.message || err.message || 'Tente novamente'));
+          }
+        });
+      }
     }
   }
 

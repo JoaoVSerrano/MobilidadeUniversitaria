@@ -107,6 +107,8 @@
         <tr>
           <th>Usuário</th>
           <th>Contato</th>
+          <th>Endereço</th>
+          <th>Faculdade</th>
           <th>Tipo</th>
           <th>Status</th>
           <th>Data Cadastro</th>
@@ -140,6 +142,26 @@
                   </svg>
                   {{ user.phone }}
                 </div>
+              </div>
+            </td>
+            <td>
+              <div class="address-cell">
+                @if (user.address) {
+                  <div>{{ user.address.cep }}</div>
+                  <div>{{ user.address.rua }}, {{ user.address.numero }}</div>
+                  <div>{{ user.address.bairro }}</div>
+                } @else {
+                  <div>-</div>
+                }
+              </div>
+            </td>
+            <td>
+              <div class="college-cell">
+                @if (user.faculdade) {
+                  <div>{{ user.faculdade.nome }}</div>
+                } @else {
+                  <div>-</div>
+                }
               </div>
             </td>
             <td>

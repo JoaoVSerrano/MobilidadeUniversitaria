@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/system")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('GESTOR')")
 public class SystemSettingsController {
 
     private final SystemSettingsService service;

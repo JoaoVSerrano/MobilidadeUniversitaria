@@ -30,6 +30,7 @@ export class AppMotoristaViagensComponent implements OnInit {
   presencas = signal<Presenca[]>([]);
   showStudentsList = signal(false);
   isLoadingPresencas = signal(false);
+  paradaAtual = signal<number>(0);
 
   ngOnInit() {
     this.http.get<any[]>(`${this.baseUrl}/driver/trips/today`).subscribe({
@@ -38,6 +39,16 @@ export class AppMotoristaViagensComponent implements OnInit {
         this.erro.set(err.error?.message || 'Erro ao carregar viagens.');
         this.isLoading.set(false);
       }
+    });
+  }
+
+  atualizarParada(viagemId: number, novoIndex: number) {
+    this.http.put<any>(`${this.baseUrl}/driver/trips/${viagemId}/parada`, { novaParadaIndex: novoIndex }).subscribe({
+      next: (updated) => {
+        this.viagens.update(vs => vs.map(v => v.id === viagemId ? updated : v));
+        this.paradaAtual.set(novoIndex);
+      },
+      error: (err: any) => this.erro.set(err.error?.message || 'Erro ao atualizar parada.')
     });
   }
 

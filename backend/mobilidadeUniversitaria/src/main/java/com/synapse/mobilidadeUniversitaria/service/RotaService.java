@@ -8,6 +8,7 @@ import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.mapper.RotaMapper;
 import com.synapse.mobilidadeUniversitaria.repositories.RotaRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.VeiculoRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.ViagemRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,13 +20,16 @@ public class RotaService {
     private final RotaRepository rotaRepository;
     private final RotaMapper rotaMapper;
     private final VeiculoRepository veiculoRepository;
+    private final ViagemRepository viagemRepository;
 
     public RotaService(RotaRepository rotaRepository,
                        RotaMapper rotaMapper,
-                       VeiculoRepository veiculoRepository) {
+                       VeiculoRepository veiculoRepository,
+                       ViagemRepository viagemRepository) {
         this.rotaRepository = rotaRepository;
         this.rotaMapper = rotaMapper;
         this.veiculoRepository = veiculoRepository;
+        this.viagemRepository = viagemRepository;
     }
 
     public RotaResponseDTO criar(RotaRequestDTO dto) {
@@ -56,9 +60,14 @@ public class RotaService {
         return rotaMapper.toResponse(atualizada);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void deletar(Long id) {
         Rota rota = rotaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rota nao encontrada com id: " + id));
+
+        // Deletar viagens associadas à rota utilizando query derivada eficiente
+        viagemRepository.deleteByRotaId(id);
+
         rotaRepository.delete(rota);
     }
 

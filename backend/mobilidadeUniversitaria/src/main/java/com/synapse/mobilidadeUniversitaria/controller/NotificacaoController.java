@@ -66,6 +66,26 @@ public class NotificacaoController {
             map.put("dataHoraEnvio", n.getDataHoraEnvio());
             map.put("lida", n.getLida());
             map.put("viagemId", n.getViagem() != null ? n.getViagem().getId() : null);
+
+            String acao = null;
+            String acaoUrl = null;
+            Long viagemId = n.getViagem() != null ? n.getViagem().getId() : null;
+
+            if (viagemId != null) {
+                if ("VIAGEM_DESIGNADA".equals(n.getTipoNotificacao())) {
+                    acao = "Iniciar Viagem";
+                    acaoUrl = "/motorista/viagem/" + viagemId;
+                } else if ("VIAGEM_ATUALIZADA".equals(n.getTipoNotificacao())) {
+                    acao = "Ver Viagem";
+                    acaoUrl = "/motorista/viagem/" + viagemId;
+                } else if ("VIAGEM_INICIADA".equals(n.getTipoNotificacao())) {
+                    acao = "Finalizar Viagem";
+                    acaoUrl = "/motorista/viagem/" + viagemId;
+                }
+            }
+            map.put("acao", acao);
+            map.put("acaoUrl", acaoUrl);
+
             return map;
         }).toList();
         return ResponseEntity.ok(result);

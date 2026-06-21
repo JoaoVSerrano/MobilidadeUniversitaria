@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 public record VeiculoRequestDTO(
 
@@ -19,6 +20,18 @@ public record VeiculoRequestDTO(
 
         @NotNull(message = "Capacidade total e obrigatoria")
         @Positive(message = "Capacidade total deve ser positiva")
-        Integer capacidadeTotal
+        Integer capacidadeTotal,
+
+        @NotNull(message = "Ano e obrigatorio")
+        @Positive(message = "Ano deve ser positivo")
+        Integer ano,
+
+        @NotBlank(message = "Status e obrigatorio")
+        @Pattern(regexp = "^(ATIVO|INATIVO|MANUTENCAO)$", message = "Status invalido. Valores aceitos: ATIVO, INATIVO, MANUTENCAO")
+        String status,
+
+        @NotNull(message = "Km rodados e obrigatorio")
+        @PositiveOrZero(message = "Km rodados nao pode ser negativo")
+        Integer kmRodados
 ) {
 }

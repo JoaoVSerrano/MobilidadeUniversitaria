@@ -55,6 +55,12 @@ public class VeiculoService {
     public void deletar(Long id) {
         Veiculo veiculo = veiculoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Veiculo nao encontrado com id: " + id));
+
+        boolean temViagens = !veiculoRepository.findByVeiculoId(veiculo.getId()).isEmpty();
+        if (temViagens) {
+            throw new IllegalStateException("Nao e possivel deletar o veiculo pois ele possui viagens vinculadas.");
+        }
+
         veiculoRepository.delete(veiculo);
     }
 
