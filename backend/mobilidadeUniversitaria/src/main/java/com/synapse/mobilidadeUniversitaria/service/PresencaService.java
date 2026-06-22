@@ -79,6 +79,61 @@ public class PresencaService {
         return confirmarPorQRCode(alunoId, qrData);
     }
 
+    public QRCodeConfirmacaoResponseDTO confirmarScanDoMotorista(String qrData) {
+        Long alunoId = null;
+        if (qrData != null && qrData.matches("\\d+")) {
+            alunoId = Long.parseLong(qrData);
+        } else if (qrData != null && qrData.startsWith("GOCAMPUS-")) {
+            String[] parts = qrData.split("-");
+            if (parts.length >= 2) {
+                try {
+                    alunoId = Long.parseLong(parts[1]);
+                } catch (NumberFormatException e) {
+                    throw new BadRequestException("ID do aluno invalido no QR Code");
+                }
+            }
+        }
+
+        if (alunoId == null) {
+            throw new BadRequestException("Formatacao de QR Code invalida");
+        }
+
+        Long motoristaId = authorizationService.currentUser().getId();
+        Viagem viagem = viagemRepository.findByMotoristaId(motoristaId)
+                .stream()
+                .filter(v -> ViagemStatus.EM_ANDAMENTO.equals(v.getStatus()) || ViagemStatus.AGENDADA.equals(v.getStatus()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException("Nenhuma viagem ativa ou agendada encontrada para o motorista"));
+
+        final Long finalAlunoId = alunoId;
+        Aluno aluno = alunoRepository.findById(finalAlunoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno nao encontrado com id: " + finalAlunoId));
+
+        PresencaDigital presenca = presencaRepository.findByAlunoIdAndViagemId(finalAlunoId, viagem.getId())
+                .orElseThrow(() -> new BadRequestException("Aluno nao possui reserva de presenca para a viagem " + viagem.getId()));
+
+        if (PresencaStatus.CANCELADA.equals(presenca.getStatus())) {
+            throw new BadRequestException("Reserva de presenca cancelada");
+        }
+
+        if (PresencaStatus.CONFIRMADA.equals(presenca.getStatus())) {
+            throw new ResourceAlreadyExistsException("Presenca ja confirmada nesta viagem");
+        }
+
+        presenca.setStatus(PresencaStatus.CONFIRMADA);
+        presenca.setDataHoraValidacao(LocalDateTime.now());
+        PresencaDigital confirmada = presencaRepository.save(presenca);
+
+        return new QRCodeConfirmacaoResponseDTO(
+                true,
+                aluno.getId(),
+                aluno.getNome(),
+                viagem.getId(),
+                "Presenca confirmada com sucesso",
+                toResponse(confirmada)
+        );
+    }
+
     private QRCodeConfirmacaoResponseDTO confirmarPorQRCode(Long alunoId, String qrData) {
         Long viagemId = qrCodeService.validarEExtrairViagemId(qrData);
 

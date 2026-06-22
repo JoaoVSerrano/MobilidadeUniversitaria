@@ -74,6 +74,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno do servidor", request, null);
     }
 
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMethodNotSupported(org.springframework.web.HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+        return error(HttpStatus.METHOD_NOT_ALLOWED, "Metodo " + ex.getMethod() + " nao suportado para este recurso", request, null);
+    }
+
     private ResponseEntity<ErrorResponseDTO> error(HttpStatus status,
                                                    String message,
                                                    HttpServletRequest request,

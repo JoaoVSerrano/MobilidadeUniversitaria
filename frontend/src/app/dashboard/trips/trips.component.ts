@@ -84,11 +84,11 @@ export class TripsComponent implements OnInit, OnDestroy {
   }
 
   loadDrivers() {
-    this.svc.getDrivers().subscribe(data => this.drivers = data);
+    this.svc.getDrivers().subscribe((data: any[]) => this.drivers = data);
   }
 
   loadVehicles() {
-    this.svc.getVehiclesList().subscribe(data => this.vehicles = data);
+    this.svc.getVehiclesList().subscribe((data: any[]) => this.vehicles = data);
   }
 
   loadRoutes() {

@@ -10,6 +10,7 @@ public record ViagemResponseDTO(
         LocalDateTime dataHoraChegadaPrevista,
         LocalDateTime dataHoraInicio,
         LocalDateTime dataHoraChegadaReal,
+        Integer paradaAtualIndex,
         ViagemStatus status,
         MotoristaResponseDTO motorista,
         VeiculoResponseDTO veiculo,

@@ -43,6 +43,7 @@ public class ViagemMapper {
                 viagem.getDataHoraChegadaPrevista(),
                 viagem.getDataHoraInicio(),
                 viagem.getDataHoraChegadaReal(),
+                viagem.getParadaAtualIndex(),
                 viagem.getStatus(),
                 motoristaMapper.toResponse(viagem.getMotorista()),
                 veiculoMapper.toResponse(viagem.getVeiculo()),

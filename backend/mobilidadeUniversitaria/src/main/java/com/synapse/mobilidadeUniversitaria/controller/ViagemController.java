@@ -4,7 +4,9 @@ import com.synapse.mobilidadeUniversitaria.dtos.request.ViagemRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.QRCodeResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.ViagemResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.ViagemStatsResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.OcupacaoViagemResponseDTO;
 import com.synapse.mobilidadeUniversitaria.service.ViagemService;
+import com.synapse.mobilidadeUniversitaria.service.PresencaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import java.util.List;
 public class ViagemController {
 
     private final ViagemService viagemService;
+    private final PresencaService presencaService;
 
     @PostMapping
     public ResponseEntity<ViagemResponseDTO> criar(@Valid @RequestBody ViagemRequestDTO dto) {
@@ -47,6 +50,11 @@ public class ViagemController {
     @GetMapping("/hoje")
     public ResponseEntity<List<ViagemResponseDTO>> listarHoje() {
         return ResponseEntity.ok(viagemService.listarHoje());
+    }
+
+    @GetMapping("/{id}/occupancy")
+    public ResponseEntity<OcupacaoViagemResponseDTO> getOcupacao(@PathVariable Long id) {
+        return ResponseEntity.ok(presencaService.ocupacaoDaViagem(id));
     }
 
     @GetMapping("/motorista/{motoristaId}")

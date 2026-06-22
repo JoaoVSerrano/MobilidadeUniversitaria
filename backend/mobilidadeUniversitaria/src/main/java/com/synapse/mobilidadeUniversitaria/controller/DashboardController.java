@@ -1,9 +1,10 @@
 package com.synapse.mobilidadeUniversitaria.controller;
 
+import com.synapse.mobilidadeUniversitaria.DTOs.DashboardKpiResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoFrequenciaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DashboardGestorResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DemandaPorDiaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.OcupacaoPorRotaResponseDTO;
-import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoFrequenciaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -39,23 +40,17 @@ public class DashboardController {
     }
 
     @GetMapping("/aluno/{alunoId}/frequencia")
-    public ResponseEntity<com.synapse.mobilidadeUniversitaria.dtos.response.AlunoFrequenciaResponseDTO> frequenciaAluno(@PathVariable Long alunoId) {
+    public ResponseEntity<AlunoFrequenciaResponseDTO> frequenciaAluno(@PathVariable Long alunoId) {
         return ResponseEntity.ok(dashboardService.calcularFrequenciaAluno(alunoId));
     }
 
-    @GetMapping("/kpis")
-    public ResponseEntity<com.synapse.mobilidadeUniversitaria.DTOs.DashboardKpiResponseDTO> kpis() {
-        DashboardGestorResponseDTO base = dashboardService.dashboardGestor();
-        long viagensFinalizadas = dashboardService.contarViagensFinalizadasHoje();
+    @GetMapping("/alunos/frequencia")
+    public ResponseEntity<List<AlunoFrequenciaResponseDTO>> frequenciaTodosAlunos() {
+        return ResponseEntity.ok(dashboardService.calcularFrequenciaTodosAlunos());
+    }
 
-        return ResponseEntity.ok(com.synapse.mobilidadeUniversitaria.DTOs.DashboardKpiResponseDTO.builder()
-                .totalAlunos(base.totalAlunos())
-                .variacaoAlunos(0.0)
-                .taxaOcupacao((int) Math.round(base.taxaOcupacao()))
-                .variacaoOcupacao(0.0)
-                .viagensHoje(base.viagensHoje())
-                .viagensFinalizadas(viagensFinalizadas)
-                .economiaEstimada(0.0)
-                .build());
+    @GetMapping("/kpis")
+    public ResponseEntity<DashboardKpiResponseDTO> kpis() {
+        return ResponseEntity.ok(dashboardService.kpis());
     }
 }

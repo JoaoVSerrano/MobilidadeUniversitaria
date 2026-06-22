@@ -1,17 +1,65 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable, forkJoin, of } from 'rxjs';
+import { map, switchMap, catchError } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
-import { User, Route, Vehicle, Trip, Document, DailyDemand, RouteOccupancy, RouteStop } from '../models/dashboard.model';
+import { User, Route, Vehicle, Trip, Document, DailyDemand, RouteOccupancy, RouteStop, DashboardSummary, StudentUsageRow } from '../models/dashboard.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
   private api = inject(ApiService);
+  private http = inject(HttpClient);
 
-  public getStats(): Observable<any> {
-    return this.api.get('/dashboard/kpis');
+  public getStats(): Observable<DashboardSummary> {
+    return this.getSummary();
+  }
+
+  public getSummary(): Observable<DashboardSummary> {
+    return this.api.get('/dashboard/kpis').pipe(
+      map((data: any) => ({
+        totalStudents: Number(data.totalAlunos ?? 0),
+        studentsGrowth: Number(data.variacaoAlunos ?? 0),
+        occupancyRate: Number(data.taxaOcupacao ?? 0),
+        occupancyGrowth: Number(data.variacaoOcupacao ?? 0),
+        tripsToday: Number(data.viagensHoje ?? 0),
+        completedTripsToday: Number(data.viagensFinalizadas ?? 0)
+      }))
+    );
+  }
+
+  public getStudentFrequencia(alunoId: number): Observable<StudentUsageRow> {
+    return this.api.get(`/dashboard/aluno/${alunoId}/frequencia`).pipe(
+      map((data: any) => ({
+        alunoId: Number(data.alunoId ?? alunoId),
+        nome: String(data.nome ?? ''),
+        viagensReservadas: Number(data.viagensReservadas ?? 0),
+        viagensConfirmadas: Number(data.viagensConfirmadas ?? 0),
+        percentualFrequencia: Number(data.percentualFrequencia ?? 0),
+        createdAt: data.createdAt ? new Date(data.createdAt).toLocaleDateString('pt-BR') : '—'
+      }))
+    );
+  }
+
+  public getStudentUsageRows(): Observable<StudentUsageRow[]> {
+    // Single bulk call — avoids N parallel requests and forkJoin failures
+    return this.api.get('/dashboard/alunos/frequencia').pipe(
+      map((data: any) =>
+        (data as any[]).map(item => ({
+          alunoId: Number(item.alunoId ?? 0),
+          nome: String(item.nome ?? ''),
+          viagensReservadas: Number(item.viagensReservadas ?? 0),
+          viagensConfirmadas: Number(item.viagensConfirmadas ?? 0),
+          percentualFrequencia: Number(item.percentualFrequencia ?? 0),
+          createdAt: item.createdAt
+            ? new Date(item.createdAt).toLocaleDateString('pt-BR')
+            : '—'
+        }))
+      ),
+      map((rows) => rows.sort((a, b) => b.alunoId - a.alunoId)),
+      catchError(() => of([]))
+    );
   }
 
   // Users API - map backend response to frontend model
@@ -83,9 +131,11 @@ export class DashboardService {
           try {
             const parsed = typeof r.paradas === 'string' ? JSON.parse(r.paradas) : r.paradas;
             if (Array.isArray(parsed)) {
-              stops = parsed.map((s: string, i: number) => ({ name: s, time: '' }));
+              stops = parsed.map((s: string) => ({ name: s, time: '' }));
             }
-          } catch { /* ignore parse errors */ }
+          } catch {
+            stops = [];
+          }
         }
         return {
           id: r.id,
@@ -142,6 +192,23 @@ export class DashboardService {
         capacity: v.capacidadeTotal,
         kmRodados: v.kmRodados ?? 0,
         proximaRevisao: v.proximaRevisao ?? null
+      })))
+    );
+  }
+
+  public getVehiclesList(): Observable<Vehicle[]> {
+    return this.getVehicles();
+  }
+
+  public getDrivers(): Observable<any[]> {
+    return this.api.get('/motoristas').pipe(
+      map((data: any) => (data as any[]).map((m) => ({
+        id: m.id,
+        name: m.nome,
+        email: m.email,
+        phone: m.telefone,
+        cpf: m.cpf,
+        status: m.status ?? 'Ativo'
       })))
     );
   }
@@ -230,83 +297,98 @@ export class DashboardService {
     }) as Observable<Trip>;
   }
 
-  public getDrivers(): Observable<any[]> {
-    return this.api.get('/motoristas').pipe(
-      map((data) => (data as any[]).map(d => ({
-        id: d.id,
-        nome: d.nome,
-        email: d.email
-      })))
-    );
-  }
-
-  public getVehiclesList(): Observable<any[]> {
-    return this.api.get('/veiculos');
-  }
-
   public deleteTrip(id: number): Observable<any> {
     return this.api.delete(`/viagens/${id}`);
   }
 
-  private mapTripStatus(status: string): Trip['status'] {
-    const statusMap: Record<string, Trip['status']> = {
-      'AGENDADA': 'agendada',
-      'EM_ANDAMENTO': 'in-progress',
-      'FINALIZADA': 'completed',
-      'CANCELADA': 'concluida'
-    };
-    return statusMap[status] || 'pending';
-  }
-
-  // Notifications API
-  public getNotifications(): Observable<any[]> {
-    return this.api.get('/notificacoes');
-  }
-
-  public sendNotification(request: any): Observable<any> {
-    return this.api.post('/notificacoes', request);
-  }
-
-  // System Settings API
-  public getSystemSettings(): Observable<any> {
-    return this.api.get('/system/settings');
-  }
-
-  public updateSystemSettings(settings: any): Observable<any> {
-    return this.api.put('/system/settings', settings);
+  public updateTripStatus(id: number, status: string): Observable<any> {
+    return this.api.put(`/viagens/${id}/status`, { status: status.toUpperCase() });
   }
 
   // Documents API
-  public getDocumentStats(): Observable<any> {
-    return this.api.get('/documents/stats');
-  }
-
   public getDocuments(): Observable<Document[]> {
-    return this.api.get('/documents') as Observable<Document[]>;
+    return this.api.get('/documents').pipe(
+      map((data) => (data as any[]).map(d => ({
+        id: d.id,
+        name: d.nome,
+        type: d.tipoDocumento,
+        size: d.tamanho || '0 KB',
+        date: d.dataCriacao || new Date().toLocaleDateString('pt-BR')
+      })))
+    );
   }
 
-  public uploadDocument(file: File, nome: string, tipo: string): Observable<Document> {
+  public uploadDocument(file: File, nome: string, tipo: string): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('nome', nome);
     formData.append('tipo', tipo);
-    return this.api.post('/documents/upload', formData, true) as Observable<Document>;
+    return this.api.post('/documents/upload', formData, true);
   }
 
   public downloadDocument(id: number): Observable<Blob> {
-    return this.api.get(`/documents/${id}/download`) as unknown as Observable<Blob>;
+    return this.api.getBlob(`/documents//download`);
+  }
+
+  public createDocument(document: Partial<Document>): Observable<Document> {
+    return this.api.post('/documents', {
+      nome: document.name,
+      tipoDocumento: document.type,
+      urlArquivo: '',
+      tamanho: document.size,
+      descricao: ''
+    }) as Observable<Document>;
   }
 
   public deleteDocument(id: number): Observable<any> {
     return this.api.delete(`/documents/${id}`);
   }
 
-  // Dashboard APIs
+  public sendNotification(payload: { destinatarios: string; tipo: string; titulo: string; mensagem: string }): Observable<any> {
+    return this.api.post('/notificacoes', payload);
+  }
+
+  public getSystemSettings(): Observable<any> {
+    return this.api.get('/system/settings');
+  }
+
+  public updateSystemSettings(payload: any): Observable<any> {
+    return this.api.put('/system/settings', payload);
+  }
+
+  // Dashboard analytics
   public getDailyDemand(): Observable<DailyDemand[]> {
-    return this.api.get('/dashboard/demanda-por-dia');
+    return this.api.get('/dashboard/demanda-por-dia').pipe(
+      map((data) => (data as any[]).map(d => ({
+        day: d.dia || d.day,
+        students: Number(d.total || d.students || 0)
+      })))
+    );
   }
 
   public getRouteOccupancy(): Observable<RouteOccupancy[]> {
-    return this.api.get('/dashboard/ocupacao-por-rota');
+    return this.api.get('/dashboard/ocupacao-por-rota').pipe(
+      map((data) => (data as any[]).map(r => ({
+        route: r.nomeRota || r.route,
+        occupancy: Number(r.ocupacao || r.occupancy || 0)
+      })))
+    );
+  }
+
+  private mapTripStatus(status?: string): Trip['status'] {
+    switch ((status || '').toUpperCase()) {
+      case 'AGENDADA':
+      case 'PENDING':
+        return 'agendada';
+      case 'EM_ANDAMENTO':
+      case 'IN_PROGRESS':
+        return 'in-progress';
+      case 'FINALIZADA':
+      case 'CONCLUIDA':
+      case 'COMPLETED':
+        return 'concluida';
+      default:
+        return 'pending';
+    }
   }
 }

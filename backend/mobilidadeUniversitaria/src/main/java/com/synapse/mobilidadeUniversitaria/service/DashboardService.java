@@ -1,16 +1,21 @@
 package com.synapse.mobilidadeUniversitaria.service;
 
-import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoFrequenciaResponseDTO;
+import com.synapse.mobilidadeUniversitaria.DTOs.DashboardKpiResponseDTO;
 import com.synapse.mobilidadeUniversitaria.Entities.Aluno;
 import com.synapse.mobilidadeUniversitaria.Entities.PresencaDigital;
+import com.synapse.mobilidadeUniversitaria.Entities.Usuario;
 import com.synapse.mobilidadeUniversitaria.Entities.Viagem;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.PresencaStatus;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.StatusMatricula;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.ViagemStatus;
+import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoFrequenciaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DashboardGestorResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DemandaPorDiaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.OcupacaoPorRotaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.repositories.AlunoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.PresencaDigitalRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.UsuarioRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.ViagemRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +33,16 @@ public class DashboardService {
     private final AlunoRepository alunoRepository;
     private final ViagemRepository viagemRepository;
     private final PresencaDigitalRepository presencaRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public DashboardService(AlunoRepository alunoRepository,
                             ViagemRepository viagemRepository,
-                            PresencaDigitalRepository presencaRepository) {
+                            PresencaDigitalRepository presencaRepository,
+                            UsuarioRepository usuarioRepository) {
         this.alunoRepository = alunoRepository;
         this.viagemRepository = viagemRepository;
         this.presencaRepository = presencaRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public DashboardGestorResponseDTO dashboardGestor() {
@@ -47,12 +55,43 @@ public class DashboardService {
 
         double taxaOcupacao = capacidadeHoje == 0 ? 0 : (presencasHoje * 100.0) / capacidadeHoje;
 
+        long totalAlunos = usuarioRepository.findByUserType(UserType.ALUNO).size();
+
         return new DashboardGestorResponseDTO(
-                alunoRepository.count(),
+                totalAlunos,
                 taxaOcupacao,
                 viagensHoje.size(),
                 0
         );
+    }
+
+    public DashboardKpiResponseDTO kpis() {
+        LocalDate hoje = LocalDate.now();
+        LocalDateTime inicioHoje = hoje.atStartOfDay();
+        LocalDateTime fimHoje = hoje.plusDays(1).atStartOfDay();
+        LocalDateTime inicio7DiasAntes = hoje.minusDays(7).atStartOfDay();
+        LocalDateTime inicio14DiasAntes = hoje.minusDays(14).atStartOfDay();
+        LocalDateTime inicio30DiasAntes = hoje.minusDays(30).atStartOfDay();
+        LocalDateTime inicio60DiasAntes = hoje.minusDays(60).atStartOfDay();
+
+        long totalAlunosAtivos = alunoRepository.countByStatusMatricula(StatusMatricula.ATIVA);
+        long alunosCriadosPeriodoAtual = alunoRepository.countByStatusMatriculaAndCreatedAtBetween(StatusMatricula.ATIVA, inicio30DiasAntes, inicioHoje);
+        long alunosCriadosPeriodoAnterior = alunoRepository.countByStatusMatriculaAndCreatedAtBetween(StatusMatricula.ATIVA, inicio60DiasAntes, inicio30DiasAntes);
+
+        List<Viagem> viagensHoje = viagensHoje();
+        double ocupacaoHoje = calcularOcupacaoPeriodo(inicioHoje, fimHoje);
+        double ocupacao7Dias = calcularOcupacaoPeriodo(inicio7DiasAntes, fimHoje);
+        double ocupacao7DiasAnteriores = calcularOcupacaoPeriodo(inicio14DiasAntes, inicio7DiasAntes);
+
+        return DashboardKpiResponseDTO.builder()
+                .totalAlunos(totalAlunosAtivos)
+                .variacaoAlunos(calcularVariacaoPercentual(alunosCriadosPeriodoAtual, alunosCriadosPeriodoAnterior))
+                .taxaOcupacao((int) Math.round(ocupacaoHoje))
+                .variacaoOcupacao(calcularVariacaoPercentual(ocupacao7Dias, ocupacao7DiasAnteriores))
+                .viagensHoje((long) viagensHoje.size())
+                .viagensFinalizadas(contarViagensFinalizadasHoje())
+                .economiaEstimada(0.0)
+                .build();
     }
 
     public List<OcupacaoPorRotaResponseDTO> ocupacaoPorRota() {
@@ -104,11 +143,36 @@ public class DashboardService {
         return viagemRepository.findByDataHoraPartidaBetween(inicio, fim);
     }
 
+    private List<Viagem> viagensNoPeriodo(LocalDateTime inicio, LocalDateTime fim) {
+        return viagemRepository.findByDataHoraPartidaBetween(inicio, fim);
+    }
+
     private long presencasDasViagens(List<Viagem> viagens) {
         return viagens.stream()
                 .map(Viagem::getId)
                 .mapToLong(viagemId -> presencaRepository.findByViagemId(viagemId).size())
                 .sum();
+    }
+
+    private double calcularOcupacaoPeriodo(LocalDateTime inicio, LocalDateTime fim) {
+        List<Viagem> viagens = viagensNoPeriodo(inicio, fim);
+        int capacidadeTotal = viagens.stream()
+                .filter(viagem -> viagem.getVeiculo() != null)
+                .mapToInt(viagem -> viagem.getVeiculo().getCapacidadeTotal())
+                .sum();
+        long presencasTotais = presencasDasViagens(viagens);
+        return capacidadeTotal == 0 ? 0 : (presencasTotais * 100.0) / capacidadeTotal;
+    }
+
+    private double calcularVariacaoPercentual(double atual, double anterior) {
+        if (anterior == 0) {
+            return atual > 0 ? 100.0 : 0.0;
+        }
+        return ((atual - anterior) * 100.0) / anterior;
+    }
+
+    private double calcularVariacaoPercentual(long atual, long anterior) {
+        return calcularVariacaoPercentual((double) atual, (double) anterior);
     }
 
     public long contarViagensFinalizadasHoje() {
@@ -118,8 +182,25 @@ public class DashboardService {
     }
 
     public AlunoFrequenciaResponseDTO calcularFrequenciaAluno(Long alunoId) {
-        Aluno aluno = alunoRepository.findById(alunoId)
-                .orElseThrow(() -> new com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException("Aluno nao encontrado"));
+        // Try to find as Aluno entity (proper JPA subtype)
+        String nome;
+        LocalDateTime createdAt;
+
+        java.util.Optional<Aluno> alunoOpt = alunoRepository.findById(alunoId);
+        if (alunoOpt.isPresent()) {
+            Aluno aluno = alunoOpt.get();
+            nome = aluno.getNome();
+            createdAt = aluno.getCreatedAt();
+        } else {
+            // Fallback: find by usuario table (e.g. created via UsuarioService)
+            Usuario usuario = usuarioRepository.findById(alunoId)
+                    .orElseThrow(() -> new com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException("Aluno nao encontrado com id: " + alunoId));
+            if (usuario.getUserType() != UserType.ALUNO) {
+                throw new com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException("Usuario " + alunoId + " nao e do tipo ALUNO");
+            }
+            nome = usuario.getNome();
+            createdAt = usuario.getCreatedAt();
+        }
 
         List<PresencaDigital> presencas = presencaRepository.findByAlunoId(alunoId);
 
@@ -131,11 +212,35 @@ public class DashboardService {
         double frequencia = totalReservadas == 0 ? 0 : (confirmadas * 100.0) / totalReservadas;
 
         return new AlunoFrequenciaResponseDTO(
-                aluno.getId(),
-                aluno.getNome(),
+                alunoId,
+                nome,
                 totalReservadas,
                 confirmadas,
-                frequencia
+                frequencia,
+                createdAt
         );
+    }
+
+    public List<AlunoFrequenciaResponseDTO> calcularFrequenciaTodosAlunos() {
+        // Get all users with ALUNO type directly
+        List<Usuario> alunos = usuarioRepository.findByUserType(UserType.ALUNO);
+        return alunos.stream()
+                .map(u -> {
+                    List<PresencaDigital> presencas = presencaRepository.findByAlunoId(u.getId());
+                    long totalReservadas = presencas.size();
+                    long confirmadas = presencas.stream()
+                            .filter(p -> PresencaStatus.CONFIRMADA.equals(p.getStatus()))
+                            .count();
+                    double frequencia = totalReservadas == 0 ? 0 : (confirmadas * 100.0) / totalReservadas;
+                    return new AlunoFrequenciaResponseDTO(
+                            u.getId(),
+                            u.getNome(),
+                            totalReservadas,
+                            confirmadas,
+                            frequencia,
+                            u.getCreatedAt()
+                    );
+                })
+                .collect(Collectors.toList());
     }
 }

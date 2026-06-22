@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
@@ -18,9 +18,11 @@ interface Presenca {
   templateUrl: './app-motorista-viagens/app-motorista-viagens.component.html',
   styleUrl: './app-motorista-viagens/app-motorista-viagens.component.css'
 })
-export class AppMotoristaViagensComponent implements OnInit {
+export class AppMotoristaViagensComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
+  private refreshHandle?: ReturnType<typeof setInterval>;
+  private presencaRefreshHandle?: ReturnType<typeof setInterval>;
 
   viagens = signal<any[]>([]);
   isLoading = signal(true);
@@ -30,9 +32,19 @@ export class AppMotoristaViagensComponent implements OnInit {
   presencas = signal<Presenca[]>([]);
   showStudentsList = signal(false);
   isLoadingPresencas = signal(false);
-  paradaAtual = signal<number>(0);
 
   ngOnInit() {
+    this.carregarViagens();
+    // Poll trips every 15s
+    this.refreshHandle = setInterval(() => this.carregarViagens(), 15000);
+  }
+
+  ngOnDestroy() {
+    if (this.refreshHandle) clearInterval(this.refreshHandle);
+    if (this.presencaRefreshHandle) clearInterval(this.presencaRefreshHandle);
+  }
+
+  carregarViagens() {
     this.http.get<any[]>(`${this.baseUrl}/driver/trips/today`).subscribe({
       next: (data) => { this.viagens.set(data); this.isLoading.set(false); },
       error: (err: any) => {
@@ -46,10 +58,31 @@ export class AppMotoristaViagensComponent implements OnInit {
     this.http.put<any>(`${this.baseUrl}/driver/trips/${viagemId}/parada`, { novaParadaIndex: novoIndex }).subscribe({
       next: (updated) => {
         this.viagens.update(vs => vs.map(v => v.id === viagemId ? updated : v));
-        this.paradaAtual.set(novoIndex);
       },
       error: (err: any) => this.erro.set(err.error?.message || 'Erro ao atualizar parada.')
     });
+  }
+
+  marcarProximaParada(viagem: any) {
+    const atual = Number(viagem.paradaAtualIndex ?? 0);
+    const total = this.getTotalParadas(viagem);
+    const proxima = Math.min(atual + 1, Math.max(total - 1, 0));
+    this.atualizarParada(viagem.id, proxima);
+  }
+
+  getTotalParadas(viagem: any): number {
+    return this.getParadas(viagem).length;
+  }
+
+  getParadas(viagem: any): string[] {
+    const raw = viagem?.rota?.paradas;
+    if (!raw) return [];
+    try {
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 
   formatHora(dt: string): string {
@@ -75,11 +108,30 @@ export class AppMotoristaViagensComponent implements OnInit {
     this.erro.set('');
     this.selectedViagem.set(viagem);
     this.showStudentsList.set(true);
-    this.isLoadingPresencas.set(true);
+    this.carregarPresencas(viagem.id);
 
-    this.http.get<Presenca[]>(`${this.baseUrl}/driver/trips/${viagem.id}/students`).subscribe({
+    // Poll student list every 10s while open
+    if (this.presencaRefreshHandle) clearInterval(this.presencaRefreshHandle);
+    this.presencaRefreshHandle = setInterval(() => {
+      if (this.showStudentsList() && this.selectedViagem()) {
+        this.carregarPresencas(this.selectedViagem().id);
+      }
+    }, 10000);
+  }
+
+  carregarPresencas(viagemId: number) {
+    this.isLoadingPresencas.set(true);
+    this.http.get<any[]>(`${this.baseUrl}/driver/trips/${viagemId}/students`).subscribe({
       next: (data) => {
-        this.presencas.set(data);
+        // PresencaDigitalResponseDTO: { id, alunoId, alunoNome, viagemId, dataHoraReserva, dataHoraValidacao, status }
+        // Derive 'confirmada' from status field
+        this.presencas.set(data.map(p => ({
+          id: p.id,
+          alunoId: p.alunoId,
+          alunoNome: p.alunoNome || 'Aluno #' + p.alunoId,
+          status: p.status || 'RESERVADA',
+          confirmada: p.status === 'CONFIRMADA'
+        })));
         this.isLoadingPresencas.set(false);
       },
       error: (err: any) => {
@@ -93,6 +145,10 @@ export class AppMotoristaViagensComponent implements OnInit {
     this.showStudentsList.set(false);
     this.selectedViagem.set(null);
     this.presencas.set([]);
+    if (this.presencaRefreshHandle) {
+      clearInterval(this.presencaRefreshHandle);
+      this.presencaRefreshHandle = undefined;
+    }
   }
 
   confirmarPresenca(presencaId: number) {
@@ -127,9 +183,5 @@ export class AppMotoristaViagensComponent implements OnInit {
       case 'FINALIZADA': return 'Concluída';
       default: return '';
     }
-  }
-
-  max(a: number, b: number): number {
-    return Math.max(a, b);
   }
 }

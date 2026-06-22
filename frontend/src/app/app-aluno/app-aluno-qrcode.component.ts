@@ -34,21 +34,13 @@ export class AppAlunoQrcodeComponent implements OnInit {
   carregar() {
     this.isLoading.set(true);
     this.erro.set('');
-    // TODO: substituir por endpoint backend real
     this.http.get<any>(`${this.baseUrl}/student/qrcode`).subscribe({
       next: (data) => {
         this.qrData.set(data);
         this.isLoading.set(false);
       },
-      error: () => {
-        // Fallback local — gera QR com dados do usuário
-        const user = this.user();
-        const expiry = new Date(Date.now() + 10 * 60 * 1000);
-        this.qrData.set({
-          qrData: `GOCAMPUS-${user?.id ?? 0}-${Date.now()}`,
-          alunoId: user?.id,
-          expiresAt: expiry.toISOString()
-        });
+      error: (err) => {
+        this.erro.set(err.error?.message || 'Erro ao obter QR Code.');
         this.isLoading.set(false);
       }
     });
@@ -56,20 +48,14 @@ export class AppAlunoQrcodeComponent implements OnInit {
 
   atualizarQRCode() {
     this.isLoading.set(true);
-    // TODO: substituir por endpoint backend real
+    this.erro.set('');
     this.http.post<any>(`${this.baseUrl}/student/qrcode/refresh`, {}).subscribe({
       next: (data) => {
         this.qrData.set(data);
         this.isLoading.set(false);
       },
-      error: () => {
-        const user = this.user();
-        const expiry = new Date(Date.now() + 10 * 60 * 1000);
-        this.qrData.set({
-          qrData: `GOCAMPUS-${user?.id ?? 0}-${Date.now()}`,
-          alunoId: user?.id,
-          expiresAt: expiry.toISOString()
-        });
+      error: (err) => {
+        this.erro.set(err.error?.message || 'Erro ao renovar QR Code.');
         this.isLoading.set(false);
       }
     });

@@ -22,6 +22,9 @@ public class AlunoMapper extends UsuarioMapper {
         Aluno aluno = new Aluno();
         updateCommon(aluno, dto);
         aluno.setStatusMatricula(dto.getStatusMatricula());
+        if (dto.getCreatedAt() != null) {
+            aluno.setCreatedAt(dto.getCreatedAt());
+        }
         return aluno;
     }
 

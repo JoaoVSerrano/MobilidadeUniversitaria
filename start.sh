@@ -9,11 +9,13 @@ echo "Iniciando backend..."
 ./backend/start.sh
 
 echo "Aguardando backend ficar disponível..."
+backend_ready=false
 for i in {1..60}; do
     status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8082/api/viagens || echo "000")
     case "$status_code" in
         200|401|403)
             echo "Backend está pronto!"
+            backend_ready=true
             break
             ;;
     esac
@@ -21,13 +23,18 @@ for i in {1..60}; do
     sleep 1
 done
 
+if [ "$backend_ready" != "true" ]; then
+    echo "Backend não respondeu em tempo hábil. Abortando inicialização."
+    exit 1
+fi
+
 echo "Iniciando o frontend (Angular)..."
 cd frontend
 
 # Verificar se node_modules existe
 if [ ! -d "node_modules" ]; then
     echo "Instalando dependências do frontend..."
-    npm install
+    npm ci
 fi
 
 npm start &

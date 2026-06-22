@@ -198,7 +198,28 @@
 .progress-finalizada .progress-label    { color: #10b981; }
 .progress-cancelada .progress-label     { color: #ef4444; }
 
-.viagem-actions { display: flex; gap: 10px; }
+.viagem-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+
+.paradas-emulator {
+  display: flex; flex-direction: column; gap: 8px; flex: 1 1 100%;
+  background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.parada-label { font-size: 13px; font-weight: 600; color: #9ca3af; margin: 0; }
+.paradas-controls { display: flex; gap: 8px; }
+
+.btn-parada {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px; border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+}
+.btn-mark-stop {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff;
+}
+.btn-mark-stop:hover:not(:disabled) {
+  transform: translateY(-2px); box-shadow: 0 4px 12px rgba(139,92,246,.4);
+}
+.btn-mark-stop:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-action {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;

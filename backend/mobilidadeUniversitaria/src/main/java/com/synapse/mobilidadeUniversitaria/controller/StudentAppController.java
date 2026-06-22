@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import com.synapse.mobilidadeUniversitaria.dtos.response.StudentQRCodeResponseDTO;
+
 @RestController
 @RequestMapping("/api/student")
 @RequiredArgsConstructor
@@ -47,5 +49,21 @@ public class StudentAppController {
     @PostMapping("/qrcode/scan")
     public ResponseEntity<QRCodeConfirmacaoResponseDTO> confirmarPresencaPorQRCode(@Valid @RequestBody QRCodeScanRequestDTO dto) {
         return ResponseEntity.ok(presencaService.confirmarPorQRCodeDoAlunoLogado(dto.qrData()));
+    }
+
+    @GetMapping("/qrcode")
+    public ResponseEntity<StudentQRCodeResponseDTO> obterMeuQRCode() {
+        Long alunoId = authorizationService.currentUser().getId();
+        String qrData = "GOCAMPUS-" + alunoId + "-" + System.currentTimeMillis();
+        java.time.LocalDateTime expiresAt = java.time.LocalDateTime.now().plusMinutes(5);
+        return ResponseEntity.ok(new StudentQRCodeResponseDTO(qrData, expiresAt, alunoId));
+    }
+
+    @PostMapping("/qrcode/refresh")
+    public ResponseEntity<StudentQRCodeResponseDTO> atualizarMeuQRCode() {
+        Long alunoId = authorizationService.currentUser().getId();
+        String qrData = "GOCAMPUS-" + alunoId + "-" + System.currentTimeMillis();
+        java.time.LocalDateTime expiresAt = java.time.LocalDateTime.now().plusMinutes(5);
+        return ResponseEntity.ok(new StudentQRCodeResponseDTO(qrData, expiresAt, alunoId));
     }
 }

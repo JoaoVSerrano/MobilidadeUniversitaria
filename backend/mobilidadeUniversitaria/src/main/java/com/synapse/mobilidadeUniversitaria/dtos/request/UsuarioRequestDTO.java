@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class UsuarioRequestDTO implements UsuarioDadosDTO {
@@ -35,4 +37,6 @@ public class UsuarioRequestDTO implements UsuarioDadosDTO {
     @NotBlank(message = "Telefone e obrigatorio")
     @Pattern(regexp = "^\\(\\d{2}\\)\\s?\\d{4,5}-\\d{4}$", message = "Telefone invalido")
     private String telefone;
+
+    private LocalDateTime createdAt;
 }

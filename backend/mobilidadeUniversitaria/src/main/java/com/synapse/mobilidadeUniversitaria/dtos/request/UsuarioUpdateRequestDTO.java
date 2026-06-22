@@ -27,8 +27,6 @@ public class UsuarioUpdateRequestDTO implements UsuarioDadosDTO {
     @Size(min = 6, message = "Senha deve ter no minimo 6 caracteres")
     private String senha;
 
-    @NotNull(message = "Endereco e obrigatorio")
-    @Positive(message = "Endereco deve ser um id positivo")
     private Long enderecoId;
 
     @NotBlank(message = "Telefone e obrigatorio")

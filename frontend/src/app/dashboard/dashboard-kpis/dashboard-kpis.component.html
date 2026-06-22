@@ -1,0 +1,27 @@
+@if (summary) {
+  <div class="kpis-grid">
+    <dashboard-kpi-card
+      title="Total de Alunos"
+      [value]="summary.totalStudents.toLocaleString('pt-BR')"
+      [trend]="summary.studentsGrowth"
+      icon="users"
+      color="blue"
+    />
+
+    <dashboard-kpi-card
+      title="Taxa de Ocupação"
+      [value]="summary.occupancyRate.toFixed(0) + '%'"
+      [trend]="summary.occupancyGrowth"
+      icon="trend"
+      color="green"
+    />
+
+    <dashboard-kpi-card
+      title="Viagens Hoje"
+      [value]="summary.tripsToday.toString()"
+      [subtitle]="summary.completedTripsToday + ' finalizadas'"
+      icon="calendar"
+      color="purple"
+    />
+  </div>
+}

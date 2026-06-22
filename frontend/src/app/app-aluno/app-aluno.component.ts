@@ -1,6 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { AppAlunoDashboardComponent } from './app-aluno-dashboard.component';
 import { AppAlunoReservaComponent } from './app-aluno-reserva.component';
@@ -35,8 +34,6 @@ interface NavItem {
 })
 export class AppAlunoComponent {
   private authService = inject(AuthService);
-  private router = inject(Router);
-
   currentScreen: Screen = 'dashboard';
 
   navItems: NavItem[] = [
@@ -59,6 +56,7 @@ export class AppAlunoComponent {
   constructor() {
     // Listen for custom navigation events from child components
     window.addEventListener('navigate-to-reservas', () => this.setScreen('reserva'));
+    window.addEventListener('navigate-to-notificacoes', () => this.setScreen('notificacoes'));
   }
 
   setScreen(screen: Screen): void {
@@ -66,10 +64,7 @@ export class AppAlunoComponent {
   }
 
   logout(): void {
-    if (confirm('Deseja realmente sair?')) {
-      this.authService.logout();
-      this.router.navigate(['/login']);
-    }
+    this.authService.logout();
   }
 
   getIconSvg(icon: string): string {

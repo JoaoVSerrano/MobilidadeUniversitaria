@@ -1,7 +1,12 @@
+<!-- Section 0: KPI Summary -->
+<section class="kpis-section">
+  <dashboard-kpis [summary]="summary"></dashboard-kpis>
+</section>
+
 <!-- Section 1: Stat Cards Grid -->
 <section class="stats-section">
   @for (stat of stats; track stat.title) {
-    <app-stat-card 
+    <app-stat-card
       [title]="stat.title"
       [value]="stat.value"
       [trend]="stat.trend"
@@ -14,7 +19,6 @@
 
 <!-- Section 2: Charts Section Grid -->
 <section class="charts-section">
-  <!-- Card Chart 1: Daily Demand (SVG Line Chart) -->
   <div class="chart-card">
     <div class="chart-card-header">
       <div>
@@ -26,18 +30,15 @@
         <span class="legend-label">Estudantes</span>
       </div>
     </div>
-    
+
     <div class="chart-container">
-      <!-- Custom responsive SVG Line Chart -->
       <svg class="line-chart-svg" viewBox="0 0 500 150" preserveAspectRatio="none">
-        <!-- Grids -->
         <line x1="30" y1="20" x2="470" y2="20" stroke="#f1f5f9" stroke-width="1"></line>
         <line x1="30" y1="52.5" x2="470" y2="52.5" stroke="#f1f5f9" stroke-width="1"></line>
         <line x1="30" y1="85" x2="470" y2="85" stroke="#f1f5f9" stroke-width="1"></line>
         <line x1="30" y1="117.5" x2="470" y2="117.5" stroke="#f1f5f9" stroke-width="1"></line>
         <line x1="30" y1="130" x2="470" y2="130" stroke="#cbd5e1" stroke-width="1.5"></line>
 
-        <!-- Gradient Definition -->
         <defs>
           <linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stop-color="#2563eb" stop-opacity="0.25"></stop>
@@ -45,25 +46,17 @@
           </linearGradient>
         </defs>
 
-        <!-- Filled Area -->
         <path [attr.d]="getFillPath()" fill="url(#chart-gradient)"></path>
-
-        <!-- Stroke Line -->
         <path [attr.d]="svgPath" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
 
-        <!-- Dots and Labels for nodes -->
         @for (point of svgPoints; track point.day) {
           <g>
-            <!-- Highlight Circle on Hover -->
             <circle [attr.cx]="point.x" [attr.cy]="point.y" r="5" fill="#ffffff" stroke="#2563eb" stroke-width="2.5" class="chart-node"></circle>
-            
-            <!-- Tooltip values -->
             <text [attr.x]="point.x" [attr.y]="point.y - 8" text-anchor="middle" class="chart-node-val">{{ point.value }}</text>
           </g>
         }
       </svg>
-      
-      <!-- X-Axis Labels -->
+
       <div class="x-axis-labels">
         @for (point of svgPoints; track point.day) {
           <span>{{ point.day }}</span>
@@ -72,7 +65,6 @@
     </div>
   </div>
 
-  <!-- Card Chart 2: Route Occupancy (CSS Progress Bars) -->
   <div class="chart-card">
     <div class="chart-card-header">
       <div>
@@ -89,7 +81,7 @@
             <span class="bar-value">{{ route.occupancy }}%</span>
           </div>
           <div class="progress-bar-bg">
-            <div class="progress-bar-fill" 
+            <div class="progress-bar-fill"
                  [style.width.%]="route.occupancy"
                  [class.high]="route.occupancy >= 85"
                  [class.medium]="route.occupancy >= 70 && route.occupancy < 85"
@@ -100,6 +92,10 @@
       }
     </div>
   </div>
+</section>
+
+<section class="student-usage-section">
+  <dashboard-student-usage-table [rows]="studentUsage"></dashboard-student-usage-table>
 </section>
 
 <!-- Section 3: Data Table -->

@@ -25,7 +25,6 @@ export class AppMotoristaQrComponent {
   erro = signal('');
   sucesso = signal('');
 
-  // Histórico de embarques da sessão
   historico = signal<any[]>([]);
 
   validarQR() {
@@ -45,7 +44,7 @@ export class AppMotoristaQrComponent {
         this.resultado.set(res);
         this.isLoading.set(false);
         if (res.valido) {
-          this.sucesso.set(`✅ Embarque confirmado — ${res.alunoNome || 'Aluno'}`);
+          this.sucesso.set(`Embarque confirmado - ${res.alunoNome || 'Aluno'}`);
           this.historico.update(h => [{
             nome: res.alunoNome || 'Aluno',
             hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
@@ -58,23 +57,8 @@ export class AppMotoristaQrComponent {
         }
       },
       error: (err: any) => {
-        // Fallback local: simular validação para demonstração
-        const isGoCampus = codigo.startsWith('GOCAMPUS-');
         this.isLoading.set(false);
-        if (isGoCampus) {
-          const partes = codigo.split('-');
-          const alunoId = partes[1] || '?';
-          this.sucesso.set(`✅ Embarque confirmado — Aluno #${alunoId}`);
-          this.historico.update(h => [{
-            nome: `Aluno #${alunoId}`,
-            hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-            status: 'OK'
-          }, ...h.slice(0, 9)]);
-          this.qrInput = '';
-          setTimeout(() => this.sucesso.set(''), 4000);
-        } else {
-          this.erro.set(err.error?.message || 'QR Code inválido ou expirado.');
-        }
+        this.erro.set(err.error?.message || 'QR Code inválido ou expirado.');
       }
     });
   }
@@ -96,7 +80,7 @@ export class AppMotoristaQrComponent {
           const imageData = await this.qrCodeService.generateQrCode(res.qrData);
           this.qrCodeImage.set(imageData);
           this.expiresAt.set(res.expiresAt);
-        } catch (err) {
+        } catch {
           this.erro.set('Erro ao gerar imagem do QR Code');
         } finally {
           this.isLoading.set(false);

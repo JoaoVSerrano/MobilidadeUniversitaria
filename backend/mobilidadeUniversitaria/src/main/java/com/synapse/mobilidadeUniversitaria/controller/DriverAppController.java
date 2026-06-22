@@ -45,10 +45,17 @@ public class DriverAppController {
         return ResponseEntity.ok(presencaService.ocupacaoDaViagem(tripId));
     }
 
-    @PostMapping("/trips/{tripId}/qrcode")
+    @org.springframework.web.bind.annotation.RequestMapping(value = "/trips/{tripId}/qrcode", method = {org.springframework.web.bind.annotation.RequestMethod.GET, org.springframework.web.bind.annotation.RequestMethod.POST})
     @PreAuthorize("@authorizationService.isMotoristaDaViagem(#tripId)")
     public ResponseEntity<QRCodeResponseDTO> gerarQRCodeDaViagem(@PathVariable Long tripId) {
         return ResponseEntity.ok(viagemService.gerarQRCode(tripId));
+    }
+
+    @PostMapping("/qrcode/scan")
+    @PreAuthorize("hasRole('MOTORISTA')")
+    public ResponseEntity<com.synapse.mobilidadeUniversitaria.dtos.response.QRCodeConfirmacaoResponseDTO> confirmarPresencaPorQRCode(
+            @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.synapse.mobilidadeUniversitaria.dtos.request.QRCodeScanRequestDTO dto) {
+        return ResponseEntity.ok(presencaService.confirmarScanDoMotorista(dto.qrData()));
     }
 
     @PostMapping("/trips/{tripId}/start")
