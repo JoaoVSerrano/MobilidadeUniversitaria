@@ -168,12 +168,7 @@
               <span [class]="'badge-type ' + user.type">{{ user.type }}</span>
             </td>
             <td>
-              <select [class]="'status-select ' + user.status.toLowerCase()">
-                <option>{{ user.status }}</option>
-                <option>Ativo</option>
-                <option>Pendente</option>
-                <option>Inativo</option>
-              </select>
+              <span [class]="'badge-status ' + user.status.toLowerCase()">{{ user.status }}</span>
             </td>
             <td class="date-cell">{{ user.createdAt }}</td>
             <td>
@@ -217,19 +212,19 @@
         <div class="modal-body">
           <div class="detail-row">
             <label>Nome</label>
-            <span>{{ selectedUser()!.name }}</span>
+            <span>{{ selectedUserDetails?.nome ?? selectedUser()!.name }}</span>
           </div>
           <div class="detail-row">
             <label>CPF</label>
-            <span>{{ selectedUser()!.cpf }}</span>
+            <span>{{ selectedUserDetails?.cpf ?? selectedUser()!.cpf }}</span>
           </div>
           <div class="detail-row">
             <label>Email</label>
-            <span>{{ selectedUser()!.email }}</span>
+            <span>{{ selectedUserDetails?.email ?? selectedUser()!.email }}</span>
           </div>
           <div class="detail-row">
             <label>Telefone</label>
-            <span>{{ selectedUser()!.phone }}</span>
+            <span>{{ selectedUserDetails?.telefone ?? selectedUser()!.phone }}</span>
           </div>
           <div class="detail-row">
             <label>Tipo</label>
@@ -243,6 +238,32 @@
             <label>Data de Cadastro</label>
             <span>{{ selectedUser()!.createdAt }}</span>
           </div>
+          @if (selectedUser()!.type === 'aluno' && selectedUserDetails?.faculdade) {
+            <div class="detail-row">
+              <label>Faculdade</label>
+              <span>{{ selectedUserDetails.faculdade.nome }}</span>
+            </div>
+          }
+          @if (selectedUserDetails?.endereco) {
+            <div class="detail-row">
+              <label>Endereço</label>
+              <span>{{ selectedUserDetails.endereco.rua }}, {{ selectedUserDetails.endereco.numero }} - {{ selectedUserDetails.endereco.bairro }}</span>
+            </div>
+            <div class="detail-row">
+              <label>CEP</label>
+              <span>{{ selectedUserDetails.endereco.cep }}</span>
+            </div>
+          }
+          @if (selectedUser()!.type === 'motorista' && selectedUserDetails?.cnhNumero) {
+            <div class="detail-row">
+              <label>CNH</label>
+              <span>{{ selectedUserDetails.cnhNumero }}</span>
+            </div>
+            <div class="detail-row">
+              <label>Vencimento CNH</label>
+              <span>{{ selectedUserDetails.vencimentoCnh }}</span>
+            </div>
+          }
         </div>
       }
     </div>

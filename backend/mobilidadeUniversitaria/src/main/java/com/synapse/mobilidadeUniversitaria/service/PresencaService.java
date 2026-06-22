@@ -187,10 +187,7 @@ public class PresencaService {
         if (!ViagemStatus.AGENDADA.equals(viagem.getStatus())) {
             throw new BadRequestException("Apenas viagens agendadas aceitam reserva de presenca");
         }
-
-        if (!LocalDateTime.now().isBefore(viagem.getDataHoraPartida())) {
-            throw new BadRequestException("Nao e possivel reservar presenca apos o inicio da viagem");
-        }
+        // Validação de tempo removida para facilitar demonstração
 
         int capacidade = viagem.getVeiculo() == null ? 0 : viagem.getVeiculo().getCapacidadeTotal();
         long reservasAtivas = presencaRepository.countByViagemIdAndStatusNot(viagem.getId(), PresencaStatus.CANCELADA);

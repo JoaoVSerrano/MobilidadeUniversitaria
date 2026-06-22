@@ -110,14 +110,6 @@ public class AuthService {
             } catch (IllegalArgumentException ignored) {}
         }
 
-        Usuario usuario = new Usuario();
-        usuario.setNome(dto.nome());
-        usuario.setEmail(dto.email());
-        usuario.setCpf(dto.cpf());
-        usuario.setTelefone(dto.telefone());
-        usuario.setUserType(userType);
-        usuario.setSenha(dto.senha()); // Será encoded pelo service
-
         // Usa o GestorService para criar o usuário (que já tem a lógica de encoding)
         UsuarioRequestDTO request = new UsuarioRequestDTO();
         request.setNome(dto.nome());

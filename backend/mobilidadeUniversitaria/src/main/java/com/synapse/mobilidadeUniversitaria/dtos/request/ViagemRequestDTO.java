@@ -2,7 +2,6 @@ package com.synapse.mobilidadeUniversitaria.dtos.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.synapse.mobilidadeUniversitaria.validation.ValidPeriodoViagem;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -13,12 +12,12 @@ public record ViagemRequestDTO(
 
         @NotNull(message = "Horario da partida e obrigatorio")
         @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
-        @Future(message = "A data de partida deve ser no futuro")
+        // @Future removido para permitir demonstração
         LocalDateTime dataHoraPartida,
 
         @NotNull(message = "Data e hora de chegada prevista e obrigatoria")
         @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
-        @Future(message = "A data de chegada prevista deve ser no futuro")
+        // @Future removido para permitir demonstração
         LocalDateTime dataHoraChegadaPrevista,
 
         @NotNull(message = "Motorista e obrigatorio")

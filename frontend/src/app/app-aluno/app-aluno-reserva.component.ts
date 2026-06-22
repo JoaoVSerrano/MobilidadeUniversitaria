@@ -9,6 +9,9 @@ interface RotaDisponivel {
   nomeRota: string;
   pontoParada: string;
   descricao: string;
+  viagemId?: number;
+  dataHoraPartida?: string;
+  capacidade?: number;
 }
 
 @Component({
@@ -32,9 +35,28 @@ export class AppAlunoReservaComponent implements OnInit {
   hoje = new Date().toISOString().split('T')[0];
 
   ngOnInit() {
-    this.http.get<RotaDisponivel[]>(`${this.baseUrl}/rotas`).subscribe({
-      next: (data) => this.rotas.set(data),
-      error: () => this.rotas.set([])
+    this.isLoading.set(true);
+    // Buscar viagens agendadas diretamente
+    this.http.get<any[]>(`${this.baseUrl}/viagens`).subscribe({
+      next: (data) => {
+        // Filtrar apenas viagens AGENDADAS
+        const viagensDisp = data.filter(v => v.status === 'AGENDADA');
+        // Extrair rotas únicas das viagens disponíveis
+        const rotasMap = new Map<number, any>();
+        viagensDisp.forEach(v => {
+          if (v.rota && !rotasMap.has(v.rota.id)) {
+            rotasMap.set(v.rota.id, {
+              ...v.rota,
+              viagemId: v.id,
+              dataHoraPartida: v.dataHoraPartida,
+              capacidade: v.veiculo?.capacidadeTotal || 45
+            });
+          }
+        });
+        this.rotas.set(Array.from(rotasMap.values()));
+        this.isLoading.set(false);
+      },
+      error: () => { this.isLoading.set(false); }
     });
   }
 
@@ -43,66 +65,48 @@ export class AppAlunoReservaComponent implements OnInit {
   }
 
   reservar() {
-    if (!this.dataSelecionada || !this.rotaSelecionada) {
-      this.mensagem.set('Selecione a data e a rota.');
+    if (!this.rotaSelecionada) {
+      this.mensagem.set('Selecione uma rota.');
+      this.mensagemTipo.set('error');
+      return;
+    }
+
+    const rotaObj = this.rotas().find(r => r.id.toString() === this.rotaSelecionada);
+    if (!rotaObj?.viagemId) {
+      this.mensagem.set('Viagem não encontrada para esta rota.');
       this.mensagemTipo.set('error');
       return;
     }
 
     this.isLoading.set(true);
-    this.mensagem.set('');
-    this.mensagemTipo.set('');
-
-    this.http.get<any[]>(`${this.baseUrl}/viagens`).subscribe({
-      next: (viagens) => {
-        const rotaId = Number(this.rotaSelecionada);
-        const dataAlvo = this.dataSelecionada;
-
-        const viagem = viagens.find(v => {
-          const viagemData = v.dataHoraPartida
-            ? new Date(v.dataHoraPartida).toISOString().split('T')[0]
-            : null;
-          return v.rota?.id === rotaId
-            && viagemData === dataAlvo
-            && v.status === 'AGENDADA';
-        });
-
-        if (!viagem) {
-          this.isLoading.set(false);
-          this.mensagem.set('Não há viagem disponível para essa rota e data. Tente outra data.');
-          this.mensagemTipo.set('error');
-          return;
-        }
-
-        this.http.post(`${this.baseUrl}/student/trips/${viagem.id}/reserve`, {}).subscribe({
-          next: () => {
-            this.isLoading.set(false);
-            this.mensagem.set(`Reserva confirmada para a viagem de ${viagem.rota?.nomeRota}!`);
-            this.mensagemTipo.set('success');
-            this.dataSelecionada = '';
-            this.rotaSelecionada = '';
-            setTimeout(() => this.mensagem.set(''), 4000);
-          },
-          error: (err: any) => {
-            this.isLoading.set(false);
-            this.mensagem.set(err.error?.message || 'Erro ao confirmar reserva.');
-            this.mensagemTipo.set('error');
-          }
-        });
-      },
-      error: () => {
+    this.http.post(`${this.baseUrl}/student/trips/${rotaObj.viagemId}/reserve`, {}).subscribe({
+      next: () => {
         this.isLoading.set(false);
-        this.mensagem.set('Erro ao buscar viagens disponíveis.');
+        this.mensagem.set(`Reserva confirmada para ${rotaObj.nomeRota}!`);
+        this.mensagemTipo.set('success');
+        this.rotaSelecionada = '';
+        setTimeout(() => this.mensagem.set(''), 4000);
+      },
+      error: (err: any) => {
+        this.isLoading.set(false);
+        const msg = err.error?.message || '';
+        if (msg.includes('ja possui reserva')) {
+          this.mensagem.set('Você já tem uma reserva para esta viagem.');
+        } else {
+          this.mensagem.set(msg || 'Erro ao confirmar reserva.');
+        }
         this.mensagemTipo.set('error');
       }
     });
   }
 
+  // DEMO: ocupação simulada baseada no id da rota (substituir por API real em produção)
   getOcupacao(rota: RotaDisponivel): number {
     const seed = rota.id * 37 % 100;
     return Math.min(seed + 40, 100);
   }
 
+  // DEMO: horário simulado baseado no id da rota (substituir por API real em produção)
   getHorario(rota: RotaDisponivel): string {
     const horas = ['07:30', '08:00', '08:30', '09:00', '09:30', '10:00'];
     return horas[rota.id % horas.length];

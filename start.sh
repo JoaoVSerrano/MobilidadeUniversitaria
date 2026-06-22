@@ -9,7 +9,7 @@ echo "Iniciando backend..."
 ./backend/start.sh
 
 echo "Aguardando backend ficar disponível..."
-for i in {1..30}; do
+for i in {1..60}; do
     status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8082/api/viagens || echo "000")
     case "$status_code" in
         200|401|403)
@@ -17,12 +17,19 @@ for i in {1..30}; do
             break
             ;;
     esac
-    echo "Aguardando... ($i/30)"
+    echo "Aguardando... ($i/60)"
     sleep 1
 done
 
 echo "Iniciando o frontend (Angular)..."
 cd frontend
+
+# Verificar se node_modules existe
+if [ ! -d "node_modules" ]; then
+    echo "Instalando dependências do frontend..."
+    npm install
+fi
+
 npm start &
 FRONTEND_PID=$!
 cd ..
@@ -32,5 +39,5 @@ echo "Backend: http://localhost:8082"
 echo "Frontend: http://localhost:4200"
 echo "Frontend PID: $FRONTEND_PID"
 
-trap 'echo "Encerrando sistemas..."; kill $FRONTEND_PID; exit' SIGINT SIGTERM
+trap 'echo "Encerrando sistemas..."; kill $FRONTEND_PID 2>/dev/null || true; exit' SIGINT SIGTERM
 wait
