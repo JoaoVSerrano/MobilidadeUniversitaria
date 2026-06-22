@@ -43,6 +43,9 @@ export interface Route {
   status: 'Ativa' | 'Inativa';
   stops: RouteStop[];
   paradas?: string[];
+  distance?: string;
+  time?: string;
+  capacity?: number;
 }
 
 export interface Vehicle {

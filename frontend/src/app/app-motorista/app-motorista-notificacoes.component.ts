@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MotoristaService } from '../services/motorista.service';
 import { AuthService } from '../services/auth.service';
 
@@ -18,7 +19,7 @@ export interface Notificacao {
 @Component({
   selector: 'app-motorista-notificacoes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './app-motorista-notificacoes.component.html',
   styleUrl: './app-motorista-notificacoes.component.css'
 })

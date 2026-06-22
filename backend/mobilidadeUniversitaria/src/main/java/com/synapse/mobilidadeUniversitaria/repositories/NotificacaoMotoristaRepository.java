@@ -10,4 +10,5 @@ public interface NotificacaoMotoristaRepository extends JpaRepository<Notificaca
     List<NotificacaoMotorista> findByMotoristaId(Long motoristaId);
     List<NotificacaoMotorista> findByMotoristaIdAndLida(Long motoristaId, Boolean lida);
     void deleteByViagemId(Long viagemId);
+    void deleteByMotoristaId(Long motoristaId);
 }

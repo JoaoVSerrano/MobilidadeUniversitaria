@@ -108,4 +108,10 @@ export class AppMotoristaQrComponent {
       }
     });
   }
+
+  simularScan() {
+    const codigoSimulado = 'GOCAMPUS-' + Math.floor(Math.random() * 1000);
+    this.qrInput = codigoSimulado;
+    this.validarQR();
+  }
 }
