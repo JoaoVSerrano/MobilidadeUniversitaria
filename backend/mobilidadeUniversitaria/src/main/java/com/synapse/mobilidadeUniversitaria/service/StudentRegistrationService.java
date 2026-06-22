@@ -1,6 +1,7 @@
 package com.synapse.mobilidadeUniversitaria.service;
 
 import com.synapse.mobilidadeUniversitaria.Entities.Endereco;
+import com.synapse.mobilidadeUniversitaria.Entities.SolicitacaoCadastroAluno;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.LocalType;
 import com.synapse.mobilidadeUniversitaria.dtos.request.AlunoRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.request.StudentRegistrationRequestDTO;
@@ -10,14 +11,13 @@ import com.synapse.mobilidadeUniversitaria.exceptions.ResourceAlreadyExistsExcep
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.repositories.EnderecoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.FaculdadeRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.SolicitacaoCadastroAlunoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +27,7 @@ public class StudentRegistrationService {
     private final EnderecoRepository enderecoRepository;
     private final FaculdadeRepository faculdadeRepository;
     private final AlunoService alunoService;
-
-    // Armazenamento em memória das solicitações pendentes
-    private final Map<Long, StudentRegistrationRequestDTO> pendingRequests = new ConcurrentHashMap<>();
-    private final AtomicLong idCounter = new AtomicLong(1L);
+    private final SolicitacaoCadastroAlunoRepository solicitacaoRepository;
 
     public void createStudentRequest(StudentRegistrationRequestDTO dto) {
         // Verificar duplicidade de email e CPF no banco de usuários ativos
@@ -40,35 +37,51 @@ public class StudentRegistrationService {
         if (usuarioRepository.existsByCpf(dto.cpf())) {
             throw new ResourceAlreadyExistsException("CPF ja cadastrado: " + dto.cpf());
         }
-        // Verificar solicitação já pendente em memória
-        boolean jaExiste = pendingRequests.values().stream()
-                .anyMatch(r -> r.email().equals(dto.email()) || r.cpf().equals(dto.cpf()));
-        if (jaExiste) {
-            throw new ResourceAlreadyExistsException("Ja existe uma solicitacao pendente para este email ou CPF");
+        // Verificar solicitação já pendente no banco
+        if (solicitacaoRepository.findByEmail(dto.email()).isPresent()) {
+            throw new ResourceAlreadyExistsException("Ja existe uma solicitacao pendente para este email");
+        }
+        if (solicitacaoRepository.findByCpf(dto.cpf()).isPresent()) {
+            throw new ResourceAlreadyExistsException("Ja existe uma solicitacao pendente para este CPF");
         }
 
-        long id = idCounter.getAndIncrement();
-        pendingRequests.put(id, dto);
+        SolicitacaoCadastroAluno solicitacao = new SolicitacaoCadastroAluno();
+        solicitacao.setNome(dto.nome());
+        solicitacao.setEmail(dto.email());
+        solicitacao.setCpf(dto.cpf());
+        solicitacao.setSenha(dto.senha());
+        solicitacao.setTelefone(dto.telefone());
+        solicitacao.setNomeFaculdade(dto.nomeFaculdade());
+        solicitacao.setCep(dto.cep());
+        solicitacao.setRua(dto.rua());
+        solicitacao.setBairro(dto.bairro());
+        solicitacao.setNumero(dto.numero());
+        solicitacao.setComplemento(dto.complemento());
+        solicitacao.setTipoLocal(dto.tipoLocal());
+        solicitacao.setStatus("PENDENTE");
+
+        solicitacaoRepository.save(solicitacao);
     }
 
     public List<Map<String, Object>> listPendingRequests() {
+        List<SolicitacaoCadastroAluno> solicitacoes = solicitacaoRepository.findByStatus("PENDENTE");
         List<Map<String, Object>> result = new ArrayList<>();
-        pendingRequests.forEach((id, dto) -> {
+        solicitacoes.forEach(solicitacao -> {
             Map<String, Object> map = new LinkedHashMap<>();
-            map.put("id", id);
-            map.put("nome", dto.nome());
-            map.put("email", dto.email());
-            map.put("cpf", dto.cpf());
-            map.put("telefone", dto.telefone());
-            map.put("nomeFaculdade", dto.nomeFaculdade());
-            map.put("cep", dto.cep());
-            map.put("rua", dto.rua());
-            map.put("bairro", dto.bairro());
-            map.put("numero", dto.numero());
-            map.put("complemento", dto.complemento());
-            map.put("tipoLocal", dto.tipoLocal());
-            map.put("status", "PENDING");
-            map.put("createdAt", LocalDate.now().toString());
+            map.put("id", solicitacao.getId());
+            map.put("nome", solicitacao.getNome());
+            map.put("email", solicitacao.getEmail());
+            map.put("cpf", solicitacao.getCpf());
+            map.put("telefone", solicitacao.getTelefone());
+            map.put("nomeFaculdade", solicitacao.getNomeFaculdade());
+            map.put("cep", solicitacao.getCep());
+            map.put("rua", solicitacao.getRua());
+            map.put("bairro", solicitacao.getBairro());
+            map.put("numero", solicitacao.getNumero());
+            map.put("complemento", solicitacao.getComplemento());
+            map.put("tipoLocal", solicitacao.getTipoLocal());
+            map.put("status", solicitacao.getStatus());
+            map.put("createdAt", solicitacao.getCreatedAt() != null ? solicitacao.getCreatedAt().toString() : LocalDate.now().toString());
             result.add(map);
         });
         return result;
@@ -76,32 +89,30 @@ public class StudentRegistrationService {
 
     @org.springframework.transaction.annotation.Transactional
     public UsuarioResponseDTO approveStudentRequest(Long id) {
-        StudentRegistrationRequestDTO dto = pendingRequests.get(id);
-        if (dto == null) {
-            throw new ResourceNotFoundException("Solicitacao nao encontrada: " + id);
-        }
+        SolicitacaoCadastroAluno solicitacao = solicitacaoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitacao nao encontrada: " + id));
 
         // Criar ou buscar endereço
         Endereco endereco = enderecoRepository.findById(1L).orElseGet(() -> {
             Endereco novo = new Endereco();
-            novo.setCep(dto.cep() != null && !dto.cep().isBlank() ? dto.cep().replaceAll("\\D", "") : "00000000");
-            novo.setRua(dto.rua() != null && !dto.rua().isBlank() ? dto.rua() : "Nao informada");
-            novo.setBairro(dto.bairro() != null && !dto.bairro().isBlank() ? dto.bairro() : "Nao informado");
-            novo.setNumero(dto.numero() != null && !dto.numero().isBlank() ? dto.numero() : "0");
+            novo.setCep(solicitacao.getCep() != null && !solicitacao.getCep().isBlank() ? solicitacao.getCep().replaceAll("\\D", "") : "00000000");
+            novo.setRua(solicitacao.getRua() != null && !solicitacao.getRua().isBlank() ? solicitacao.getRua() : "Nao informada");
+            novo.setBairro(solicitacao.getBairro() != null && !solicitacao.getBairro().isBlank() ? solicitacao.getBairro() : "Nao informado");
+            novo.setNumero(solicitacao.getNumero() != null && !solicitacao.getNumero().isBlank() ? solicitacao.getNumero() : "0");
             novo.setTipoLocal(LocalType.RESIDENCIAL);
             return enderecoRepository.save(novo);
         });
 
         // Buscar ou criar faculdade com base no nome fornecido pelo aluno
         Long faculdadeId;
-        if (dto.nomeFaculdade() != null && !dto.nomeFaculdade().isBlank()) {
+        if (solicitacao.getNomeFaculdade() != null && !solicitacao.getNomeFaculdade().isBlank()) {
             // Buscar faculdade pelo nome
-            faculdadeId = faculdadeRepository.findByNome(dto.nomeFaculdade())
+            faculdadeId = faculdadeRepository.findByNome(solicitacao.getNomeFaculdade())
                     .map(f -> f.getId())
                     .orElseGet(() -> {
                         // Criar nova faculdade com o nome fornecido
                         com.synapse.mobilidadeUniversitaria.Entities.Faculdade faculdade = new com.synapse.mobilidadeUniversitaria.Entities.Faculdade();
-                        faculdade.setNome(dto.nomeFaculdade());
+                        faculdade.setNome(solicitacao.getNomeFaculdade());
                         faculdade.setEndereco(endereco);
                         com.synapse.mobilidadeUniversitaria.Entities.Faculdade salva = faculdadeRepository.save(faculdade);
                         return salva.getId();
@@ -122,11 +133,11 @@ public class StudentRegistrationService {
 
         // Criar aluno via AlunoService (usa JPA corretamente, com bcrypt na senha)
         AlunoRequestDTO alunoRequest = new AlunoRequestDTO();
-        alunoRequest.setNome(dto.nome());
-        alunoRequest.setEmail(dto.email());
-        alunoRequest.setCpf(dto.cpf());
-        alunoRequest.setSenha(dto.senha());
-        alunoRequest.setTelefone(dto.telefone());
+        alunoRequest.setNome(solicitacao.getNome());
+        alunoRequest.setEmail(solicitacao.getEmail());
+        alunoRequest.setCpf(solicitacao.getCpf());
+        alunoRequest.setSenha(solicitacao.getSenha());
+        alunoRequest.setTelefone(solicitacao.getTelefone());
         alunoRequest.setEnderecoId(endereco.getId());
         alunoRequest.setFaculdadeId(faculdadeId);
         alunoRequest.setStatusMatricula(
@@ -134,8 +145,8 @@ public class StudentRegistrationService {
 
         AlunoResponseDTO aluno = alunoService.criar(alunoRequest);
 
-        // Remover da fila de pendentes
-        pendingRequests.remove(id);
+        // Remover solicitação do banco
+        solicitacaoRepository.delete(solicitacao);
 
         // Converter AlunoResponseDTO em UsuarioResponseDTO para retornar
         UsuarioResponseDTO response = new UsuarioResponseDTO();
@@ -149,9 +160,8 @@ public class StudentRegistrationService {
     }
 
     public void rejectStudentRequest(Long id) {
-        if (!pendingRequests.containsKey(id)) {
-            throw new ResourceNotFoundException("Solicitacao nao encontrada: " + id);
-        }
-        pendingRequests.remove(id);
+        SolicitacaoCadastroAluno solicitacao = solicitacaoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitacao nao encontrada: " + id));
+        solicitacaoRepository.delete(solicitacao);
     }
 }

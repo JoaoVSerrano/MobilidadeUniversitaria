@@ -1,6 +1,7 @@
 package com.synapse.mobilidadeUniversitaria.mapper;
 
 import com.synapse.mobilidadeUniversitaria.Entities.Viagem;
+import com.synapse.mobilidadeUniversitaria.dtos.request.ViagemRequestDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.ViagemResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

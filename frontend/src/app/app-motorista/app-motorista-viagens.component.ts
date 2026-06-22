@@ -128,4 +128,8 @@ export class AppMotoristaViagensComponent implements OnInit {
       default: return '';
     }
   }
+
+  max(a: number, b: number): number {
+    return Math.max(a, b);
+  }
 }

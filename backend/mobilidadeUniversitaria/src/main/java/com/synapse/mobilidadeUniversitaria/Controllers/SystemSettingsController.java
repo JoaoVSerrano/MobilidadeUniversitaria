@@ -3,6 +3,7 @@ package com.synapse.mobilidadeUniversitaria.Controllers;
 import com.synapse.mobilidadeUniversitaria.Entities.SystemSettings;
 import com.synapse.mobilidadeUniversitaria.Services.SystemSettingsService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 

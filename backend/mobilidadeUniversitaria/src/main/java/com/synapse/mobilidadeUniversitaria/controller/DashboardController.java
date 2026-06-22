@@ -3,10 +3,13 @@ package com.synapse.mobilidadeUniversitaria.controller;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DashboardGestorResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DemandaPorDiaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.OcupacaoPorRotaResponseDTO;
+import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoFrequenciaResponseDTO;
 import com.synapse.mobilidadeUniversitaria.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +36,11 @@ public class DashboardController {
     @GetMapping("/demanda-por-dia")
     public ResponseEntity<List<DemandaPorDiaResponseDTO>> demandaPorDia() {
         return ResponseEntity.ok(dashboardService.demandaPorDia());
+    }
+
+    @GetMapping("/aluno/{alunoId}/frequencia")
+    public ResponseEntity<com.synapse.mobilidadeUniversitaria.dtos.response.AlunoFrequenciaResponseDTO> frequenciaAluno(@PathVariable Long alunoId) {
+        return ResponseEntity.ok(dashboardService.calcularFrequenciaAluno(alunoId));
     }
 
     @GetMapping("/kpis")

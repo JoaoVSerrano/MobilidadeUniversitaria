@@ -78,8 +78,8 @@ export class RoutesComponent implements OnInit {
         this.filtered = data;
         this.totalRoutes = data.length;
         this.activeRoutes = data.filter(r => r.status === 'Ativa').length;
-        this.totalCapacity = data.reduce((acc, r) => acc + r.capacity, 0);
-        const totalKm = data.reduce((acc, r) => acc + parseFloat(r.distance), 0);
+        this.totalCapacity = data.reduce((acc, r) => acc + (r.capacity || 0), 0);
+        const totalKm = data.reduce((acc, r) => acc + parseFloat(r.distance || '0'), 0);
         this.totalDistance = totalKm.toFixed(1) + ' km';
         this.cdr.detectChanges();
       },

@@ -1,7 +1,10 @@
 package com.synapse.mobilidadeUniversitaria.service;
 
+import com.synapse.mobilidadeUniversitaria.dtos.response.AlunoFrequenciaResponseDTO;
+import com.synapse.mobilidadeUniversitaria.Entities.Aluno;
 import com.synapse.mobilidadeUniversitaria.Entities.PresencaDigital;
 import com.synapse.mobilidadeUniversitaria.Entities.Viagem;
+import com.synapse.mobilidadeUniversitaria.Entities.enums.PresencaStatus;
 import com.synapse.mobilidadeUniversitaria.Entities.enums.ViagemStatus;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DashboardGestorResponseDTO;
 import com.synapse.mobilidadeUniversitaria.dtos.response.DemandaPorDiaResponseDTO;
@@ -112,5 +115,27 @@ public class DashboardService {
         return viagensHoje().stream()
                 .filter(v -> ViagemStatus.FINALIZADA.equals(v.getStatus()))
                 .count();
+    }
+
+    public AlunoFrequenciaResponseDTO calcularFrequenciaAluno(Long alunoId) {
+        Aluno aluno = alunoRepository.findById(alunoId)
+                .orElseThrow(() -> new com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException("Aluno nao encontrado"));
+
+        List<PresencaDigital> presencas = presencaRepository.findByAlunoId(alunoId);
+
+        long totalReservadas = presencas.size();
+        long confirmadas = presencas.stream()
+                .filter(p -> PresencaStatus.CONFIRMADA.equals(p.getStatus()))
+                .count();
+
+        double frequencia = totalReservadas == 0 ? 0 : (confirmadas * 100.0) / totalReservadas;
+
+        return new AlunoFrequenciaResponseDTO(
+                aluno.getId(),
+                aluno.getNome(),
+                totalReservadas,
+                confirmadas,
+                frequencia
+        );
     }
 }

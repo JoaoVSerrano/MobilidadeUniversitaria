@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { AlunoService } from '../services/aluno.service';
 import { AuthService } from '../services/auth.service';
 
@@ -17,7 +18,7 @@ export interface Notificacao {
 @Component({
   selector: 'app-aluno-notificacoes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './app-aluno-notificacoes.component.html',
   styleUrl: './app-aluno-notificacoes.component.css'
 })
