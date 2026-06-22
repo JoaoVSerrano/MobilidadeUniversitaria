@@ -142,6 +142,7 @@ public class StudentRegistrationService {
         alunoRequest.setFaculdadeId(faculdadeId);
         alunoRequest.setStatusMatricula(
                 com.synapse.mobilidadeUniversitaria.Entities.enums.StatusMatricula.ATIVA);
+        alunoRequest.setCreatedAt(solicitacao.getCreatedAt());
 
         AlunoResponseDTO aluno = alunoService.criar(alunoRequest);
 

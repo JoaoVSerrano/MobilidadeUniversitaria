@@ -30,6 +30,7 @@ export const routes: Routes = [
     data: { roles: ['GESTOR'] },
     children: [
       { path: '', component: DashboardHomeComponent },
+      { path: 'relatorios', loadComponent: () => import('./dashboard/relatorios/relatorios.component').then(m => m.RelatoriosComponent) },
       { path: 'usuarios', component: UsersComponent },
       { path: 'rotas', component: RoutesComponent },
       { path: 'veiculos', component: VehiclesComponent },

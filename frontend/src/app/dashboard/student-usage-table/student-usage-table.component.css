@@ -1,0 +1,55 @@
+.table-card {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.table-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.table-title {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.table-subtitle {
+  margin: 4px 0 0;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.usage-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #e2e8f0;
+}
+
+.usage-table th,
+.usage-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #27272a;
+  text-align: left;
+}
+
+.usage-table th {
+  color: #94a3b8;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.empty-row {
+  text-align: center !important;
+  color: #94a3b8;
+}

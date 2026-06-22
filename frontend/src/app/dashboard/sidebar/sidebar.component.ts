@@ -24,6 +24,7 @@ export class SidebarComponent {
 
   menuItems: SidebarItem[] = [
     { name: 'Dashboard',     icon: 'dashboard', route: '/dashboard'              },
+    { name: 'Relatórios',    icon: 'chart',     route: '/dashboard/relatorios'   },
     { name: 'Usuários',      icon: 'users',     route: '/dashboard/usuarios'     },
     { name: 'Rotas',         icon: 'route',     route: '/dashboard/rotas'        },
     { name: 'Veículos',      icon: 'bus',       route: '/dashboard/veiculos'     },

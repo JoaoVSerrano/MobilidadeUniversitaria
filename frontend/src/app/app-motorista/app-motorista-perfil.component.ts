@@ -19,7 +19,6 @@ export class AppMotoristaPerfilComponent implements OnInit {
 
   ngOnInit() {
     const authUser = this.authService.user();
-    console.log('Auth user:', authUser);
 
     if (authUser) {
       this.user.set(authUser);

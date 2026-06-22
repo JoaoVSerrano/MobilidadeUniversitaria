@@ -17,6 +17,7 @@ import com.synapse.mobilidadeUniversitaria.repositories.MotoristaRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.RotaRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.VeiculoRepository;
 import com.synapse.mobilidadeUniversitaria.repositories.ViagemRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ViagemService {
+
 
     private final ViagemRepository viagemRepository;
     private final MotoristaRepository motoristaRepository;
@@ -236,6 +238,7 @@ public class ViagemService {
         return viagemMapper.toResponse(atualizada);
     }
 
+    @Transactional
     public void deletar(Long id) {
         Viagem viagem = viagemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Viagem nao encontrada com id: " + id));

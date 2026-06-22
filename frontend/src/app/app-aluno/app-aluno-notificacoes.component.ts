@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AlunoService } from '../services/aluno.service';
@@ -22,19 +22,23 @@ export interface Notificacao {
   templateUrl: './app-aluno-notificacoes.component.html',
   styleUrl: './app-aluno-notificacoes.component.css'
 })
-export class AppAlunoNotificacoesComponent implements OnInit {
+export class AppAlunoNotificacoesComponent implements OnInit, OnDestroy {
   private alunoService = inject(AlunoService);
   private authService = inject(AuthService);
+  private refreshHandle?: ReturnType<typeof setInterval>;
 
   notificacoes = signal<Notificacao[]>([]);
   isLoading = signal(true);
 
-  naoLidasCount = computed(() => {
-    return this.notificacoes().filter(n => !n.lida).length;
-  });
+  naoLidasCount = computed(() => this.notificacoes().filter(n => !n.lida).length);
 
   ngOnInit() {
     this.carregarNotificacoes();
+    this.refreshHandle = setInterval(() => this.carregarNotificacoes(), 15000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshHandle) clearInterval(this.refreshHandle);
   }
 
   carregarNotificacoes() {
@@ -54,8 +58,7 @@ export class AppAlunoNotificacoesComponent implements OnInit {
         this.notificacoes.set(notificacoesMapeadas);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Erro ao carregar notificações:', err);
+      error: () => {
         this.notificacoes.set([]);
         this.isLoading.set(false);
       }
@@ -66,6 +69,7 @@ export class AppAlunoNotificacoesComponent implements OnInit {
     const tipoMap: Record<string, 'info' | 'alerta' | 'atraso' | 'confirmacao'> = {
       'NOVA_VIAGEM': 'info',
       'RESERVA_CONFIRMADA': 'confirmacao',
+      'VIAGEM_INICIADA': 'alerta',
       'EMBARQUE_PROXIMO': 'info',
       'ATRASO': 'atraso',
       'CANCELAMENTO': 'alerta',
@@ -79,6 +83,7 @@ export class AppAlunoNotificacoesComponent implements OnInit {
     const tituloMap: Record<string, string> = {
       'NOVA_VIAGEM': 'Nova Viagem',
       'RESERVA_CONFIRMADA': 'Reserva Confirmada',
+      'VIAGEM_INICIADA': 'Viagem Iniciada',
       'EMBARQUE_PROXIMO': 'Embarque Próximo',
       'ATRASO': 'Atraso',
       'CANCELAMENTO': 'Cancelamento',
@@ -138,9 +143,7 @@ export class AppAlunoNotificacoesComponent implements OnInit {
           notifs.map(n => n.id === id ? { ...n, lida: true } : n)
         );
       },
-      error: (err) => {
-        console.error('Erro ao marcar notificação como lida:', err);
-      }
+      error: () => {}
     });
   }
 }

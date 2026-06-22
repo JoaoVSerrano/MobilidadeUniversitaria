@@ -1,0 +1,38 @@
+<div class="table-card">
+  <div class="table-header">
+    <div>
+      <h3 class="table-title">Uso individual dos alunos</h3>
+      <p class="table-subtitle">Viagens reservadas, presenças confirmadas, frequência e data de cadastro</p>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="usage-table">
+      <thead>
+        <tr>
+          <th>Aluno</th>
+          <th>Cadastrado em</th>
+          <th>Reservas</th>
+          <th>Confirmadas</th>
+          <th>Frequência</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.alunoId) {
+          <tr>
+            <td>{{ row.nome }}</td>
+            <td>{{ row.createdAt }}</td>
+            <td>{{ row.viagensReservadas }}</td>
+            <td>{{ row.viagensConfirmadas }}</td>
+            <td>{{ row.percentualFrequencia.toFixed(0) }}%</td>
+          </tr>
+        }
+        @if (rows.length === 0) {
+          <tr>
+            <td colspan="5" class="empty-row">Nenhum aluno encontrado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

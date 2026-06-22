@@ -1,5 +1,4 @@
 <div class="reserva-page">
-
   <div class="page-header">
     <h2>Reservar Presença</h2>
     <p>Mostrando apenas rotas disponíveis</p>
@@ -9,14 +8,37 @@
     <div class="message" [class]="mensagemTipo()">{{ mensagem() }}</div>
   }
 
-  <div class="section-label">Selecione a Data</div>
-  <div class="input-group">
-    <input
-      type="date"
-      [(ngModel)]="dataSelecionada"
-      name="data"
-      [min]="hoje"
-      class="date-input">
+  <div class="section-block">
+    <div class="section-label">Minhas Reservas</div>
+    @if (reservas().length === 0) {
+      <div class="empty-state">
+        <p>Você ainda não reservou nenhuma viagem.</p>
+      </div>
+    } @else {
+      <div class="reservas-list">
+        @for (reserva of reservas(); track reserva.viagemId) {
+          <div class="reserva-card">
+            <div>
+              <span class="reserva-nome">{{ reserva.rotaNome }}</span>
+              <span class="reserva-data">{{ formatarDataHora(reserva.dataHoraPartida) }}</span>
+            </div>
+            <span class="reserva-status" [class.confirmada]="reserva.confirmada">{{ reserva.status }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="section-block">
+    <div class="section-label">Selecione a Data</div>
+    <div class="input-group">
+      <input
+        type="date"
+        [(ngModel)]="dataSelecionada"
+        name="data"
+        [min]="hoje"
+        class="date-input">
+    </div>
   </div>
 
   <div class="section-label">Selecione a Rota</div>
@@ -64,12 +86,12 @@
     </div>
   }
 
-  @if (rotaSelecionada && dataSelecionada) {
+  @if (rotaSelecionada) {
     <div class="confirm-footer">
-      <button class="btn btn-primary" (click)="reservar()" [disabled]="isLoading()">
-        @if (isLoading()) { Confirmando... } @else { Confirmar Reserva }
+      <button class="btn-reservar" (click)="reservar()" [disabled]="isLoading()">
+        <span class="btn-icon">🎫</span>
+        @if (isLoading()) { <span>Confirmando...</span> } @else { <span>Confirmar Reserva</span> }
       </button>
     </div>
   }
-
 </div>

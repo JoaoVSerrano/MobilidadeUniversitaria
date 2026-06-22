@@ -24,7 +24,7 @@ public class PresencaDigital {
 
     @ManyToOne
     @JoinColumn(name = "aluno_id")
-    private Aluno aluno;
+    private Usuario aluno;
 
     @ManyToOne
     @JoinColumn(name = "viagem_id")

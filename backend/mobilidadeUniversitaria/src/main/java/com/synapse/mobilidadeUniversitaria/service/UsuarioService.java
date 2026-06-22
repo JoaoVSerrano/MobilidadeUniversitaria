@@ -171,6 +171,33 @@ public class UsuarioService {
         return toResponse(usuarioRepository.save(usuario));
     }
 
+    @Transactional
+    public UsuarioResponseDTO atualizar(Long id, CriarUsuarioRequestDTO dto) {
+        Usuario usuario = buscarUsuarioPorId(id);
+
+        // Only validate email uniqueness if email is being changed
+        if (dto.getEmail() != null && !dto.getEmail().equals(usuario.getEmail())) {
+            if (usuarioRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
+                throw new com.synapse.mobilidadeUniversitaria.exceptions.ResourceAlreadyExistsException("Email ja cadastrado: " + dto.getEmail());
+            }
+        }
+
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        usuario.setTelefone(dto.getTelefone());
+
+        // Only update CPF if provided and non-empty
+        if (dto.getCpf() != null && !dto.getCpf().isBlank() && !dto.getCpf().equals("00000000000")) {
+            usuario.setCpf(dto.getCpf());
+        }
+
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+        }
+
+        return toResponse(usuarioRepository.save(usuario));
+    }
+
     public List<UsuarioResponseDTO> listarPorTipo(UserType tipoUsuario) {
         return usuarioRepository.findByUserType(tipoUsuario)
                 .stream()

@@ -174,3 +174,29 @@
   width: 18px;
   height: 18px;
 }
+
+.qr-text-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.qr-text-label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.qr-text {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #111118;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  font-size: 14px;
+  word-break: break-all;
+  text-align: center;
+}

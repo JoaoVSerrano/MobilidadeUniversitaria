@@ -27,6 +27,10 @@
         <div class="qr-container">
           <img class="qr-code" [src]="qrDataUrl()" alt="QR Code da carteirinha" />
         </div>
+        <div class="qr-text-box">
+          <span class="qr-text-label">Código para digitação</span>
+          <code class="qr-text">{{ user()?.id }}</code>
+        </div>
         <div class="qr-status">
           <span class="status-indicator active"></span>
           <span class="status-text">Ativo</span>

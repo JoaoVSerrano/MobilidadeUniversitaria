@@ -7,6 +7,7 @@ import com.synapse.mobilidadeUniversitaria.dtos.response.VeiculoStatsResponseDTO
 import com.synapse.mobilidadeUniversitaria.exceptions.ResourceNotFoundException;
 import com.synapse.mobilidadeUniversitaria.mapper.VeiculoMapper;
 import com.synapse.mobilidadeUniversitaria.repositories.VeiculoRepository;
+import com.synapse.mobilidadeUniversitaria.repositories.ViagemRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,11 +17,14 @@ import java.util.stream.Collectors;
 public class VeiculoService {
 
     private final VeiculoRepository veiculoRepository;
+    private final ViagemRepository viagemRepository;
     private final VeiculoMapper veiculoMapper;
 
     public VeiculoService(VeiculoRepository veiculoRepository,
+                          ViagemRepository viagemRepository,
                           VeiculoMapper veiculoMapper) {
         this.veiculoRepository = veiculoRepository;
+        this.viagemRepository = viagemRepository;
         this.veiculoMapper = veiculoMapper;
     }
 
@@ -56,7 +60,7 @@ public class VeiculoService {
         Veiculo veiculo = veiculoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Veiculo nao encontrado com id: " + id));
 
-        boolean temViagens = !veiculoRepository.findByVeiculoId(veiculo.getId()).isEmpty();
+        boolean temViagens = !viagemRepository.findByVeiculoId(veiculo.getId()).isEmpty();
         if (temViagens) {
             throw new IllegalStateException("Nao e possivel deletar o veiculo pois ele possui viagens vinculadas.");
         }

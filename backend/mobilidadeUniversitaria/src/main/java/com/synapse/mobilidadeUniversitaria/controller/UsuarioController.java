@@ -45,6 +45,13 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.listarPorTipo(tipoUsuario));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('GESTOR')")
+    public ResponseEntity<UsuarioResponseDTO> atualizar(@PathVariable Long id,
+                                                        @Valid @RequestBody CriarUsuarioRequestDTO dto) {
+        return ResponseEntity.ok(usuarioService.atualizar(id, dto));
+    }
+
     @GetMapping("/stats")
     @PreAuthorize("hasRole('GESTOR')")
     public ResponseEntity<UsuarioStatsResponseDTO> estatisticas() {

@@ -90,3 +90,21 @@ export interface RouteOccupancy {
   route: string;
   occupancy: number; // percentage
 }
+
+export interface DashboardSummary {
+  totalStudents: number;
+  studentsGrowth: number;
+  occupancyRate: number;
+  occupancyGrowth: number;
+  tripsToday: number;
+  completedTripsToday: number;
+}
+
+export interface StudentUsageRow {
+  alunoId: number;
+  nome: string;
+  viagensReservadas: number;
+  viagensConfirmadas: number;
+  percentualFrequencia: number;
+  createdAt: string;
+}

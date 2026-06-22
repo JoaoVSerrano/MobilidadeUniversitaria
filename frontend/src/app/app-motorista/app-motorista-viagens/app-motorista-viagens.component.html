@@ -109,18 +109,13 @@
                 Ver Alunos
               </button>
               <div class="paradas-emulator">
-                <p class="parada-label">Parada Atual:</p>
+                <p class="parada-label">Parada Atual: {{ (viagem.paradaAtualIndex ?? 0) + 1 }} de {{ getTotalParadas(viagem) || 1 }}</p>
                 <div class="paradas-controls">
-                  <button class="btn-parada" (click)="atualizarParada(viagem.id, max(0, viagem.paradaAtualIndex - 1))" [disabled]="viagem.paradaAtualIndex === 0">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                      <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                  </button>
-                  <span class="parada-index">Parada {{ viagem.paradaAtualIndex + 1 }}</span>
-                  <button class="btn-parada" (click)="atualizarParada(viagem.id, viagem.paradaAtualIndex + 1)">
+                  <button class="btn-parada btn-mark-stop" (click)="marcarProximaParada(viagem)" [disabled]="getTotalParadas(viagem) === 0">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
+                    Marcar Parada
                   </button>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlunoService } from '../services/aluno.service';
 import { AuthService } from '../services/auth.service';
@@ -26,9 +26,11 @@ interface Notificacao {
   templateUrl: './app-aluno-dashboard.component.html',
   styleUrl: './app-aluno-dashboard.component.css'
 })
-export class AppAlunoDashboardComponent implements OnInit {
+export class AppAlunoDashboardComponent implements OnInit, OnDestroy {
   private alunoService = inject(AlunoService);
   private authService = inject(AuthService);
+  private refreshHandle?: ReturnType<typeof setInterval>;
+  private onReservationUpdated = () => this.reloadData();
 
   user = this.authService.user;
   isLoading = signal(true);
@@ -36,15 +38,23 @@ export class AppAlunoDashboardComponent implements OnInit {
   notificacoesRecentes = signal<Notificacao[]>([]);
 
   ngOnInit(): void {
+    this.reloadData();
+    this.refreshHandle = setInterval(() => this.reloadData(), 15000);
+    window.addEventListener('student-reservation-updated', this.onReservationUpdated);
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshHandle) clearInterval(this.refreshHandle);
+    window.removeEventListener('student-reservation-updated', this.onReservationUpdated);
+  }
+
+  reloadData(): void {
     const user = this.user();
     if (!user) return;
 
-    // Carregar próxima viagem
     this.alunoService.getViagensByAlunoId(user.id).subscribe({
       next: (viagens: any[]) => {
-        const proxima = viagens.find((v: any) =>
-          v.status === 'AGENDADA' || v.status === 'EM_ANDAMENTO'
-        );
+        const proxima = viagens.find((v: any) => v.status === 'AGENDADA' || v.status === 'EM_ANDAMENTO');
         if (proxima) {
           this.proximaViagem.set({
             id: proxima.id,
@@ -66,7 +76,6 @@ export class AppAlunoDashboardComponent implements OnInit {
       }
     });
 
-    // Carregar notificações recentes da API
     this.alunoService.getNotificacoes().subscribe({
       next: (notificacoes: any[]) => {
         const notificacoesMapeadas = notificacoes.slice(0, 3).map(n => ({
@@ -77,8 +86,7 @@ export class AppAlunoDashboardComponent implements OnInit {
         }));
         this.notificacoesRecentes.set(notificacoesMapeadas);
       },
-      error: (err) => {
-        console.error('Erro ao carregar notificações:', err);
+      error: () => {
         this.notificacoesRecentes.set([]);
       }
     });
@@ -102,14 +110,10 @@ export class AppAlunoDashboardComponent implements OnInit {
   }
 
   irParaReservas(): void {
-    // Emitir evento ou usar router para navegar para reservas
-    const event = new CustomEvent('navigate-to-reservas');
-    window.dispatchEvent(event);
+    window.dispatchEvent(new CustomEvent('navigate-to-reservas'));
   }
 
   irParaNotificacoes(): void {
-    // Emitir evento ou usar router para navegar para notificações
-    const event = new CustomEvent('navigate-to-notificacoes');
-    window.dispatchEvent(event);
+    window.dispatchEvent(new CustomEvent('navigate-to-notificacoes'));
   }
 }

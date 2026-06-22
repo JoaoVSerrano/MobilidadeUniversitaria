@@ -2,8 +2,9 @@ package com.synapse.mobilidadeUniversitaria.Entities;
 
 import com.synapse.mobilidadeUniversitaria.Entities.enums.UserType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -18,19 +19,15 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    
     @Column(nullable = false)
     private String nome;
 
-    
     @Column(nullable = false, unique = true)
     private String email;
 
-    
     @Column(nullable = false)
     private String senha;
 
-    
     @Column(nullable = false, unique = true)
     private String cpf;
 
@@ -45,4 +42,13 @@ public class Usuario {
     @Column(nullable = false)
     private String telefone;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

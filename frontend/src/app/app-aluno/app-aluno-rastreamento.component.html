@@ -1,26 +1,29 @@
 <div class="rastreamento">
   <h2 class="page-title">Rastrear Ônibus</h2>
-  <p class="page-subtitle">Acompanhe em tempo real a localização do seu ônibus</p>
+  <p class="page-subtitle">Acompanhe as paradas da sua viagem em tempo real</p>
 
-  @if (location()) {
+  @if (tripState(); as state) {
     <div class="card live-location">
       <div class="live-indicator">
         <span class="pulse"></span>
-        <span>Ao Vivo</span>
+        <span>{{ state.status === 'EM_ANDAMENTO' ? 'Ao Vivo' : 'Agendada' }}</span>
       </div>
       <div class="location-data">
         <div class="data-item">
-          <span class="data-label">Velocidade</span>
-          <span class="data-value">{{ location()!.velocidade }} km/h</span>
+          <span class="data-label">Rota</span>
+          <span class="data-value">{{ state.routeName }}</span>
+        </div>
+        <div class="data-item">
+          <span class="data-label">Parada Atual</span>
+          <span class="data-value">{{ (state.currentStopIndex + 1) }} de {{ state.stops.length || 1 }}</span>
         </div>
         <div class="data-item">
           <span class="data-label">Próxima Parada</span>
-          <span class="data-value">{{ location()!.proximaParada || 'Em trânsito' }}</span>
+          <span class="data-value">{{ state.nextStop }}</span>
         </div>
-        <div class="data-item">
-          <span class="data-label">Distância</span>
-          <span class="data-value">{{ location()!.distanciaRestante }} km</span>
-        </div>
+      </div>
+      <div class="progress-shell">
+        <div class="progress-bar" [style.width.%]="getProgress()"></div>
       </div>
     </div>
   } @else {
@@ -31,34 +34,40 @@
           <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
       </div>
-      <p>Aguardando dados de localização...</p>
-      <span class="waiting-hint">Isso pode levar alguns segundos</span>
+      <p>Aguardando início da viagem...</p>
+      <span class="waiting-hint">Quando o motorista iniciar a viagem, as paradas aparecerão aqui</span>
     </div>
   }
 
   <div class="card">
     <h3 class="card-title">Paradas da Rota</h3>
-    <div class="stops-timeline">
-      @for (parada of rota; track parada.nome; let i = $index; let last = $last) {
-        <div class="stop-item" [class.completed]="parada.chegou">
-          <div class="stop-marker">
-            @if (parada.chegou) {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="20 6 9 17 4 9"></polyline>
-              </svg>
-            } @else {
-              <span class="stop-number">{{ i + 1 }}</span>
+    @if (tripState(); as state) {
+      <div class="stops-timeline">
+        @for (parada of state.stops; track parada.nome; let i = $index; let last = $last) {
+          <div class="stop-item" [class.completed]="parada.chegou">
+            <div class="stop-marker">
+              @if (parada.chegou) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 9"></polyline>
+                </svg>
+              } @else {
+                <span class="stop-number">{{ i + 1 }}</span>
+              }
+            </div>
+            @if (!last) {
+              <div class="stop-line" [class.completed]="parada.chegou"></div>
             }
+            <div class="stop-info">
+              <span class="stop-name">{{ parada.nome }}</span>
+              <span class="stop-time">{{ parada.chegou ? 'Já marcada' : 'Aguardando' }}</span>
+            </div>
           </div>
-          @if (!last) {
-            <div class="stop-line" [class.completed]="parada.chegou"></div>
-          }
-          <div class="stop-info">
-            <span class="stop-name">{{ parada.nome }}</span>
-            <span class="stop-time">{{ parada.hora }}</span>
-          </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <p>As paradas da viagem ativa aparecerão aqui.</p>
+      </div>
+    }
   </div>
 </div>

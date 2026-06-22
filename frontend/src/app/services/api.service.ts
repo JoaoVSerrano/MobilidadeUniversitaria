@@ -35,4 +35,11 @@ export class ApiService {
   delete<T>(path: string): Observable<T> {
     return this.http.delete<T>(`${this.baseUrl}${path}`, { headers: this.getHeaders() });
   }
+
+  getBlob(path: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${path}`, {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    });
+  }
 }

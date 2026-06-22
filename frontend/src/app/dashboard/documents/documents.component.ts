@@ -113,7 +113,7 @@ export class DocumentsComponent implements OnInit {
         this.closeUploadModal();
         this.loadDocuments();
       },
-      error: (err) => {
+      error: (err: unknown) => {
         this.isUploading.set(false);
         this.uploadError.set('Erro ao fazer upload. Tente novamente.');
         console.error(err);
@@ -123,7 +123,7 @@ export class DocumentsComponent implements OnInit {
 
   downloadDocument(doc: Document) {
     this.svc.downloadDocument(doc.id).subscribe({
-      next: (blob) => {
+      next: (blob: Blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -131,7 +131,7 @@ export class DocumentsComponent implements OnInit {
         a.click();
         URL.revokeObjectURL(url);
       },
-      error: (err) => console.error('Erro ao baixar:', err)
+      error: (err: unknown) => console.error('Erro ao baixar:', err)
     });
   }
 

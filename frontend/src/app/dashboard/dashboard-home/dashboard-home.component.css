@@ -1,13 +1,15 @@
 :host { display: flex; flex-direction: column; gap: 24px; width: 100%; }
 
-/* Stats Cards Layout Grid */
+.kpis-section {
+  width: 100%;
+}
+
 .stats-section {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 
-/* Charts Grid */
 .charts-section {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -51,12 +53,9 @@
 .legend-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: #64748b; }
 
 .chart-container { display: flex; flex-direction: column; position: relative; margin-top: 10px; }
-
 .line-chart-svg { width: 100%; height: 160px; overflow: visible; }
-
 .chart-node { transition: all 0.2s ease; cursor: pointer; }
 .chart-node:hover { r: 7px; stroke-width: 3.5px; }
-
 .chart-node-val {
   font-family: 'Inter', sans-serif;
   font-size: 10px;
@@ -80,13 +79,11 @@
   margin-top: 8px;
 }
 
-/* Route Occupancy Styling */
 .bar-chart-container { display: flex; flex-direction: column; gap: 18px; }
 .bar-row { display: flex; flex-direction: column; gap: 8px; }
 .bar-row-info { display: flex; justify-content: space-between; align-items: center; }
 .bar-label { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #cbd5e1; }
 .bar-value { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #f8fafc; }
-
 .progress-bar-bg {
   width: 100%;
   height: 8px;
@@ -94,7 +91,6 @@
   border-radius: 9999px;
   overflow: hidden;
 }
-
 .progress-bar-fill {
   height: 100%;
   border-radius: 9999px;
@@ -104,7 +100,10 @@
 .progress-bar-fill.medium { background-color: #2563eb; }
 .progress-bar-fill.low    { background-color: #d97706; }
 
-/* Table section uses DataTableComponent's own styles, no override needed */
+.student-usage-section,
+.table-section {
+  width: 100%;
+}
 
 @media (max-width: 1199px) { .stats-section { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 767px)  { .charts-section { grid-template-columns: 1fr; } }
