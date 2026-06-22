@@ -29,13 +29,13 @@ public class NotificacaoController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@authService.canAccessNotificacao(#id)")
+    @PreAuthorize("@authorizationService.canAccessNotificacao(#id)")
     public ResponseEntity<NotificacaoResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(notificacaoService.buscarPorId(id));
     }
 
     @PatchMapping("/{id}/lida")
-    @PreAuthorize("@authService.canAccessNotificacao(#id)")
+    @PreAuthorize("@authorizationService.canAccessNotificacao(#id)")
     public ResponseEntity<NotificacaoResponseDTO> marcarComoLida(@PathVariable Long id) {
         return ResponseEntity.ok(notificacaoService.marcarComoLida(id));
     }

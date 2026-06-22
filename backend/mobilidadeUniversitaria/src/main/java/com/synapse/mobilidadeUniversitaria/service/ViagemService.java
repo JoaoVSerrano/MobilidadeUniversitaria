@@ -243,20 +243,16 @@ public class ViagemService {
             throw new BadRequestException("Viagem finalizada nao pode ser cancelada");
         }
 
-        // Deletar notificações associadas à viagem
-        try {
-            notificacaoRepository.deleteByViagemId(id);
-        } catch (Exception e) {
-            // Não impede a exclusão da viagem se falhar ao deletar notificações
-        }
+        // 1. Deletar presenças vinculadas primeiro
+        try { presencaDigitalRepository.deleteByViagemId(id); } catch (Exception ignored) {}
 
-        // Deletar notificações de motorista associadas à viagem
-        try {
-            notificacaoMotoristaRepository.deleteByViagemId(id);
-        } catch (Exception e) {
-            // Não impede a exclusão da viagem se falhar ao deletar notificações
-        }
+        // 2. Deletar notificações de alunos
+        try { notificacaoRepository.deleteByViagemId(id); } catch (Exception ignored) {}
 
+        // 3. Deletar notificações de motorista
+        try { notificacaoMotoristaRepository.deleteByViagemId(id); } catch (Exception ignored) {}
+
+        // 4. Agora deletar a viagem
         viagemRepository.delete(viagem);
     }
 

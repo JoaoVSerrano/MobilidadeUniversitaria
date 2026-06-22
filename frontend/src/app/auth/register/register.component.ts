@@ -132,8 +132,26 @@ export class RegisterComponent {
       },
       error: (err: any) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Erro ao enviar solicitacao. Tente novamente.');
-        console.error('Erro ao enviar solicitação:', err);
+        const status = err.status;
+        const msg = err.error?.message || '';
+
+        // HTTP 201/200 nunca chegam aqui — apenas erros reais
+        if (status === 409 || msg.includes('Email ja cadastrado')) {
+          this.errorMessage.set('Este email já está cadastrado.');
+        } else if (status === 409 || msg.includes('CPF ja cadastrado')) {
+          this.errorMessage.set('Este CPF já está cadastrado.');
+        } else if (status === 400) {
+          // Erros de validação do bean
+          const validationErrors = err.error?.validationErrors;
+          if (validationErrors) {
+            const firstError = Object.values(validationErrors)[0] as string;
+            this.errorMessage.set(firstError);
+          } else {
+            this.errorMessage.set(msg || 'Dados inválidos. Verifique os campos e tente novamente.');
+          }
+        } else {
+          this.errorMessage.set('Erro ao enviar solicitação. Tente novamente.');
+        }
       }
     });
   }

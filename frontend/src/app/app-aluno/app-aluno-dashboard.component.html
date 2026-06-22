@@ -16,7 +16,7 @@
         <span class="status-label">Status da Matrícula</span>
         <span class="status-indicator active"></span>
       </div>
-      <span class="status-value">Aprovado</span>
+      <span class="status-value">{{ user()?.tipoUsuario === 'ALUNO' ? 'Ativo' : '—' }}</span>
     </div>
 
     <!-- Card Próxima Viagem -->

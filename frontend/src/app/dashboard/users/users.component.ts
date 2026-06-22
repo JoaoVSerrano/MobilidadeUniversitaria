@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardService } from '../services/dashboard.service';
@@ -6,6 +6,7 @@ import { User } from '../models/dashboard.model';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { Subscription } from 'rxjs';
 
 interface StudentRequest {
   id: number;
@@ -31,13 +32,14 @@ interface StudentRequest {
   templateUrl: './users.component.html',
   styleUrl: './users.component.css'
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
   private svc = inject(DashboardService);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
+  private routerSub?: Subscription;
 
   users: User[] = [];
   filtered: User[] = [];
@@ -78,7 +80,7 @@ export class UsersComponent implements OnInit {
     this.loadUsers();
     this.loadStudentRequests();
 
-    this.router.events.subscribe((event) => {
+    this.routerSub = this.router.events.subscribe((event) => {
       if (event.constructor.name === 'NavigationEnd') {
         if (this.router.url === '/dashboard/usuarios') {
           this.loadUsers();
@@ -86,6 +88,12 @@ export class UsersComponent implements OnInit {
         }
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.routerSub) {
+      this.routerSub.unsubscribe();
+    }
   }
 
   loadStudentRequests() {
@@ -170,7 +178,18 @@ export class UsersComponent implements OnInit {
 
   openViewModal(user: User) {
     this.selectedUser.set(user);
-    this.showViewModal.set(true);
+    const endpoint = this.getUserEndpoint(user.type);
+    this.http.get<any>(`${this.baseUrl}/${endpoint}/${user.id}`).subscribe({
+      next: (details) => {
+        this.selectedUserDetails = details;
+        this.showViewModal.set(true);
+      },
+      error: () => {
+        // Se falhar, mostra modal sem detalhes
+        this.selectedUserDetails = null;
+        this.showViewModal.set(true);
+      }
+    });
   }
 
   closeViewModal() {

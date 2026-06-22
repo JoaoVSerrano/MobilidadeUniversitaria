@@ -199,8 +199,11 @@ public class UsuarioService {
         notificacaoRepository.deleteByAlunoId(id);
         notificacaoMotoristaRepository.deleteByMotoristaId(id);
 
-        // Deletar viagens associadas ao usuário (se for motorista)
-        viagemRepository.deleteByMotoristaId(id);
+        // Desvincular o motorista das viagens sem deletar as viagens
+        viagemRepository.findByMotoristaId(id).forEach(v -> {
+            v.setMotorista(null);
+            viagemRepository.save(v);
+        });
 
         // Deletar presenças digitais associadas ao usuário (se for aluno)
         presencaDigitalRepository.deleteByAlunoId(id);
